@@ -1,8 +1,7 @@
 :root{--bg:#ECEEF6;--ink:#1B1D3A;--mute:#6B7090;--line:#D8DBEA;--accent:#3B3FD8;--soft:#E4E5FB;--coral:#FF4F6D}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-body{font:500 14px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:var(--bg);
-  background-image:radial-gradient(circle,#C2C7DE 1.2px,transparent 1.6px);background-size:24px 24px}
+body{font:500 14px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:#fff}
 canvas{position:fixed;inset:0;touch-action:none;display:block}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
