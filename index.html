@@ -2,69 +2,93 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Холст — рисуйте фигуры и картинки</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Во что сыграем?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Unbounded:wght@600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
+*{box-sizing:border-box;margin:0}
+body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overflow-x:hidden}
+#hearts{position:fixed;inset:0;overflow:hidden;pointer-events:none}
+#hearts span{position:absolute;bottom:-70px;animation:rise linear infinite}
+#hearts span:nth-child(3n){color:#E91E63}#hearts span:nth-child(3n+1){color:#FF7FA8}#hearts span:nth-child(3n+2){color:#fff}
+@keyframes rise{to{transform:translateY(-125vh) rotate(14deg)}}
+main{position:relative;max-width:520px;margin:0 auto;padding:max(48px,env(safe-area-inset-top)) 20px max(32px,env(safe-area-inset-bottom));display:grid;gap:14px}
+h1{font:400 clamp(52px,16vw,84px)/1 'Marck Script',cursive;color:var(--deep);text-align:center}
+.lead{text-align:center;color:var(--mute);margin-bottom:14px}
+.game{display:flex;align-items:center;gap:16px;width:100%;text-align:left;padding:16px;border:0;border-radius:28px;background:rgba(255,255,255,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 14px 34px -16px rgba(142,15,69,.55);cursor:pointer;color:inherit;font:inherit;transition:transform .2s}
+.game:hover{transform:translateY(-2px)}
+.tile{flex:none;width:68px;height:68px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(145deg,#FF7FA8,#C2185B)}
+.game b{display:block;font-size:22px}
+.game small{display:block;color:var(--mute);font-size:14px;line-height:1.35}
+.go{margin-left:auto;color:var(--rose);font-size:24px}
+.soon{padding:18px;border:2px dashed rgba(194,24,91,.35);border-radius:28px;text-align:center;color:var(--mute);font-size:14px}
+dialog{border:0;border-radius:28px;padding:26px 22px 22px;width:min(400px,calc(100vw - 32px));margin:auto;background:#FFF8FA;color:var(--ink);box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
+dialog::backdrop{background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
+dialog h2{font:400 38px/1.1 'Marck Script',cursive;color:var(--deep);text-align:center}
+dialog p{text-align:center;color:var(--mute);font-size:14px;margin:8px 0 16px}
+.link{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:14px;background:#fff;font:600 14px Manrope,sans-serif;color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.btn{padding:12px;border:1.5px solid var(--rose);border-radius:14px;background:none;color:var(--rose);font:700 15px Manrope,sans-serif;cursor:pointer}
+.play{width:100%;padding:15px;border:0;border-radius:16px;background:var(--rose);color:#fff;font:700 17px Manrope,sans-serif;cursor:pointer}
+.x{position:absolute;top:8px;right:10px;width:40px;height:40px;border:0;background:none;font-size:22px;color:var(--mute);cursor:pointer}
+.hint{font-size:12px;color:var(--mute);text-align:center;margin-top:10px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){#hearts span{animation:none;bottom:auto;top:calc(var(--y)*1%)}.game{transition:none}}
+</style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<input id="txt" hidden placeholder="Введите текст" autocomplete="off">
+<div id="hearts" aria-hidden="true"></div>
+<main>
+  <h1>Во что сыграем?</h1>
+  <p class="lead">Выберите игру для двоих</p>
+  <button class="game" id="paint">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 30 20"><circle cx="8" cy="11" r="7" fill="#fff"/><rect x="10" y="4" width="12" height="12" rx="2" fill="#fff" fill-opacity=".6"/><path d="M21 18l4.5-9 4.5 9z" fill="#FFE08A"/></svg></span>
+    <span><b>Холст</b><small>Рисуйте вместе: рисунок сразу появляется у второго</small></span>
+    <span class="go">♥&#xFE0E;</span>
+  </button>
+  <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
+</main>
 
-<div class="empty" id="empty">
-  <h1>Чистый холст</h1>
-  <p>Выберите инструмент слева и рисуйте. Картинку можно перетащить прямо сюда или вставить из буфера.</p>
-</div>
+<dialog id="dlg">
+  <button class="x" id="x" aria-label="Закрыть">✕</button>
+  <h2>Комната для двоих</h2>
+  <p>Отправьте ссылку тому, с кем хотите играть, и нажмите «Играть».</p>
+  <input class="link" id="link" readonly aria-label="Ссылка на комнату">
+  <div class="two"><button class="btn" id="share">Поделиться</button><button class="btn" id="copy">Копировать</button></div>
+  <button class="play" id="play">Играть</button>
+  <p class="hint" id="hint" hidden>Ссылка заработает, когда сайт будет опубликован в интернете.</p>
+</dialog>
 
-<header class="pill brand">
-  <svg width="30" height="20" viewBox="0 0 30 20"><circle cx="8" cy="11" r="7" fill="#3B3FD8"/><rect x="10" y="4" width="12" height="12" rx="2" fill="#FF4F6D"/><path d="M21 18l4.5-9 4.5 9z" fill="#F2B705"/></svg>
-  Холст
-</header>
-
-<nav class="pill tools" id="tools" aria-label="Инструменты">
-  <button data-tool="select" data-icon="select" title="Выделение (V)"></button>
-  <button data-tool="pen" data-icon="pen" title="Карандаш (P)"></button>
-  <button data-tool="line" data-icon="line" title="Линия (L)"></button>
-  <button data-tool="arrow" data-icon="arrow" title="Стрелка (A)"></button>
-  <button data-tool="rect" data-icon="rect" title="Прямоугольник (R)"></button>
-  <button data-tool="ellipse" data-icon="ellipse" title="Эллипс (O)"></button>
-  <button data-tool="tri" data-icon="tri" title="Треугольник (G)"></button>
-  <button data-tool="star" data-icon="star" title="Звезда (S)"></button>
-  <button data-tool="text" data-icon="text" title="Текст (T)"></button>
-  <button data-tool="erase" data-icon="erase" title="Ластик (E)"></button>
-</nav>
-
-<div class="pill actions">
-  <button id="pt" class="only-m" data-icon="sliders" title="Стиль"></button>
-  <button id="share" data-icon="link" title="Ссылка для двоих"></button>
-  <button id="undo" data-icon="undo" title="Отменить (Ctrl+Z)"></button>
-  <button id="redo" data-icon="redo" title="Вернуть (Ctrl+Shift+Z)"></button>
-  <button id="img" data-icon="image" title="Добавить картинку"></button>
-  <button id="save" data-icon="download" title="Скачать PNG"></button>
-  <button id="del" data-icon="trash" title="Удалить выбранное или очистить всё"></button>
-</div>
-
-<aside class="pill props" id="props">
-  <div class="chips">
-    <button class="chip" id="cs" data-t="stroke"><i></i>Контур</button>
-    <button class="chip" id="cf" data-t="fill"><i></i>Заливка</button>
-  </div>
-  <div class="sw" id="sw"></div>
-  <label class="row"><span>Толщина</span><output id="swv"></output>
-    <input type="range" id="sww" min="1" max="24" step="1"></label>
-  <label class="row"><span>Непрозрачность</span><output id="opv"></output>
-    <input type="range" id="opw" min="10" max="100" step="5"></label>
-</aside>
-
-<input type="file" id="file" accept="image/*" multiple hidden>
-<div class="pill status" id="status" hidden></div>
-<div class="toast" id="toast"></div>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="script.js"></script>
-<script src="sync.js"></script>
+<script>
+const $ = s => document.querySelector(s), dlg = $('#dlg'), link = $('#link');
+for (let i = 0; i < 16; i++) {
+  const s = document.createElement('span'), y = Math.random() * 90;
+  s.textContent = '♥\uFE0E';
+  s.style.cssText = `left:${Math.random() * 100}%;font-size:${14 + Math.random() * 34}px;opacity:${.25 + Math.random() * .35};animation-duration:${14 + Math.random() * 16}s;animation-delay:-${Math.random() * 30}s;--y:${y}`;
+  $('#hearts').append(s);
+}
+$('#paint').onclick = () => {
+  const code = [...crypto.getRandomValues(new Uint8Array(10))].map(n => 'abcdefghijkmnpqrstuvwxyz23456789'[n % 32]).join('');
+  link.value = new URL('paint.html#room=' + code, location.href).href;
+  $('#hint').hidden = location.protocol !== 'file:';
+  dlg.showModal();
+};
+$('#x').onclick = () => dlg.close();
+dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };
+link.onclick = () => link.select();
+async function copy() {
+  try { await navigator.clipboard.writeText(link.value); } catch (_) { link.select(); document.execCommand('copy'); }
+  $('#copy').textContent = 'Скопировано'; setTimeout(() => $('#copy').textContent = 'Копировать', 1800);
+}
+$('#copy').onclick = copy;
+$('#share').onclick = async () => {
+  if (!navigator.share) return copy();
+  try { await navigator.share({ title: 'Холст', text: 'Рисуем вместе', url: link.value }); } catch (_) {}
+};
+$('#play').onclick = () => { location.href = link.value; };
+</script>
 </body>
 </html>

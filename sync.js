@@ -1,24 +1,21 @@
 'use strict';
 (function () {
-  const cfg = window.FIREBASE_CONFIG || {}, bar = $('#status'), shareBtn = $('#share');
-  const say = (t, on) => { bar.hidden = false; bar.textContent = t; bar.classList.toggle('on', !!on); };
+  const cfg = window.FIREBASE_CONFIG || {}, shareBtn = $('#share');
   if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
-    shareBtn.disabled = true; say('Без синхронизации: заполните firebase-config.js'); return;
+    shareBtn.disabled = true; toast('Без синхронизации: заполните firebase-config.js'); return;
   }
   let room = (location.hash.match(/room=([\w-]+)/) || [])[1];
   if (!room) { room = uid() + uid() + uid(); history.replaceState(null, '', '#room=' + room); }
   addEventListener('hashchange', () => location.reload());
 
   firebase.initializeApp(cfg);
-  const db = firebase.database(), base = db.ref('rooms/' + room), box = base.child('objs');
-  const known = {};
+  const box = firebase.database().ref('rooms/' + room + '/objs'), known = {};
   const canon = o => JSON.stringify(o, Object.keys(o).sort());
   const ser = o => {
     const r = {}; for (const k in o) if (k !== 'img' && o[k] !== undefined) r[k] = o[k];
     if (r.p) r.p = r.p.map(q => [+q[0].toFixed(3), +q[1].toFixed(3)]);
     return r;
   };
-
   const apply = s => {
     const v = s.val(), id = s.key, j = canon(v);
     if (known[id] === j || (drag && sel && sel.id === id)) return;
@@ -38,7 +35,6 @@
     delete known[s.key]; const i = objs.findIndex(x => x.id === s.key); if (i < 0) return;
     if (sel && sel.id === s.key) sel = null; objs.splice(i, 1); render();
   });
-
   syncLocal = () => {
     const ids = {};
     objs.forEach(o => {
@@ -47,14 +43,6 @@
     });
     for (const id in known) if (!ids[id]) { delete known[id]; box.child(id).remove(); }
   };
-
-  const me = base.child('presence/' + ME);
-  db.ref('.info/connected').on('value', s => { if (s.val()) { me.onDisconnect().remove(); me.set(true); } });
-  base.child('presence').on('value', s => {
-    const n = s.numChildren();
-    say(n > 1 ? 'Рисуете вместе: ' + n : 'Ждём второго человека', n > 1);
-  });
-
   shareBtn.onclick = async () => {
     if (location.protocol === 'file:') return toast('Ссылка заработает после публикации сайта');
     try {

@@ -1,6 +1,6 @@
 :root{--bg:#ECEEF6;--ink:#1B1D3A;--mute:#6B7090;--line:#D8DBEA;--accent:#3B3FD8;--soft:#E4E5FB;--coral:#FF4F6D}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%;overflow:hidden}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 body{font:500 14px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:var(--bg);
   background-image:radial-gradient(circle,#C2C7DE 1.2px,transparent 1.6px);background-size:24px 24px}
 canvas{position:fixed;inset:0;touch-action:none;display:block}
@@ -8,7 +8,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .pill{position:fixed;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 28px -12px rgba(27,29,58,.3)}
-.brand{top:16px;left:16px;display:flex;align-items:center;gap:10px;padding:9px 16px 9px 12px;font:600 15px Unbounded,Manrope,sans-serif}
+.brand{top:16px;left:16px;color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;padding:9px 16px 9px 12px;font:600 15px Unbounded,Manrope,sans-serif}
 .tools{left:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;padding:8px}
 .actions{top:16px;right:16px;display:flex;gap:4px;padding:6px}
 .tools button,.actions button{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;transition:background .15s,color .15s}
@@ -44,17 +44,16 @@ svg{display:block}.tools svg,.actions svg{width:22px;height:22px}
 .only-m{display:none!important}
 
 @media(max-width:720px){
-  .brand{top:8px;left:8px;padding:6px 12px 6px 8px;font-size:13px}.actions{top:8px;right:8px}
-  .tools{left:8px;right:8px;top:auto;bottom:8px;transform:none;flex-direction:row;overflow-x:auto;padding:6px}
-  .tools button{flex:none}.actions button{width:38px;height:38px}
+  .brand{top:calc(8px + env(safe-area-inset-top,0px));left:8px;width:44px;height:44px;padding:0;justify-content:center}
+  .brand span{display:none}
+  .actions{top:calc(8px + env(safe-area-inset-top,0px));right:8px;gap:2px;padding:4px}
+  .actions button{width:36px;height:36px}.actions svg{width:20px;height:20px}
+  .tools{left:8px;right:8px;top:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:none;flex-direction:row;gap:2px;padding:6px}
+  .tools button{flex:1 1 0;min-width:0;width:auto;height:40px}
   .only-m{display:grid!important}
-  .props{display:none;left:8px;right:8px;bottom:76px;width:auto;max-height:42vh;overflow:auto;padding:12px}
+  .props{display:none;left:8px;right:8px;bottom:calc(68px + env(safe-area-inset-bottom,0px));width:auto;max-height:42vh;overflow:auto;padding:12px}
   .props.open{display:flex}
-  .empty{padding:0 24px}.toast{bottom:84px}
+  .empty{padding:0 24px}.toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-.status{top:16px;left:50%;transform:translateX(-50%);padding:9px 14px;font-weight:700;white-space:nowrap}
-.status::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#B5BAD6;margin-right:8px}
-.status.on::before{background:#1FA56B}
-@media(max-width:720px){.status{top:52px;left:8px;transform:none;padding:6px 12px;font-size:13px}}
