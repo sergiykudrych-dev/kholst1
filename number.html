@@ -44,6 +44,13 @@ h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
 .toast.on{opacity:1}
 @media(prefers-reduced-motion:reduce){.beat{animation:none}}
+.cols{flex:1;min-height:0;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:8px}
+.col{display:flex;flex-direction:column;align-items:center;gap:6px;overflow-y:auto;min-height:0}
+.col h3{font-size:13px;color:var(--mute);font-weight:700}
+.col .try{width:100%;justify-content:space-between;padding:6px 14px;font-size:15px}
+.turn{font-weight:700;color:var(--deep);text-align:center}
+.mine{margin:6px auto 0;padding:5px 14px;border-radius:999px;background:rgba(255,255,255,.7);font-size:13px;color:var(--mute)}
+.pad button:disabled{opacity:.4;cursor:default}
 </style>
 </head>
 <body>
@@ -76,51 +83,67 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   view.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
   firebase.initializeApp(cfg);
-  const ref = firebase.database().ref('rooms/' + room + '/num');
-  let S = { phase: 'pick' }, draft = '', prev = '';
+  const ref = firebase.database().ref('rooms/' + room + '/duel'), other = 3 - me;
+  let S = { phase: 'write' }, draft = '', prev = '';
   const valid = () => +draft >= 1 && +draft <= 100;
   const disp = () => `<div class="disp ${draft ? '' : 'empty'}">${draft || '?'}</div>`;
-  const pad = () => '<div class="pad">' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-k="${n}">${n}</button>`).join('') +
-    '<button data-act="bs" aria-label="Стереть">⌫</button><button data-k="0">0</button><span></span></div>';
+  const pad = dis => '<div class="pad">' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-k="${n}" ${dis ? 'disabled' : ''}>${n}</button>`).join('') +
+    `<button data-act="bs" ${dis ? 'disabled' : ''} aria-label="Стереть">⌫</button><button data-k="0" ${dis ? 'disabled' : ''}>0</button><span></span></div>`;
+  const col = a => a.length ? [...a].reverse().map(x => `<div class="try"><b>${x.n}</b><span>${x.r === 'up' ? 'больше ↑' : x.r === 'down' ? 'меньше ↓' : 'угадали ♥&#xFE0E;'}</span></div>`).join('') : '<p class="hint">—</p>';
 
   function render() {
-    if (S.phase !== prev) { draft = ''; prev = S.phase; }
-    const p = S.phase;
-    if (p === 'pick') {
-      view.innerHTML = `<div class="mid"><h1>Кто загадывает число?</h1><div class="pick">` +
-        [1, 2].map(n => `<button data-act="setter" data-v="${n}">Игрок ${n}<small>${n === me ? 'это вы' : n === 1 ? 'создатель комнаты' : 'зашёл по ссылке'}</small></button>`).join('') + '</div></div>';
-    } else if (p === 'write' && S.setter !== me) {
-      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Игрок ${S.setter} загадывает число…</h1></div>`;
-    } else if (p === 'write') {
-      view.innerHTML = `<div class="mid"><h1>Загадайте число</h1><p class="hint">От 1 до 100</p>${disp()}</div>${pad()}
+    const key = S.phase + '|' + S.turn + '|' + (S['n' + me] || 0);
+    if (key !== prev) { draft = ''; prev = key; }
+    const p = S.phase, my = S['n' + me];
+    if (p === 'write' && !my) {
+      view.innerHTML = `<div class="mid"><h1>Загадайте число</h1><p class="hint">От 1 до 100. Игрок ${other} его не увидит</p>${disp()}</div>${pad(false)}
         <button class="start" data-act="start" ${valid() ? '' : 'disabled'}>Загадать</button>`;
+    } else if (p === 'write') {
+      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём Игрока ${other}…</h1><p class="hint">Вы загадали ${my}</p></div>`;
     } else {
-      const t = S.tries || [], isSetter = me === S.setter; let lo = 1, hi = 100;
-      t.forEach(x => { if (x.r === 'up') lo = Math.max(lo, x.n + 1); if (x.r === 'down') hi = Math.min(hi, x.n - 1); });
-      const hist = t.length ? [...t].reverse().map(x => `<div class="try"><b>${x.n}</b><span>${x.r === 'up' ? 'больше ↑' : x.r === 'down' ? 'меньше ↓' : 'угадали ♥&#xFE0E;'}</span></div>`).join('') : '<p class="hint">Пока нет попыток</p>';
-      view.innerHTML = `<div class="range"><p class="who">Игрок ${3 - S.setter} угадывает · попыток: ${t.length}</p>
-        <p class="who">Число от <b>${lo}</b> до <b>${hi}</b></p><div class="bar"><i style="left:${lo - 1}%;width:${hi - lo + 1}%"></i></div></div>` +
-        (isSetter ? `<p class="who" style="margin-top:14px">Вы загадали</p><div class="disp">${S.num}</div>` : '') +
-        `<div class="hist">${hist}</div>` +
-        (isSetter ? '' : `${disp()}${pad()}<button class="start" data-act="check" ${valid() ? '' : 'disabled'}>Проверить</button>`) +
-        (p === 'won' ? `<div class="over"><div class="card"><h2>Поздравляем!</h2><p class="hint">Число угадано за ${t.length} ${pl(t.length)}</p>
-          <div class="big">${S.num}</div><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>` : '');
+      const mine = S['t' + me] || [], theirs = S['t' + other] || [], myTurn = p === 'guess' && S.turn === me;
+      let lo = 1, hi = 100;
+      mine.forEach(x => { if (x.r === 'up') lo = Math.max(lo, x.n + 1); if (x.r === 'down') hi = Math.min(hi, x.n - 1); });
+      let over = '';
+      if (p === 'over') {
+        const w = S.winner, cnt = w === 0 ? (S.t1 || []).length : (S['t' + w] || []).length;
+        const title = w === 0 ? 'Ничья!' : w === me ? 'Победа!' : 'Не в этот раз';
+        const sub = w === 0 ? `Оба угадали за ${cnt} ${pl(cnt)}` : w === me ? `Вы угадали число Игрока ${other} за ${cnt} ${pl(cnt)}` : `Игрок ${other} угадал ваше число за ${cnt} ${pl(cnt)}`;
+        over = `<div class="over"><div class="card"><h2>${title}</h2><p class="hint">${sub}</p><p class="hint">Числа: Игрок 1 и Игрок 2</p>
+          <div class="big">${S.n1} и ${S.n2}</div><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
+      }
+      view.innerHTML = `<div class="range"><p class="turn">${p === 'over' ? 'Игра окончена' : myTurn ? 'Ваш ход' : `Ход Игрока ${other}…`}</p>
+        <p class="who">Число Игрока ${other}: от <b>${lo}</b> до <b>${hi}</b></p><div class="bar"><i style="left:${lo - 1}%;width:${hi - lo + 1}%"></i></div></div>
+        <div class="cols"><div class="col"><h3>Ваши попытки</h3>${col(mine)}</div><div class="col"><h3>Попытки Игрока ${other}</h3>${col(theirs)}</div></div>
+        <p class="mine">Ваше число: ${my}</p>${disp()}${pad(!myTurn)}
+        <button class="start" data-act="check" ${myTurn && valid() ? '' : 'disabled'}>Проверить</button>${over}`;
     }
   }
-  ref.on('value', s => { S = s.val() || { phase: 'pick' }; render(); });
+  ref.on('value', s => { S = s.val() || { phase: 'write' }; render(); });
 
   function press(d) {
-    const can = (S.phase === 'write' && S.setter === me) || (S.phase === 'guess' && S.setter !== me);
+    const can = (S.phase === 'write' && !S['n' + me]) || (S.phase === 'guess' && S.turn === me);
     if (!can || (!draft && d === '0') || +(draft + d) > 100) return;
     draft += d; render();
   }
-  function start() { if (valid()) ref.set({ phase: 'guess', setter: me, num: +draft }); }
-  function check() {
-    if (!valid() || S.phase !== 'guess') return; const n = +draft; draft = '';
+  function start() {
+    if (!valid()) return; const n = +draft; draft = '';
     ref.transaction(s => {
-      if (!s || s.phase !== 'guess') return;
-      const r = n < s.num ? 'up' : n > s.num ? 'down' : 'ok';
-      return { ...s, tries: [...(s.tries || []), { n, r }], phase: r === 'ok' ? 'won' : 'guess' };
+      s = { ...(s || { phase: 'write' }) }; if (s.phase !== 'write') return;
+      s['n' + me] = n; if (s.n1 && s.n2) { s.phase = 'guess'; s.turn = 1; } return s;
+    });
+  }
+  function check() {
+    if (!valid() || S.phase !== 'guess' || S.turn !== me) return; const n = +draft; draft = '';
+    ref.transaction(s => {
+      if (!s || s.phase !== 'guess' || s.turn !== me) return;
+      const target = s['n' + other], r = n < target ? 'up' : n > target ? 'down' : 'ok', t = { ...s };
+      t['t' + me] = [...(s['t' + me] || []), { n, r }];
+      const ok1 = (t.t1 || []).some(x => x.r === 'ok'), ok2 = (t.t2 || []).some(x => x.r === 'ok');
+      if (me === 1) t.turn = 2;
+      else if (ok1 || ok2) { t.phase = 'over'; t.winner = ok1 && ok2 ? 0 : ok1 ? 1 : 2; }
+      else t.turn = 1;
+      return t;
     });
     render();
   }
@@ -128,11 +151,10 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     const b = e.target.closest('button'); if (!b || b.disabled) return;
     if (b.dataset.k) return press(b.dataset.k);
     const a = b.dataset.act;
-    if (a === 'setter') ref.set({ phase: 'write', setter: +b.dataset.v });
-    else if (a === 'bs') { draft = draft.slice(0, -1); render(); }
+    if (a === 'bs') { draft = draft.slice(0, -1); render(); }
     else if (a === 'start') start();
     else if (a === 'check') check();
-    else if (a === 'again') ref.set({ phase: 'pick' });
+    else if (a === 'again') ref.set({ phase: 'write' });
   };
   addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
