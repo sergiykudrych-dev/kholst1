@@ -38,6 +38,7 @@
   syncLocal = () => {
     const ids = {};
     objs.forEach(o => {
+      if (o.priv) return;
       ids[o.id] = 1; const s = ser(o), j = canon(s);
       if (known[o.id] !== j) { known[o.id] = j; box.child(o.id).set(s); }
     });

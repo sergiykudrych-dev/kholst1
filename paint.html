@@ -38,6 +38,7 @@
 
 <div class="pill actions">
   <button id="pt" class="only-m" data-icon="sliders" title="Стиль"></button>
+  <button id="hide" data-icon="eye" title="Рисовать скрытно: второй человек не видит"></button>
   <button id="share" data-icon="link" title="Ссылка для двоих"></button>
   <button id="undo" data-icon="undo" title="Отменить (Ctrl+Z)"></button>
   <button id="redo" data-icon="redo" title="Вернуть (Ctrl+Shift+Z)"></button>
@@ -59,6 +60,7 @@
 </aside>
 
 <input type="file" id="file" accept="image/*" multiple hidden>
+<div class="pill hbar" id="hbar" hidden><span id="hmsg"></span><button id="reveal" hidden>Показать</button></div>
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>

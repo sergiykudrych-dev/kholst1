@@ -46,7 +46,7 @@ svg{display:block}.tools svg,.actions svg{width:22px;height:22px}
   .brand{top:calc(8px + env(safe-area-inset-top,0px));left:8px;width:44px;height:44px;padding:0;justify-content:center}
   .brand span{display:none}
   .actions{top:calc(8px + env(safe-area-inset-top,0px));right:8px;gap:2px;padding:4px}
-  .actions button{width:36px;height:36px}.actions svg{width:20px;height:20px}
+  .actions button{width:34px;height:34px}.actions svg{width:20px;height:20px}
   .tools{left:8px;right:8px;top:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:none;flex-direction:row;gap:2px;padding:6px}
   .tools button{flex:1 1 0;min-width:0;width:auto;height:40px}
   .only-m{display:grid!important}
@@ -56,3 +56,10 @@ svg{display:block}.tools svg,.actions svg{width:22px;height:22px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
+
+.actions button.on{background:var(--accent);color:#fff}
+.hbar{top:80px;right:16px;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 14px;font-weight:700;font-size:13px}
+.hbar[hidden]{display:none}
+.hbar button{padding:7px 14px;border-radius:12px;background:var(--accent);color:#fff;font-weight:700}
+body.hiding::after{content:"";position:fixed;inset:0;border:3px dashed var(--coral);opacity:.45;pointer-events:none}
+@media(max-width:720px){.hbar{top:calc(56px + env(safe-area-inset-top,0px));right:8px}}

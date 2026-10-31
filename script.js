@@ -10,7 +10,9 @@ const ICONS = {
   undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3', redo: 'M15 14l5-5-5-5M20 9H10a6 6 0 000 12h3',
   image: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01', download: 'M12 4v11M7 11l5 5 5-5M5 20h14',
   trash: 'M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13', sliders: 'M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6',
-  link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1'
+  link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1',
+  eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z',
+  eyeoff: 'M3 3l18 18M10.6 6.1A10 10 0 0112 6c6 0 10 6 10 6a17 17 0 01-3.2 3.9M6.6 7.6C3.9 9.4 2 12 2 12s4 7 10 7c1.7 0 3.2-.4 4.5-1M9.9 9.9a3 3 0 004.2 4.2'
 };
 document.querySelectorAll('[data-icon]').forEach(b => b.insertAdjacentHTML('afterbegin',
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[b.dataset.icon]}"/></svg>`));
@@ -21,7 +23,8 @@ const COLORS = ['#1B1D3A', '#3B3FD8', '#8E92F5', '#18A0C8', '#1FA56B', '#F2B705'
 const LINEAR = ['line', 'arrow'];
 const uid = () => Math.random().toString(36).slice(2, 8);
 let ME; try { ME = sessionStorage.me || (sessionStorage.me = uid()); } catch (_) { ME = uid(); }
-const stamp = o => Object.assign(o, { id: uid() + uid(), by: ME, ts: Date.now() });
+let hiding = false;
+const stamp = o => Object.assign(o, { id: uid() + uid(), by: ME, ts: Date.now() }, hiding ? { priv: true } : {});
 let syncLocal = () => {};
 
 /* ---------- отрисовка ---------- */
@@ -79,6 +82,7 @@ function render() {
   ctx.clearRect(0, 0, innerWidth, innerHeight);
   objs.forEach(draw); if (cur) draw(cur); if (sel) drawSel(sel);
   $('#empty').classList.toggle('off', !!(objs.length || cur || txtOpen));
+  hideUI();
 }
 
 /* ---------- выбор и изменение размера ---------- */
@@ -262,6 +266,23 @@ addEventListener('keydown', e => {
     objs.splice(objs.indexOf(sel), 1); e.key === ']' ? objs.push(sel) : objs.unshift(sel); push(); render();
   } else if (KEYS[e.code]) setTool(KEYS[e.code]);
 });
+
+/* ---------- скрытый режим ---------- */
+function hideUI() {
+  const n = objs.filter(o => o.priv).length, bar = $('#hbar');
+  bar.hidden = !(hiding || n); document.body.classList.toggle('hiding', hiding);
+  $('#hmsg').textContent = (hiding ? 'Рисуете скрытно' : 'Скрыто') + (n ? ' · ' + n : '');
+  $('#reveal').hidden = !n;
+}
+$('#hide').onclick = () => {
+  hiding = !hiding; $('#hide').classList.toggle('on', hiding);
+  $('#hide path').setAttribute('d', ICONS[hiding ? 'eyeoff' : 'eye']);
+  toast(hiding ? 'Второй человек не видит то, что вы рисуете' : 'Скрытый режим выключен'); render();
+};
+$('#reveal').onclick = () => {
+  const t = Date.now(); objs.forEach((o, i) => { if (o.priv) { delete o.priv; o.ts = t + i; } });
+  push(); render(); toast('Рисунок показан');
+};
 
 addEventListener('resize', fit);
 setTool('select'); ui(); btns(); fit();
