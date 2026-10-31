@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Холст — рисуйте фигуры и картинки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Unbounded:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<input id="txt" hidden placeholder="Введите текст" autocomplete="off">
+
+<div class="empty" id="empty">
+  <h1>Чистый холст</h1>
+  <p>Выберите инструмент слева и рисуйте. Картинку можно перетащить прямо сюда или вставить из буфера.</p>
+</div>
+
+<header class="pill brand">
+  <svg width="30" height="20" viewBox="0 0 30 20"><circle cx="8" cy="11" r="7" fill="#3B3FD8"/><rect x="10" y="4" width="12" height="12" rx="2" fill="#FF4F6D"/><path d="M21 18l4.5-9 4.5 9z" fill="#F2B705"/></svg>
+  Холст
+</header>
+
+<nav class="pill tools" id="tools" aria-label="Инструменты">
+  <button data-tool="select" data-icon="select" title="Выделение (V)"></button>
+  <button data-tool="pen" data-icon="pen" title="Карандаш (P)"></button>
+  <button data-tool="line" data-icon="line" title="Линия (L)"></button>
+  <button data-tool="arrow" data-icon="arrow" title="Стрелка (A)"></button>
+  <button data-tool="rect" data-icon="rect" title="Прямоугольник (R)"></button>
+  <button data-tool="ellipse" data-icon="ellipse" title="Эллипс (O)"></button>
+  <button data-tool="tri" data-icon="tri" title="Треугольник (G)"></button>
+  <button data-tool="star" data-icon="star" title="Звезда (S)"></button>
+  <button data-tool="text" data-icon="text" title="Текст (T)"></button>
+  <button data-tool="erase" data-icon="erase" title="Ластик (E)"></button>
+</nav>
+
+<div class="pill actions">
+  <button id="pt" class="only-m" data-icon="sliders" title="Стиль"></button>
+  <button id="share" data-icon="link" title="Ссылка для двоих"></button>
+  <button id="undo" data-icon="undo" title="Отменить (Ctrl+Z)"></button>
+  <button id="redo" data-icon="redo" title="Вернуть (Ctrl+Shift+Z)"></button>
+  <button id="img" data-icon="image" title="Добавить картинку"></button>
+  <button id="save" data-icon="download" title="Скачать PNG"></button>
+  <button id="del" data-icon="trash" title="Удалить выбранное или очистить всё"></button>
+</div>
+
+<aside class="pill props" id="props">
+  <div class="chips">
+    <button class="chip" id="cs" data-t="stroke"><i></i>Контур</button>
+    <button class="chip" id="cf" data-t="fill"><i></i>Заливка</button>
+  </div>
+  <div class="sw" id="sw"></div>
+  <label class="row"><span>Толщина</span><output id="swv"></output>
+    <input type="range" id="sww" min="1" max="24" step="1"></label>
+  <label class="row"><span>Непрозрачность</span><output id="opv"></output>
+    <input type="range" id="opw" min="10" max="100" step="5"></label>
+</aside>
+
+<input type="file" id="file" accept="image/*" multiple hidden>
+<div class="pill status" id="status" hidden></div>
+<div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="script.js"></script>
+<script src="sync.js"></script>
+</body>
+</html>
