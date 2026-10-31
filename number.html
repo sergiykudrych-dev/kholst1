@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Угадай число</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
+*{box-sizing:border-box;margin:0}
+body{display:flex;flex-direction:column;min-height:100dvh;font:500 16px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) 12px 6px;max-width:520px;width:100%;margin:0 auto}
+.chip{padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.78);font-weight:700;font-size:14px;color:var(--deep);text-decoration:none}
+#view{flex:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:520px;margin:0 auto;padding:0 10px max(12px,env(safe-area-inset-bottom))}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;width:100%;text-align:center}
+h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
+.pick{display:grid;gap:12px;width:100%}
+.pick button{padding:20px;border-radius:24px;background:rgba(255,255,255,.82);box-shadow:0 14px 34px -18px rgba(142,15,69,.6);font-size:22px;font-weight:700}
+.pick small{display:block;font-size:13px;font-weight:500;color:var(--mute)}
+.beat{font-size:64px;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.18)}}
+.who,.hint{color:var(--mute);font-size:14px}
+.disp{display:grid;place-items:center;min-height:78px;font:700 clamp(52px,16vw,72px)/1 Manrope,sans-serif;color:var(--deep);letter-spacing:2px}
+.disp.empty{color:rgba(142,15,69,.25)}
+.range{width:100%;text-align:center;padding-top:6px}
+.bar{position:relative;height:10px;margin-top:8px;border-radius:99px;background:rgba(255,255,255,.7);overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--rose)}
+.hist{flex:1;min-height:0;width:100%;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0}
+.try{display:flex;gap:12px;align-items:center;padding:8px 18px;border-radius:999px;background:rgba(255,255,255,.82);font-weight:700;color:var(--deep)}
+.try span{font-weight:500;color:var(--mute)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:340px}
+.pad button{height:54px;border-radius:14px;background:rgba(255,255,255,.9);color:var(--deep);font-weight:700;font-size:24px;box-shadow:0 2px 0 rgba(142,15,69,.2)}
+.start,.again{width:100%;max-width:340px;padding:15px;border-radius:16px;background:var(--rose);color:#fff;font-weight:700;font-size:17px;margin-top:10px}
+.start:disabled{opacity:.4;cursor:default}
+.over{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
+.card{width:100%;max-width:400px;padding:28px 22px 22px;border-radius:28px;background:#FFF8FA;text-align:center;box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
+.card h2{font:400 42px/1.1 'Marck Script',cursive;color:var(--deep)}
+.big{margin:10px 0 14px;font-weight:700;font-size:26px;letter-spacing:2px;text-transform:uppercase;color:var(--rose);word-break:break-word}
+.card a{display:inline-block;margin-top:12px;color:var(--mute);font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){.beat{animation:none}}
+</style>
+</head>
+<body>
+<header>
+  <a class="chip" href="index.html">← Игры</a>
+  <span class="chip" id="me"></span>
+  <button class="chip" id="inv">Пригласить</button>
+</header>
+<div id="view"></div>
+<div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+const $ = s => document.querySelector(s), view = $('#view');
+const room = (location.hash.match(/room=([\w-]+)/) || [])[1];
+if (!room) location.replace('index.html');
+const me = /host=1/.test(location.hash) ? 1 : 2;
+$('#me').textContent = 'Вы — Игрок ' + me;
+let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2000); };
+$('#inv').onclick = async () => {
+  const u = location.href.split('#')[0] + '#room=' + room;
+  try { if (navigator.share) await navigator.share({ title: 'Угадай число', url: u }); else { await navigator.clipboard.writeText(u); toast('Ссылка скопирована'); } }
+  catch (e) { if (e.name !== 'AbortError') prompt('Скопируйте ссылку:', u); }
+};
+const pl = n => n % 10 === 1 && n % 100 !== 11 ? 'попытку' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'попытки' : 'попыток';
+
+const cfg = window.FIREBASE_CONFIG || {};
+if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
+  view.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
+} else {
+  firebase.initializeApp(cfg);
+  const ref = firebase.database().ref('rooms/' + room + '/num');
+  let S = { phase: 'pick' }, draft = '', prev = '';
+  const valid = () => +draft >= 1 && +draft <= 100;
+  const disp = () => `<div class="disp ${draft ? '' : 'empty'}">${draft || '?'}</div>`;
+  const pad = () => '<div class="pad">' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-k="${n}">${n}</button>`).join('') +
+    '<button data-act="bs" aria-label="Стереть">⌫</button><button data-k="0">0</button><span></span></div>';
+
+  function render() {
+    if (S.phase !== prev) { draft = ''; prev = S.phase; }
+    const p = S.phase;
+    if (p === 'pick') {
+      view.innerHTML = `<div class="mid"><h1>Кто загадывает число?</h1><div class="pick">` +
+        [1, 2].map(n => `<button data-act="setter" data-v="${n}">Игрок ${n}<small>${n === me ? 'это вы' : n === 1 ? 'создатель комнаты' : 'зашёл по ссылке'}</small></button>`).join('') + '</div></div>';
+    } else if (p === 'write' && S.setter !== me) {
+      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Игрок ${S.setter} загадывает число…</h1></div>`;
+    } else if (p === 'write') {
+      view.innerHTML = `<div class="mid"><h1>Загадайте число</h1><p class="hint">От 1 до 100</p>${disp()}</div>${pad()}
+        <button class="start" data-act="start" ${valid() ? '' : 'disabled'}>Загадать</button>`;
+    } else {
+      const t = S.tries || [], isSetter = me === S.setter; let lo = 1, hi = 100;
+      t.forEach(x => { if (x.r === 'up') lo = Math.max(lo, x.n + 1); if (x.r === 'down') hi = Math.min(hi, x.n - 1); });
+      const hist = t.length ? [...t].reverse().map(x => `<div class="try"><b>${x.n}</b><span>${x.r === 'up' ? 'больше ↑' : x.r === 'down' ? 'меньше ↓' : 'угадали ♥&#xFE0E;'}</span></div>`).join('') : '<p class="hint">Пока нет попыток</p>';
+      view.innerHTML = `<div class="range"><p class="who">Игрок ${3 - S.setter} угадывает · попыток: ${t.length}</p>
+        <p class="who">Число от <b>${lo}</b> до <b>${hi}</b></p><div class="bar"><i style="left:${lo - 1}%;width:${hi - lo + 1}%"></i></div></div>` +
+        (isSetter ? `<p class="who" style="margin-top:14px">Вы загадали</p><div class="disp">${S.num}</div>` : '') +
+        `<div class="hist">${hist}</div>` +
+        (isSetter ? '' : `${disp()}${pad()}<button class="start" data-act="check" ${valid() ? '' : 'disabled'}>Проверить</button>`) +
+        (p === 'won' ? `<div class="over"><div class="card"><h2>Поздравляем!</h2><p class="hint">Число угадано за ${t.length} ${pl(t.length)}</p>
+          <div class="big">${S.num}</div><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>` : '');
+    }
+  }
+  ref.on('value', s => { S = s.val() || { phase: 'pick' }; render(); });
+
+  function press(d) {
+    const can = (S.phase === 'write' && S.setter === me) || (S.phase === 'guess' && S.setter !== me);
+    if (!can || (!draft && d === '0') || +(draft + d) > 100) return;
+    draft += d; render();
+  }
+  function start() { if (valid()) ref.set({ phase: 'guess', setter: me, num: +draft }); }
+  function check() {
+    if (!valid() || S.phase !== 'guess') return; const n = +draft; draft = '';
+    ref.transaction(s => {
+      if (!s || s.phase !== 'guess') return;
+      const r = n < s.num ? 'up' : n > s.num ? 'down' : 'ok';
+      return { ...s, tries: [...(s.tries || []), { n, r }], phase: r === 'ok' ? 'won' : 'guess' };
+    });
+    render();
+  }
+  view.onclick = e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.k) return press(b.dataset.k);
+    const a = b.dataset.act;
+    if (a === 'setter') ref.set({ phase: 'write', setter: +b.dataset.v });
+    else if (a === 'bs') { draft = draft.slice(0, -1); render(); }
+    else if (a === 'start') start();
+    else if (a === 'check') check();
+    else if (a === 'again') ref.set({ phase: 'pick' });
+  };
+  addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^\d$/.test(e.key)) press(e.key);
+    else if (e.key === 'Backspace') { draft = draft.slice(0, -1); render(); }
+    else if (e.key === 'Enter') S.phase === 'write' ? start() : check();
+  });
+}
+</script>
+</body>
+</html>

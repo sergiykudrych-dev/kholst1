@@ -54,6 +54,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rose);outline-o
     <span><b>Угадай слово</b><small>Один загадывает, другой угадывает по буквам</small></span>
     <span class="go">♥&#xFE0E;</span>
   </button>
+  <button class="game" id="num">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><text x="22" y="25" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="700" font-size="28" fill="#fff">?</text></svg></span>
+    <span><b>Угадай число</b><small>От 1 до 100: сайт подсказывает «больше» или «меньше»</small></span>
+    <span class="go">♥&#xFE0E;</span>
+  </button>
   <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
 </main>
 
@@ -83,6 +88,7 @@ const open = page => {
 };
 $('#paint').onclick = () => open('paint.html');
 $('#word').onclick = () => open('word.html');
+$('#num').onclick = () => open('number.html');
 $('#x').onclick = () => dlg.close();
 dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };
 link.onclick = () => link.select();
