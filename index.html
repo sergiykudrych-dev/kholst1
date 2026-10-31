@@ -49,6 +49,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rose);outline-o
     <span><b>Холст</b><small>Рисуйте вместе: рисунок сразу появляется у второго</small></span>
     <span class="go">♥&#xFE0E;</span>
   </button>
+  <button class="game" id="word">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><path d="M3 26h10M17 26h10M31 26h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/><g font-family="Manrope,sans-serif" font-weight="700" font-size="18" fill="#fff" text-anchor="middle"><text x="8" y="21">А</text><text x="36" y="21">Я</text></g></svg></span>
+    <span><b>Угадай слово</b><small>Один загадывает, другой угадывает по буквам</small></span>
+    <span class="go">♥&#xFE0E;</span>
+  </button>
   <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
 </main>
 
@@ -70,12 +75,14 @@ for (let i = 0; i < 16; i++) {
   s.style.cssText = `left:${Math.random() * 100}%;font-size:${14 + Math.random() * 34}px;opacity:${.25 + Math.random() * .35};animation-duration:${14 + Math.random() * 16}s;animation-delay:-${Math.random() * 30}s;--y:${y}`;
   $('#hearts').append(s);
 }
-$('#paint').onclick = () => {
+const open = page => {
   const code = [...crypto.getRandomValues(new Uint8Array(10))].map(n => 'abcdefghijkmnpqrstuvwxyz23456789'[n % 32]).join('');
-  link.value = new URL('paint.html#room=' + code, location.href).href;
+  link.value = new URL(page + '#room=' + code, location.href).href;
   $('#hint').hidden = location.protocol !== 'file:';
   dlg.showModal();
 };
+$('#paint').onclick = () => open('paint.html');
+$('#word').onclick = () => open('word.html');
 $('#x').onclick = () => dlg.close();
 dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };
 link.onclick = () => link.select();
@@ -88,7 +95,7 @@ $('#share').onclick = async () => {
   if (!navigator.share) return copy();
   try { await navigator.share({ title: 'Холст', text: 'Рисуем вместе', url: link.value }); } catch (_) {}
 };
-$('#play').onclick = () => { location.href = link.value; };
+$('#play').onclick = () => { location.href = link.value + '&host=1'; };
 </script>
 </body>
 </html>

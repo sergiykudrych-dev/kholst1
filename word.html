@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Угадай слово</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
+*{box-sizing:border-box;margin:0}
+body{display:flex;flex-direction:column;min-height:100dvh;font:500 16px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) 12px 6px;max-width:520px;width:100%;margin:0 auto}
+.chip{padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.78);font-weight:700;font-size:14px;color:var(--deep);text-decoration:none}
+#view{flex:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:520px;margin:0 auto;padding:0 10px max(12px,env(safe-area-inset-bottom))}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;width:100%;text-align:center}
+h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
+.pick{display:grid;gap:12px;width:100%}
+.pick button{padding:20px;border-radius:24px;background:rgba(255,255,255,.82);box-shadow:0 14px 34px -18px rgba(142,15,69,.6);font-size:22px;font-weight:700}
+.pick small{display:block;font-size:13px;font-weight:500;color:var(--mute)}
+.beat{font-size:64px;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.18)}}
+.hearts{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;padding:8px 0 0}
+.hearts svg{width:32px;height:32px;fill:var(--rose)}
+.hearts svg.off{fill:none;stroke:#D9A0B8;stroke-width:1.6}
+.who,.hint{color:var(--mute);font-size:14px}
+.blanks{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;min-height:56px}
+.cell{--w:clamp(18px,calc((min(100vw,520px) - 56px)/var(--n) - 6px),40px);width:var(--w);height:56px;font-size:calc(var(--w)*.78);line-height:52px;font-weight:700;text-transform:uppercase;border-bottom:3px solid var(--rose);color:var(--ink)}
+.cell.ghost{color:rgba(142,15,69,.35)}
+.lv{display:flex;align-items:center;gap:14px;font-weight:700}
+.lv button{width:40px;height:40px;border-radius:50%;background:#fff;color:var(--rose);font-size:22px;box-shadow:0 2px 0 rgba(142,15,69,.2)}
+.kb{width:100%;display:grid;gap:6px;padding-top:8px}
+.row{display:flex;justify-content:center;gap:4px}
+.key{position:relative;flex:1 1 0;max-width:42px;height:50px;border-radius:10px;background:rgba(255,255,255,.9);color:var(--deep);font-weight:700;font-size:18px;text-transform:uppercase;box-shadow:0 2px 0 rgba(142,15,69,.2)}
+.key.wide{max-width:64px;flex:1.5 1 0}
+.key:disabled{cursor:default}.key:disabled:not(.ok):not(.bad){opacity:.65}
+.key.ok{background:var(--rose);color:#fff}
+.key.bad{opacity:.55}
+.key.bad::after{content:'✕';position:absolute;inset:0;display:grid;place-items:center;color:#D50032;font-size:28px}
+.start,.again{width:100%;padding:15px;border-radius:16px;background:var(--rose);color:#fff;font-weight:700;font-size:17px;margin-top:10px}
+.start:disabled{opacity:.4;cursor:default}
+.over{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
+.card{width:100%;max-width:400px;padding:28px 22px 22px;border-radius:28px;background:#FFF8FA;text-align:center;box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
+.card h2{font:400 42px/1.1 'Marck Script',cursive;color:var(--deep)}
+.big{margin:10px 0 14px;font-weight:700;font-size:26px;letter-spacing:2px;text-transform:uppercase;color:var(--rose);word-break:break-word}
+.card a{display:inline-block;margin-top:12px;color:var(--mute);font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){.beat{animation:none}}
+</style>
+</head>
+<body>
+<header>
+  <a class="chip" href="index.html">← Игры</a>
+  <span class="chip" id="me"></span>
+  <button class="chip" id="inv">Пригласить</button>
+</header>
+<div id="view"></div>
+<div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+const $ = s => document.querySelector(s), view = $('#view');
+const room = (location.hash.match(/room=([\w-]+)/) || [])[1];
+if (!room) location.replace('index.html');
+const me = /host=1/.test(location.hash) ? 1 : 2;
+const ROWS = ['йцукенгшщзхъ', 'фывапролджэ', 'ячсмитьбю'];
+const HEART = 'M12 21C5 15.7 2 12.4 2 8.9 2 6.2 4.1 4.2 6.7 4.2c1.9 0 3.7 1 5.3 3.1 1.6-2.1 3.4-3.1 5.3-3.1C19.9 4.2 22 6.2 22 8.9c0 3.5-3 6.8-10 12.1z';
+const heart = on => `<svg viewBox="0 0 24 24" class="${on ? '' : 'off'}"><path d="${HEART}"/></svg>`;
+$('#me').textContent = 'Вы — Игрок ' + me;
+let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2000); };
+$('#inv').onclick = async () => {
+  const u = location.href.split('#')[0] + '#room=' + room;
+  try { if (navigator.share) await navigator.share({ title: 'Угадай слово', url: u }); else { await navigator.clipboard.writeText(u); toast('Ссылка скопирована'); } }
+  catch (e) { if (e.name !== 'AbortError') prompt('Скопируйте ссылку:', u); }
+};
+
+const cfg = window.FIREBASE_CONFIG || {};
+if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
+  view.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
+} else {
+  firebase.initializeApp(cfg);
+  const ref = firebase.database().ref('rooms/' + room + '/word');
+  let S = { phase: 'pick' }, draft = '', lives = 7, prev = '';
+
+  const cells = (arr, empty) => `<div class="blanks" style="--n:${Math.max(arr.length, 1)}">` +
+    arr.map(c => `<span class="cell ${c.g ? 'ghost' : ''}">${c.l}</span>`).join('') + '</div>' + (empty ? '<p class="hint">Нажимайте буквы на клавиатуре</p>' : '');
+
+  function kb(mode) {
+    const g = S.guessed || [], can = mode === 'guess' && S.phase === 'guess' && me !== S.setter;
+    return '<div class="kb">' + ROWS.map((r, i) => '<div class="row">' + [...r].map(l => {
+      let c = 'key', d = '';
+      if (mode === 'guess') { if (g.includes(l)) { c += S.word.includes(l) ? ' ok' : ' bad'; d = 'disabled'; } else if (!can) d = 'disabled'; }
+      return `<button class="${c}" data-k="${l}" ${d}>${l}</button>`;
+    }).join('') + (mode === 'write' && i === 2 ? '<button class="key wide" data-act="bs" aria-label="Стереть">⌫</button>' : '') + '</div>').join('') + '</div>';
+  }
+
+  function render() {
+    if (S.phase !== prev) { if (S.phase === 'write') draft = ''; prev = S.phase; }
+    const p = S.phase;
+    if (p === 'pick') {
+      view.innerHTML = `<div class="mid"><h1>Кто загадывает слово?</h1><div class="pick">` +
+        [1, 2].map(n => `<button data-act="setter" data-v="${n}">Игрок ${n}<small>${n === me ? 'это вы' : n === 1 ? 'создатель комнаты' : 'зашёл по ссылке'}</small></button>`).join('') + '</div></div>';
+    } else if (p === 'write' && S.setter !== me) {
+      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Игрок ${S.setter} загадывает слово…</h1></div>`;
+    } else if (p === 'write') {
+      view.innerHTML = `<div class="mid"><h1>Загадайте слово</h1>
+        <div class="lv"><button data-act="lm" aria-label="Меньше">−</button><span>Сердечек: ${lives}</span><button data-act="lp" aria-label="Больше">+</button></div>
+        ${cells([...draft].map(l => ({ l })), !draft)}</div>${kb('write')}
+        <button class="start" data-act="start" ${draft.length < 2 ? 'disabled' : ''}>Начать</button>`;
+    } else {
+      const g = S.guessed || [], isSetter = me === S.setter, over = p !== 'guess';
+      const arr = [...S.word].map(ch => g.includes(ch) ? { l: ch } : (p === 'lost' || isSetter) ? { l: ch, g: 1 } : { l: '' });
+      view.innerHTML = `<div class="hearts">${Array.from({ length: S.maxLives }, (_, i) => heart(i < S.lives)).join('')}</div>
+        <div class="mid"><p class="who">${isSetter ? `Игрок ${3 - S.setter} угадывает` : 'Угадайте слово'}</p>${cells(arr)}</div>${kb('guess')}` +
+        (over ? `<div class="over"><div class="card"><h2>${p === 'won' ? 'Поздравляем!' : 'Не угадали'}</h2>
+          <p class="hint">${p === 'won' ? 'Слово угадано' : 'Сердечки закончились. Слово было'}</p><div class="big">${S.word}</div>
+          <button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>` : '');
+    }
+  }
+  ref.on('value', s => { S = s.val() || { phase: 'pick' }; render(); });
+
+  function press(l) {
+    if (S.phase === 'write' && S.setter === me) { if (draft.length < 14) { draft += l; render(); } }
+    else if (S.phase === 'guess' && S.setter !== me) {
+      ref.transaction(s => {
+        if (!s || s.phase !== 'guess') return;
+        const g = s.guessed || []; if (g.includes(l)) return;
+        const ng = [...g, l], lv = s.lives - (s.word.includes(l) ? 0 : 1);
+        const done = [...s.word].every(c => ng.includes(c));
+        return { ...s, guessed: ng, lives: lv, phase: done ? 'won' : lv <= 0 ? 'lost' : 'guess' };
+      });
+    }
+  }
+  const start = () => draft.length >= 2 && ref.set({ phase: 'guess', setter: me, word: draft, lives, maxLives: lives });
+  view.onclick = e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.k) return press(b.dataset.k);
+    const a = b.dataset.act;
+    if (a === 'setter') ref.set({ phase: 'write', setter: +b.dataset.v });
+    else if (a === 'bs') { draft = draft.slice(0, -1); render(); }
+    else if (a === 'lm') { lives = Math.max(3, lives - 1); render(); }
+    else if (a === 'lp') { lives = Math.min(10, lives + 1); render(); }
+    else if (a === 'start') start();
+    else if (a === 'again') ref.set({ phase: 'pick' });
+  };
+  addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'Backspace' && S.phase === 'write' && S.setter === me) { draft = draft.slice(0, -1); render(); }
+    else if (e.key === 'Enter' && S.phase === 'write' && S.setter === me) start();
+    else { const l = e.key.toLowerCase().replace('ё', 'е'); if (/^[а-я]$/.test(l)) press(l); }
+  });
+}
+</script>
+</body>
+</html>
