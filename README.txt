@@ -32,3 +32,4 @@
 ФАЙЛЫ: index.html — главная («Во что сыграем?»), paint.html — игра «Холст».
 word.html — игра «Угадай слово».
 number.html — игра «Угадай число».
+Холст (paint.html) теперь один файл: style.css, script.js и sync.js больше не нужны.

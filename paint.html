@@ -7,7 +7,84 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Unbounded:wght@600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<style>
+:root{--bg:#ECEEF6;--ink:#1B1D3A;--mute:#6B7090;--line:#D8DBEA;--accent:#3B3FD8;--soft:#E4E5FB;--coral:#FF4F6D}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{font:500 14px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:#fff}
+canvas{position:fixed;inset:0;touch-action:none;display:block}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.pill{position:fixed;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 28px -12px rgba(27,29,58,.3)}
+.brand{top:16px;left:16px;color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;padding:9px 16px 9px 12px;font:600 15px Unbounded,Manrope,sans-serif}
+.tools{left:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;padding:8px}
+.actions{top:16px;right:16px;display:flex;gap:4px;padding:6px}
+.tools button,.actions button{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;transition:background .15s,color .15s}
+.tools button:hover,.actions button:hover:not(:disabled){background:var(--soft)}
+.tools button.on{background:var(--accent);color:#fff}
+.actions button:disabled{opacity:.35;cursor:default}
+#del:hover{color:var(--coral)}
+svg{display:block}.tools svg,.actions svg{width:22px;height:22px}
+
+.props{right:16px;bottom:16px;width:252px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--line);border-radius:12px;font-weight:700}
+.chip.on{border-color:var(--accent);background:var(--soft)}
+.chip i,.sw button,.sw label{width:100%}
+.chip i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(27,29,58,.25);flex:none}
+.none{background:linear-gradient(135deg,#fff 45%,var(--coral) 45% 55%,#fff 55%)!important}
+.sw{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.sw button,.sw label{aspect-ratio:1;border-radius:50%;border:1px solid rgba(27,29,58,.2);position:relative;cursor:pointer}
+.sw .cur{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--accent)}
+.sw label{background:conic-gradient(#ff4f6d,#f2b705,#1fa56b,#18a0c8,#3b3fd8,#b04bdb,#ff4f6d);overflow:hidden}
+.sw input{position:absolute;inset:-8px;width:200%;height:200%;opacity:0;cursor:pointer}
+.row{display:grid;grid-template-columns:1fr auto;gap:6px 8px;color:var(--mute);font-size:13px}
+.row output{color:var(--ink);font-weight:700}
+.row input{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+
+.empty{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:12px;text-align:center;pointer-events:none;padding:0 90px;transition:opacity .3s}
+.empty h1{font:600 clamp(28px,5vw,52px)/1.1 Unbounded,Manrope,sans-serif;color:#B5BAD6}
+.empty p{max-width:38ch;color:var(--mute)}
+.empty.off{opacity:0}
+#txt{position:fixed;z-index:5;border:0;background:transparent;outline:1.5px dashed var(--accent);padding:0 2px;font:700 20px Manrope,sans-serif;min-width:120px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.only-m{display:none!important}
+
+@media(max-width:720px){
+  .brand{top:calc(8px + env(safe-area-inset-top,0px));left:8px;width:44px;height:44px;padding:0;justify-content:center}
+  .brand span{display:none}
+  .actions{top:calc(8px + env(safe-area-inset-top,0px));right:8px;gap:2px;padding:4px}
+  .actions button{width:34px;height:34px}.actions svg{width:20px;height:20px}
+  .tools{left:8px;right:8px;top:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:none;flex-direction:row;gap:2px;padding:6px}
+  .tools button{flex:1 1 0;min-width:0;width:auto;height:40px}
+  .only-m{display:grid!important}
+  .props{display:none;left:8px;right:8px;bottom:calc(68px + env(safe-area-inset-bottom,0px));width:auto;max-height:42vh;overflow:auto;padding:12px}
+  .props.open{display:flex}
+  .empty{padding:0 24px}.toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+
+.actions button.on{background:var(--accent);color:#fff}
+.hbar{top:80px;right:16px;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 14px;font-weight:700;font-size:13px}
+.hbar[hidden]{display:none}
+.hbar button{padding:7px 14px;border-radius:12px;background:var(--accent);color:#fff;font-weight:700}
+body.hiding::after{content:"";position:fixed;inset:0;border:3px dashed var(--coral);opacity:.45;pointer-events:none}
+@media(max-width:720px){.hbar{top:calc(56px + env(safe-area-inset-top,0px));right:8px}}
+
+html,body,button,input,a{touch-action:manipulation}
+body{-webkit-user-select:none;user-select:none}
+#txt{-webkit-user-select:text;user-select:text}
+.zoom{left:16px;bottom:16px;display:flex;align-items:center;padding:4px}
+.zoom button{height:38px;min-width:38px;border-radius:12px;font-weight:700;color:var(--ink)}
+.zoom button:hover{background:var(--soft)}
+#zv{min-width:58px;font-size:13px}
+@media(max-width:720px){.zoom{left:auto;right:8px;bottom:auto;top:50%;transform:translateY(-50%);flex-direction:column-reverse;padding:4px}.zoom button{width:44px;height:44px}#zv{min-width:44px;font-size:12px}}
+
+button{-webkit-tap-highlight-color:transparent}
+</style>
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -66,7 +143,393 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
-<script src="script.js"></script>
-<script src="sync.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const cv = $('#c'); let ctx = cv.getContext('2d');
+const ICONS = {
+  select: 'M5 3l14 7-6 2-2 6z', pen: 'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3', line: 'M5 19L19 5',
+  arrow: 'M5 19L19 5M10 5h9v9', rect: 'M6 6h12a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2z',
+  ellipse: 'M12 4a8 8 0 100 16 8 8 0 000-16z', tri: 'M12 4l9 16H3z',
+  star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',
+  text: 'M5 6V4h14v2M12 4v16M9 20h6', erase: 'M3 17l9-10 7 7-5 5H8zM9 12l6 6',
+  undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3', redo: 'M15 14l5-5-5-5M20 9H10a6 6 0 000 12h3',
+  image: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01', download: 'M12 4v11M7 11l5 5 5-5M5 20h14',
+  trash: 'M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13', sliders: 'M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6',
+  link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1',
+  eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z',
+  eyeoff: 'M3 3l18 18M10.6 6.1A10 10 0 0112 6c6 0 10 6 10 6a17 17 0 01-3.2 3.9M6.6 7.6C3.9 9.4 2 12 2 12s4 7 10 7c1.7 0 3.2-.4 4.5-1M9.9 9.9a3 3 0 004.2 4.2'
+};
+document.querySelectorAll('[data-icon]').forEach(b => b.insertAdjacentHTML('afterbegin',
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[b.dataset.icon]}"/></svg>`));
+
+let objs = [], hist = [[]], hi = 0, tool = 'select', sel = null, cur = null, drag = null, txtOpen = null, ht;
+const st = { stroke: '#1B1D3A', fill: '#F2B705', sw: 4, op: 100, target: 'fill' };
+const COLORS = ['#1B1D3A', '#3B3FD8', '#8E92F5', '#18A0C8', '#1FA56B', '#F2B705', '#FF8A3D', '#FF4F6D', '#B04BDB', '#FFFFFF'];
+const LINEAR = ['line', 'arrow'];
+const uid = () => Math.random().toString(36).slice(2, 8);
+let ME; try { ME = sessionStorage.me || (sessionStorage.me = uid()); } catch (_) { ME = uid(); }
+let hiding = false;
+const cam = { k: 1, x: 0, y: 0 }, clampK = k => Math.min(8, Math.max(.25, k));
+const stamp = o => Object.assign(o, { id: uid() + uid(), by: ME, ts: Date.now() }, hiding ? { priv: true } : {});
+let syncLocal = () => {};
+
+/* ---------- отрисовка ---------- */
+function fit() {
+  const d = devicePixelRatio || 1;
+  cv.width = innerWidth * d; cv.height = innerHeight * d;
+  cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
+  ctx.setTransform(d, 0, 0, d, 0, 0); render();
+}
+const font = o => `700 ${o.size}px Manrope, system-ui, sans-serif`;
+function measure(o) { ctx.save(); ctx.font = font(o); o.w = ctx.measureText(o.text).width; o.h = o.size * 1.25; ctx.restore(); }
+
+function path(o) {
+  const { x, y, w, h } = o; ctx.beginPath();
+  switch (o.t) {
+    case 'rect': ctx.roundRect ? ctx.roundRect(x, y, w, h, Math.min(10, w / 4, h / 4)) : ctx.rect(x, y, w, h); break;
+    case 'ellipse': ctx.ellipse(x + w / 2, y + h / 2, Math.abs(w / 2), Math.abs(h / 2), 0, 0, 7); break;
+    case 'tri': ctx.moveTo(x + w / 2, y); ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.closePath(); break;
+    case 'star':
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 ? .42 : 1, a = -Math.PI / 2 + i * Math.PI / 5;
+        const px = x + w / 2 + Math.cos(a) * r * w / 2, py = y + h / 2 + Math.sin(a) * r * h / 2;
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      } ctx.closePath(); break;
+    case 'line': case 'arrow': ctx.moveTo(x, y); ctx.lineTo(x + w, y + h); break;
+    case 'pen': (o.raw || o.p.map(q => [x + q[0] * w, y + q[1] * h])).forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); break;
+  }
+}
+function draw(o) {
+  ctx.save(); ctx.globalAlpha = o.op / 100; ctx.lineJoin = ctx.lineCap = 'round';
+  ctx.lineWidth = o.sw; ctx.strokeStyle = o.stroke; ctx.fillStyle = o.fill;
+  if (o.t === 'img') ctx.drawImage(o.img, o.x, o.y, o.w, o.h);
+  else if (o.t === 'text') { ctx.font = font(o); ctx.textBaseline = 'top'; ctx.fillStyle = o.stroke; ctx.fillText(o.text, o.x, o.y); }
+  else {
+    path(o);
+    if (o.fill !== 'none' && o.t !== 'pen' && !LINEAR.includes(o.t)) ctx.fill();
+    ctx.stroke();
+    if (o.t === 'arrow') {
+      const a = Math.atan2(o.h, o.w), L = 10 + o.sw * 2, ex = o.x + o.w, ey = o.y + o.h;
+      ctx.beginPath(); ctx.moveTo(ex - L * Math.cos(a - .45), ey - L * Math.sin(a - .45));
+      ctx.lineTo(ex, ey); ctx.lineTo(ex - L * Math.cos(a + .45), ey - L * Math.sin(a + .45)); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+const bbox = o => [Math.min(o.x, o.x + o.w), Math.min(o.y, o.y + o.h), Math.max(o.x, o.x + o.w), Math.max(o.y, o.y + o.h)];
+function drawSel(o) {
+  const [l, t, r, b] = bbox(o), u = 1 / cam.k; ctx.save();
+  ctx.strokeStyle = '#3B3FD8'; ctx.lineWidth = 1.5 * u; ctx.setLineDash([5 * u, 4 * u]); ctx.strokeRect(l - 4 * u, t - 4 * u, r - l + 8 * u, b - t + 8 * u);
+  ctx.setLineDash([]); ctx.fillStyle = '#fff';
+  if (o.t !== 'text') for (const [px, py] of Object.values(corners(o))) { ctx.beginPath(); ctx.rect(px - 5 * u, py - 5 * u, 10 * u, 10 * u); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+}
+function render() {
+  const d = devicePixelRatio || 1;
+  ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, innerWidth, innerHeight);
+  ctx.setTransform(d * cam.k, 0, 0, d * cam.k, d * cam.x, d * cam.y);
+  objs.forEach(draw); if (cur) draw(cur); if (sel) drawSel(sel);
+  $('#empty').classList.toggle('off', !!(objs.length || cur || txtOpen));
+  $('#zv').textContent = Math.round(cam.k * 100) + '%';
+  hideUI();
+}
+
+/* ---------- выбор и изменение размера ---------- */
+function corners(o) { const [l, t, r, b] = bbox(o), u = 4 / cam.k; return { nw: [l - u, t - u], ne: [r + u, t - u], sw: [l - u, b + u], se: [r + u, b + u] }; }
+function handleAt(o, p) { if (o.t === 'text') return null; for (const [k, c] of Object.entries(corners(o))) if (Math.hypot(p[0] - c[0], p[1] - c[1]) < 14 / cam.k) return k; return null; }
+function hit(o, px, py) {
+  if (LINEAR.includes(o.t)) {
+    const dx = o.w, dy = o.h, t = Math.max(0, Math.min(1, ((px - o.x) * dx + (py - o.y) * dy) / (dx * dx + dy * dy || 1)));
+    return Math.hypot(px - o.x - t * dx, py - o.y - t * dy) <= Math.max(8 / cam.k, o.sw / 2 + 6 / cam.k);
+  }
+  const m = Math.max(6 / cam.k, o.sw / 2 + 4 / cam.k), [l, t, r, b] = bbox(o);
+  return px >= l - m && px <= r + m && py >= t - m && py <= b + m;
+}
+const pick = p => { for (let i = objs.length - 1; i >= 0; i--) if (hit(objs[i], p[0], p[1])) return objs[i]; return null; };
+
+function resize(d, p) {
+  const o = d.o; let [l, t, r, b] = d.bb;
+  d.h[1] === 'w' ? l = p[0] : r = p[0]; d.h[0] === 'n' ? t = p[1] : b = p[1];
+  if (l > r) [l, r] = [r, l]; if (r - l < 6) r = l + 6;
+  if (o.t === 'img') { const nh = (r - l) / d.ar; d.h[0] === 'n' ? t = b - nh : b = t + nh; }
+  else { if (t > b) [t, b] = [b, t]; if (b - t < 6) b = t + 6; }
+  o.w = d.sx * (r - l); o.x = d.sx > 0 ? l : r; o.h = d.sy * (b - t); o.y = d.sy > 0 ? t : b;
+}
+
+/* ---------- указатель ---------- */
+const pos = e => [(e.clientX - cam.x) / cam.k, (e.clientY - cam.y) / cam.k];
+const ptrs = new Map(); let gest = null, panning = null, space = false;
+cv.addEventListener('pointerdown', e => {
+  ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  if (ptrs.size === 2) return startGesture();
+  if (ptrs.size > 2) return;
+  if (e.button === 1 || (e.button === 0 && space)) { e.preventDefault(); cv.setPointerCapture(e.pointerId); commitText(); panning = { sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y }; return; }
+  if (e.button > 0) return; cv.setPointerCapture(e.pointerId); const p = pos(e); commitText();
+  if (tool === 'select') {
+    const h = sel && handleAt(sel, p);
+    if (h) { drag = { k: 'size', h, o: sel, bb: bbox(sel), sx: Math.sign(sel.w) || 1, sy: Math.sign(sel.h) || 1, ar: Math.abs(sel.w / sel.h) || 1 }; return; }
+    sel = pick(p); if (sel) { drag = { k: 'move', sx: p[0], sy: p[1], ox: sel.x, oy: sel.y }; load(sel); } render(); return;
+  }
+  if (tool === 'erase') { drag = { k: 'erase' }; erase(p); render(); return; }
+  if (tool === 'text') { startText(p); return; }
+  sel = null;
+  const base = { stroke: st.stroke, fill: st.fill, sw: st.sw, op: st.op, x: p[0], y: p[1], w: 0, h: 0, t: tool };
+  cur = tool === 'pen' ? { ...base, raw: [p] } : base; drag = { k: 'draw', sx: p[0], sy: p[1] };
+});
+cv.addEventListener('pointermove', e => {
+  if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  if (gest && ptrs.size >= 2) {
+    const [a, b] = [...ptrs.values()], c = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    cam.k = clampK(gest.k * Math.hypot(a[0] - b[0], a[1] - b[1]) / gest.d); cam.x = c[0] - gest.wx * cam.k; cam.y = c[1] - gest.wy * cam.k; return render();
+  }
+  if (panning) { cam.x = panning.cx + e.clientX - panning.sx; cam.y = panning.cy + e.clientY - panning.sy; return render(); }
+  if (!drag) return; const p = pos(e);
+  if (drag.k === 'draw') {
+    if (cur.t === 'pen') cur.raw.push(p);
+    else if (LINEAR.includes(cur.t)) { cur.w = p[0] - drag.sx; cur.h = p[1] - drag.sy; }
+    else { cur.x = Math.min(drag.sx, p[0]); cur.y = Math.min(drag.sy, p[1]); cur.w = Math.abs(p[0] - drag.sx); cur.h = Math.abs(p[1] - drag.sy); }
+  } else if (drag.k === 'move') { sel.x = drag.ox + p[0] - drag.sx; sel.y = drag.oy + p[1] - drag.sy; drag.moved = true; }
+  else if (drag.k === 'size') { resize(drag, p); drag.moved = true; }
+  else erase(p);
+  render();
+});
+function endDrag() {
+  if (!drag) return; const d = drag; drag = null;
+  if (d.k === 'draw' && cur) {
+    const o = cur; cur = null;
+    if (o.t === 'pen') {
+      const r = o.raw; if (r.length === 1) r.push([...r[0]]);
+      const xs = r.map(q => q[0]), ys = r.map(q => q[1]), x = Math.min(...xs), y = Math.min(...ys);
+      o.x = x; o.y = y; o.w = Math.max(Math.max(...xs) - x, 1); o.h = Math.max(Math.max(...ys) - y, 1);
+      o.p = r.map(q => [(q[0] - x) / o.w, (q[1] - y) / o.h]); delete o.raw;
+    } else if (Math.abs(o.w) < 4 && Math.abs(o.h) < 4) return render();
+    objs.push(stamp(o)); push();
+  } else if (d.moved || d.changed) push();
+  render();
+}
+function up(e) { ptrs.delete(e.pointerId); if (gest) { if (ptrs.size < 2) gest = null; return; } if (panning) { panning = null; return; } endDrag(); }
+cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+function erase(p) { const o = pick(p); if (o) { objs.splice(objs.indexOf(o), 1); drag.changed = true; } }
+
+/* ---------- текст ---------- */
+const txt = $('#txt');
+function startText(p) {
+  txtOpen = { x: p[0], y: p[1], size: 14 + st.sw * 4 };
+  Object.assign(txt.style, { left: (p[0] * cam.k + cam.x) + 'px', top: (p[1] * cam.k + cam.y) + 'px', fontSize: Math.max(16, txtOpen.size * cam.k) + 'px', color: st.stroke });
+  txt.hidden = false; txt.value = ''; setTimeout(() => txt.focus(), 30); render();
+}
+function commitText() {
+  if (!txtOpen) return; const t = txtOpen, v = txt.value.trim(); txtOpen = null; txt.hidden = true;
+  if (v) { const o = { t: 'text', text: v, x: t.x, y: t.y, size: t.size, stroke: st.stroke, fill: 'none', sw: st.sw, op: st.op }; measure(o); objs.push(stamp(o)); push(); }
+  render();
+}
+txt.addEventListener('keydown', e => { if (e.key === 'Enter') commitText(); if (e.key === 'Escape') { txt.value = ''; commitText(); } });
+txt.addEventListener('blur', commitText);
+
+/* ---------- история ---------- */
+const snap = () => objs.map(o => ({ ...o }));
+function push() { hist = hist.slice(0, hi + 1).slice(-99); hist.push(snap()); hi = hist.length - 1; btns(); syncLocal(); }
+function go(d) {
+  const n = hi + d; if (n < 0 || n >= hist.length) return;
+  hi = n; const mine = hist[hi].filter(o => o.by === ME).map(o => ({ ...o }));
+  objs = objs.filter(o => o.by !== ME).concat(mine).sort((a, b) => a.ts - b.ts); sel = null; render(); btns(); syncLocal();
+}
+const btns = () => { $('#undo').disabled = hi === 0; $('#redo').disabled = hi === hist.length - 1; };
+
+/* ---------- панель стиля ---------- */
+const sw = $('#sw');
+COLORS.forEach(c => sw.insertAdjacentHTML('beforeend', `<button data-c="${c}" style="background:${c}" aria-label="${c}"></button>`));
+sw.insertAdjacentHTML('beforeend', '<button data-c="none" class="none" aria-label="Без заливки"></button><label title="Свой цвет"><input type="color" id="custom"></label>');
+function ui() {
+  for (const k of ['stroke', 'fill']) { const i = $(k === 'stroke' ? '#cs i' : '#cf i'); i.style.background = st[k] === 'none' ? '' : st[k]; i.classList.toggle('none', st[k] === 'none'); }
+  $('#cs').classList.toggle('on', st.target === 'stroke'); $('#cf').classList.toggle('on', st.target === 'fill');
+  sw.querySelectorAll('button').forEach(b => b.classList.toggle('cur', b.dataset.c.toLowerCase() === String(st[st.target]).toLowerCase()));
+  $('#sww').value = st.sw; $('#swv').textContent = st.sw + ' px'; $('#opw').value = st.op; $('#opv').textContent = st.op + '%';
+}
+function apply() {
+  ui(); if (!sel) return;
+  Object.assign(sel, { stroke: st.stroke, fill: sel.t === 'text' ? 'none' : st.fill, sw: st.sw, op: st.op });
+  if (sel.t === 'text') { sel.size = 14 + st.sw * 4; measure(sel); }
+  render(); clearTimeout(ht); ht = setTimeout(push, 500);
+}
+function load(o) {
+  if (o.t === 'img') st.op = o.op;
+  else { Object.assign(st, { stroke: o.stroke, fill: o.fill, sw: o.t === 'text' ? (o.size - 14) / 4 : o.sw, op: o.op }); }
+  ui();
+}
+document.querySelectorAll('.chip').forEach(b => b.onclick = () => { st.target = b.dataset.t; ui(); });
+sw.onclick = e => { const b = e.target.closest('button'); if (!b) return; st[st.target] = st.target === 'stroke' && b.dataset.c === 'none' ? st.stroke : b.dataset.c; apply(); };
+$('#custom').oninput = e => { st[st.target] = e.target.value; apply(); };
+$('#sww').oninput = e => { st.sw = +e.target.value; apply(); };
+$('#opw').oninput = e => { st.op = +e.target.value; apply(); };
+$('#pt').onclick = () => $('#props').classList.toggle('open');
+
+/* ---------- инструменты ---------- */
+function setTool(t) {
+  commitText(); tool = t;
+  document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
+  cv.style.cursor = t === 'select' ? 'default' : t === 'text' ? 'text' : 'crosshair';
+  if (t !== 'select') sel = null; render();
+}
+document.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+$('#undo').onclick = () => go(-1); $('#redo').onclick = () => go(1);
+
+/* ---------- картинки ---------- */
+function addImg(src) {
+  const im = new Image();
+  im.onload = () => {
+    const k = Math.min(1, 900 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+    c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+    const s = Math.min(1, 420 / Math.max(c.width, c.height)), w = c.width * s, h = c.height * s;
+    const o = stamp({ t: 'img', img: c, src: c.toDataURL('image/jpeg', .78), x: (innerWidth - w) / 2 + objs.length % 5 * 20, y: (innerHeight - h) / 2 + objs.length % 5 * 20, w, h, sw: 0, op: st.op, stroke: '#000', fill: 'none' });
+    objs.push(o); setTool('select'); sel = o; push(); render();
+  };
+  im.src = src;
+}
+function readFiles(files) {
+  [...files].filter(f => f.type.startsWith('image/')).forEach(f => { const r = new FileReader(); r.onload = () => addImg(r.result); r.readAsDataURL(f); });
+}
+$('#img').onclick = () => $('#file').click();
+$('#file').onchange = e => { readFiles(e.target.files); e.target.value = ''; };
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => { e.preventDefault(); readFiles(e.dataTransfer.files); });
+addEventListener('paste', e => readFiles([...e.clipboardData.files]));
+
+/* ---------- сохранение и удаление ---------- */
+let tt; function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2200); }
+$('#save').onclick = () => {
+  if (!objs.length) return toast('Сначала нарисуйте что-нибудь');
+  const bs = objs.map(o => { const b = bbox(o), m = o.sw / 2 + (o.t === 'arrow' ? 10 + o.sw * 2 : 0); return [b[0] - m, b[1] - m, b[2] + m, b[3] + m]; });
+  const x0 = Math.min(...bs.map(b => b[0])) - 40, y0 = Math.min(...bs.map(b => b[1])) - 40;
+  const W = Math.max(...bs.map(b => b[2])) + 40 - x0, H = Math.max(...bs.map(b => b[3])) + 40 - y0;
+  const off = document.createElement('canvas'), real = ctx, k = 2; off.width = W * k; off.height = H * k;
+  ctx = off.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, off.width, off.height);
+  ctx.scale(k, k); ctx.translate(-x0, -y0); objs.forEach(draw); ctx = real;
+  const a = document.createElement('a'); a.download = 'holst.png'; a.href = off.toDataURL('image/png'); a.click(); toast('Рисунок сохранён');
+};
+function remove() {
+  if (sel) { objs.splice(objs.indexOf(sel), 1); sel = null; push(); render(); }
+  else if (objs.length && confirm('Очистить весь холст?')) { objs = []; push(); render(); }
+}
+$('#del').onclick = remove;
+
+/* ---------- клавиатура ---------- */
+const KEYS = { KeyV: 'select', KeyP: 'pen', KeyL: 'line', KeyA: 'arrow', KeyR: 'rect', KeyO: 'ellipse', KeyG: 'tri', KeyS: 'star', KeyT: 'text', KeyE: 'erase' };
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') { e.preventDefault(); go(e.shiftKey ? 1 : -1); }
+  else if ((e.ctrlKey || e.metaKey) && e.code === 'KeyY') { e.preventDefault(); go(1); }
+  else if (e.ctrlKey || e.metaKey || e.altKey) return;
+  else if (e.code === 'Delete' || e.code === 'Backspace') remove();
+  else if ((e.key === ']' || e.key === '[') && sel) {
+    sel.ts = e.key === ']' ? Date.now() : Math.min(...objs.map(o => o.ts)) - 1;
+    objs.splice(objs.indexOf(sel), 1); e.key === ']' ? objs.push(sel) : objs.unshift(sel); push(); render();
+  } else if (KEYS[e.code]) setTool(KEYS[e.code]);
+});
+
+/* ---------- скрытый режим ---------- */
+function hideUI() {
+  const n = objs.filter(o => o.priv).length, bar = $('#hbar');
+  bar.hidden = !(hiding || n); document.body.classList.toggle('hiding', hiding);
+  $('#hmsg').textContent = (hiding ? 'Рисуете скрытно' : 'Скрыто') + (n ? ' · ' + n : '');
+  $('#reveal').hidden = !n;
+}
+$('#hide').onclick = () => {
+  hiding = !hiding; $('#hide').classList.toggle('on', hiding);
+  $('#hide path').setAttribute('d', ICONS[hiding ? 'eyeoff' : 'eye']);
+  toast(hiding ? 'Второй человек не видит то, что вы рисуете' : 'Скрытый режим выключен'); render();
+};
+$('#reveal').onclick = () => {
+  const t = Date.now(); objs.forEach((o, i) => { if (o.priv) { delete o.priv; o.ts = t + i; } });
+  push(); render(); toast('Рисунок показан');
+};
+
+/* ---------- масштаб и перемещение ---------- */
+function zoomAt(cx, cy, f) {
+  const k = clampK(cam.k * f), r = k / cam.k; commitText();
+  cam.x = cx - (cx - cam.x) * r; cam.y = cy - (cy - cam.y) * r; cam.k = k; render();
+}
+function startGesture() {
+  commitText();
+  if (drag && drag.k === 'draw') { cur = null; drag = null; } else endDrag();
+  const [a, b] = [...ptrs.values()], c = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  gest = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, k: cam.k, wx: (c[0] - cam.x) / cam.k, wy: (c[1] - cam.y) / cam.k };
+  render();
+}
+cv.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0015))); }, { passive: false });
+document.addEventListener('gesturestart', e => e.preventDefault());
+$('#zin').onclick = () => zoomAt(innerWidth / 2, innerHeight / 2, 1.25);
+$('#zout').onclick = () => zoomAt(innerWidth / 2, innerHeight / 2, .8);
+$('#zv').onclick = () => { Object.assign(cam, { k: 1, x: 0, y: 0 }); render(); };
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.ctrlKey || e.metaKey) return;
+  if (e.code === 'Space') { space = true; cv.style.cursor = 'grab'; e.preventDefault(); }
+  else if (e.key === '+' || e.key === '=') zoomAt(innerWidth / 2, innerHeight / 2, 1.25);
+  else if (e.key === '-') zoomAt(innerWidth / 2, innerHeight / 2, .8);
+  else if (e.key === '0') { Object.assign(cam, { k: 1, x: 0, y: 0 }); render(); }
+});
+addEventListener('keyup', e => { if (e.code === 'Space') { space = false; cv.style.cursor = tool === 'select' ? 'default' : tool === 'text' ? 'text' : 'crosshair'; } });
+
+addEventListener('resize', fit);
+setTool('select'); ui(); btns(); fit();
+</script>
+<script>
+'use strict';
+(function () {
+  const cfg = window.FIREBASE_CONFIG || {}, shareBtn = $('#share');
+  if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
+    shareBtn.disabled = true; toast('Без синхронизации: заполните firebase-config.js'); return;
+  }
+  let room = (location.hash.match(/room=([\w-]+)/) || [])[1];
+  if (!room) { room = uid() + uid() + uid(); history.replaceState(null, '', '#room=' + room); }
+  addEventListener('hashchange', () => location.reload());
+
+  firebase.initializeApp(cfg);
+  const box = firebase.database().ref('rooms/' + room + '/objs'), known = {};
+  const canon = o => JSON.stringify(o, Object.keys(o).sort());
+  const ser = o => {
+    const r = {}; for (const k in o) if (k !== 'img' && o[k] !== undefined) r[k] = o[k];
+    if (r.p) r.p = r.p.map(q => [+q[0].toFixed(3), +q[1].toFixed(3)]);
+    return r;
+  };
+  const apply = s => {
+    const v = s.val(), id = s.key, j = canon(v);
+    if (known[id] === j || (drag && sel && sel.id === id)) return;
+    known[id] = j;
+    const o = { ...v, id }, i = objs.findIndex(x => x.id === id);
+    if (o.t === 'img') {
+      if (i >= 0 && objs[i].src === o.src) o.img = objs[i].img;
+      else { o.img = new Image(); o.img.onload = render; o.img.src = o.src; }
+    }
+    i < 0 ? objs.push(o) : (objs[i] = o);
+    if (sel && sel.id === id) sel = o;
+    objs.sort((a, b) => a.ts - b.ts); render();
+  };
+  box.on('child_added', apply);
+  box.on('child_changed', apply);
+  box.on('child_removed', s => {
+    delete known[s.key]; const i = objs.findIndex(x => x.id === s.key); if (i < 0) return;
+    if (sel && sel.id === s.key) sel = null; objs.splice(i, 1); render();
+  });
+  syncLocal = () => {
+    const ids = {};
+    objs.forEach(o => {
+      if (o.priv) return;
+      ids[o.id] = 1; const s = ser(o), j = canon(s);
+      if (known[o.id] !== j) { known[o.id] = j; box.child(o.id).set(s); }
+    });
+    for (const id in known) if (!ids[id]) { delete known[id]; box.child(id).remove(); }
+  };
+  shareBtn.onclick = async () => {
+    if (location.protocol === 'file:') return toast('Ссылка заработает после публикации сайта');
+    try {
+      if (navigator.share) await navigator.share({ title: 'Холст', url: location.href });
+      else { await navigator.clipboard.writeText(location.href); toast('Ссылка скопирована — отправьте её'); }
+    } catch (e) { if (e.name !== 'AbortError') prompt('Скопируйте ссылку:', location.href); }
+  };
+})();
+</script>
 </body>
 </html>
