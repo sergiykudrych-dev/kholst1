@@ -63,3 +63,12 @@ svg{display:block}.tools svg,.actions svg{width:22px;height:22px}
 .hbar button{padding:7px 14px;border-radius:12px;background:var(--accent);color:#fff;font-weight:700}
 body.hiding::after{content:"";position:fixed;inset:0;border:3px dashed var(--coral);opacity:.45;pointer-events:none}
 @media(max-width:720px){.hbar{top:calc(56px + env(safe-area-inset-top,0px));right:8px}}
+
+html,body,button,input,a{touch-action:manipulation}
+body{-webkit-user-select:none;user-select:none}
+#txt{-webkit-user-select:text;user-select:text}
+.zoom{left:16px;bottom:16px;display:flex;align-items:center;padding:4px}
+.zoom button{height:38px;min-width:38px;border-radius:12px;font-weight:700;color:var(--ink)}
+.zoom button:hover{background:var(--soft)}
+#zv{min-width:58px;font-size:13px}
+@media(max-width:720px){.zoom{left:8px;bottom:calc(68px + env(safe-area-inset-bottom,0px))}}

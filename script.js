@@ -24,6 +24,7 @@ const LINEAR = ['line', 'arrow'];
 const uid = () => Math.random().toString(36).slice(2, 8);
 let ME; try { ME = sessionStorage.me || (sessionStorage.me = uid()); } catch (_) { ME = uid(); }
 let hiding = false;
+const cam = { k: 1, x: 0, y: 0 }, clampK = k => Math.min(8, Math.max(.25, k));
 const stamp = o => Object.assign(o, { id: uid() + uid(), by: ME, ts: Date.now() }, hiding ? { priv: true } : {});
 let syncLocal = () => {};
 
@@ -72,28 +73,31 @@ function draw(o) {
 }
 const bbox = o => [Math.min(o.x, o.x + o.w), Math.min(o.y, o.y + o.h), Math.max(o.x, o.x + o.w), Math.max(o.y, o.y + o.h)];
 function drawSel(o) {
-  const [l, t, r, b] = bbox(o); ctx.save();
-  ctx.strokeStyle = '#3B3FD8'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]); ctx.strokeRect(l - 4, t - 4, r - l + 8, b - t + 8);
+  const [l, t, r, b] = bbox(o), u = 1 / cam.k; ctx.save();
+  ctx.strokeStyle = '#3B3FD8'; ctx.lineWidth = 1.5 * u; ctx.setLineDash([5 * u, 4 * u]); ctx.strokeRect(l - 4 * u, t - 4 * u, r - l + 8 * u, b - t + 8 * u);
   ctx.setLineDash([]); ctx.fillStyle = '#fff';
-  if (o.t !== 'text') for (const [px, py] of Object.values(corners(o))) { ctx.beginPath(); ctx.rect(px - 5, py - 5, 10, 10); ctx.fill(); ctx.stroke(); }
+  if (o.t !== 'text') for (const [px, py] of Object.values(corners(o))) { ctx.beginPath(); ctx.rect(px - 5 * u, py - 5 * u, 10 * u, 10 * u); ctx.fill(); ctx.stroke(); }
   ctx.restore();
 }
 function render() {
-  ctx.clearRect(0, 0, innerWidth, innerHeight);
+  const d = devicePixelRatio || 1;
+  ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, innerWidth, innerHeight);
+  ctx.setTransform(d * cam.k, 0, 0, d * cam.k, d * cam.x, d * cam.y);
   objs.forEach(draw); if (cur) draw(cur); if (sel) drawSel(sel);
   $('#empty').classList.toggle('off', !!(objs.length || cur || txtOpen));
+  $('#zv').textContent = Math.round(cam.k * 100) + '%';
   hideUI();
 }
 
 /* ---------- выбор и изменение размера ---------- */
-function corners(o) { const [l, t, r, b] = bbox(o); return { nw: [l - 4, t - 4], ne: [r + 4, t - 4], sw: [l - 4, b + 4], se: [r + 4, b + 4] }; }
-function handleAt(o, p) { if (o.t === 'text') return null; for (const [k, c] of Object.entries(corners(o))) if (Math.hypot(p[0] - c[0], p[1] - c[1]) < 14) return k; return null; }
+function corners(o) { const [l, t, r, b] = bbox(o), u = 4 / cam.k; return { nw: [l - u, t - u], ne: [r + u, t - u], sw: [l - u, b + u], se: [r + u, b + u] }; }
+function handleAt(o, p) { if (o.t === 'text') return null; for (const [k, c] of Object.entries(corners(o))) if (Math.hypot(p[0] - c[0], p[1] - c[1]) < 14 / cam.k) return k; return null; }
 function hit(o, px, py) {
   if (LINEAR.includes(o.t)) {
     const dx = o.w, dy = o.h, t = Math.max(0, Math.min(1, ((px - o.x) * dx + (py - o.y) * dy) / (dx * dx + dy * dy || 1)));
-    return Math.hypot(px - o.x - t * dx, py - o.y - t * dy) <= Math.max(8, o.sw / 2 + 6);
+    return Math.hypot(px - o.x - t * dx, py - o.y - t * dy) <= Math.max(8 / cam.k, o.sw / 2 + 6 / cam.k);
   }
-  const m = Math.max(6, o.sw / 2 + 4), [l, t, r, b] = bbox(o);
+  const m = Math.max(6 / cam.k, o.sw / 2 + 4 / cam.k), [l, t, r, b] = bbox(o);
   return px >= l - m && px <= r + m && py >= t - m && py <= b + m;
 }
 const pick = p => { for (let i = objs.length - 1; i >= 0; i--) if (hit(objs[i], p[0], p[1])) return objs[i]; return null; };
@@ -108,8 +112,13 @@ function resize(d, p) {
 }
 
 /* ---------- указатель ---------- */
-const pos = e => [e.clientX, e.clientY];
+const pos = e => [(e.clientX - cam.x) / cam.k, (e.clientY - cam.y) / cam.k];
+const ptrs = new Map(); let gest = null, panning = null, space = false;
 cv.addEventListener('pointerdown', e => {
+  ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  if (ptrs.size === 2) return startGesture();
+  if (ptrs.size > 2) return;
+  if (e.button === 1 || (e.button === 0 && space)) { e.preventDefault(); cv.setPointerCapture(e.pointerId); commitText(); panning = { sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y }; return; }
   if (e.button > 0) return; cv.setPointerCapture(e.pointerId); const p = pos(e); commitText();
   if (tool === 'select') {
     const h = sel && handleAt(sel, p);
@@ -123,6 +132,12 @@ cv.addEventListener('pointerdown', e => {
   cur = tool === 'pen' ? { ...base, raw: [p] } : base; drag = { k: 'draw', sx: p[0], sy: p[1] };
 });
 cv.addEventListener('pointermove', e => {
+  if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  if (gest && ptrs.size >= 2) {
+    const [a, b] = [...ptrs.values()], c = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    cam.k = clampK(gest.k * Math.hypot(a[0] - b[0], a[1] - b[1]) / gest.d); cam.x = c[0] - gest.wx * cam.k; cam.y = c[1] - gest.wy * cam.k; return render();
+  }
+  if (panning) { cam.x = panning.cx + e.clientX - panning.sx; cam.y = panning.cy + e.clientY - panning.sy; return render(); }
   if (!drag) return; const p = pos(e);
   if (drag.k === 'draw') {
     if (cur.t === 'pen') cur.raw.push(p);
@@ -147,14 +162,15 @@ function endDrag() {
   } else if (d.moved || d.changed) push();
   render();
 }
-cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+function up(e) { ptrs.delete(e.pointerId); if (gest) { if (ptrs.size < 2) gest = null; return; } if (panning) { panning = null; return; } endDrag(); }
+cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
 function erase(p) { const o = pick(p); if (o) { objs.splice(objs.indexOf(o), 1); drag.changed = true; } }
 
 /* ---------- текст ---------- */
 const txt = $('#txt');
 function startText(p) {
   txtOpen = { x: p[0], y: p[1], size: 14 + st.sw * 4 };
-  Object.assign(txt.style, { left: p[0] + 'px', top: p[1] + 'px', fontSize: txtOpen.size + 'px', color: st.stroke });
+  Object.assign(txt.style, { left: (p[0] * cam.k + cam.x) + 'px', top: (p[1] * cam.k + cam.y) + 'px', fontSize: Math.max(16, txtOpen.size * cam.k) + 'px', color: st.stroke });
   txt.hidden = false; txt.value = ''; setTimeout(() => txt.focus(), 30); render();
 }
 function commitText() {
@@ -283,6 +299,32 @@ $('#reveal').onclick = () => {
   const t = Date.now(); objs.forEach((o, i) => { if (o.priv) { delete o.priv; o.ts = t + i; } });
   push(); render(); toast('Рисунок показан');
 };
+
+/* ---------- масштаб и перемещение ---------- */
+function zoomAt(cx, cy, f) {
+  const k = clampK(cam.k * f), r = k / cam.k; commitText();
+  cam.x = cx - (cx - cam.x) * r; cam.y = cy - (cy - cam.y) * r; cam.k = k; render();
+}
+function startGesture() {
+  commitText();
+  if (drag && drag.k === 'draw') { cur = null; drag = null; } else endDrag();
+  const [a, b] = [...ptrs.values()], c = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  gest = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, k: cam.k, wx: (c[0] - cam.x) / cam.k, wy: (c[1] - cam.y) / cam.k };
+  render();
+}
+cv.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0015))); }, { passive: false });
+document.addEventListener('gesturestart', e => e.preventDefault());
+$('#zin').onclick = () => zoomAt(innerWidth / 2, innerHeight / 2, 1.25);
+$('#zout').onclick = () => zoomAt(innerWidth / 2, innerHeight / 2, .8);
+$('#zv').onclick = () => { Object.assign(cam, { k: 1, x: 0, y: 0 }); render(); };
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.ctrlKey || e.metaKey) return;
+  if (e.code === 'Space') { space = true; cv.style.cursor = 'grab'; e.preventDefault(); }
+  else if (e.key === '+' || e.key === '=') zoomAt(innerWidth / 2, innerHeight / 2, 1.25);
+  else if (e.key === '-') zoomAt(innerWidth / 2, innerHeight / 2, .8);
+  else if (e.key === '0') { Object.assign(cam, { k: 1, x: 0, y: 0 }); render(); }
+});
+addEventListener('keyup', e => { if (e.code === 'Space') { space = false; cv.style.cursor = tool === 'select' ? 'default' : tool === 'text' ? 'text' : 'crosshair'; } });
 
 addEventListener('resize', fit);
 setTool('select'); ui(); btns(); fit();

@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <title>Холст — рисуйте фигуры и картинки</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,6 +60,7 @@
 </aside>
 
 <input type="file" id="file" accept="image/*" multiple hidden>
+<div class="pill zoom"><button id="zout" aria-label="Уменьшить">−</button><button id="zv" aria-label="Сбросить масштаб">100%</button><button id="zin" aria-label="Увеличить">+</button></div>
 <div class="pill hbar" id="hbar" hidden><span id="hmsg"></span><button id="reveal" hidden>Показать</button></div>
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
