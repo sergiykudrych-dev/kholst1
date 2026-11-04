@@ -161,7 +161,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       return myTurn ? `<button class="${cls}" data-act="mv" data-i="${i}" aria-label="Клетка ${i + 1}"></button>` : `<div class="${cls}"></div>`;
     }).join('');
     const status = p === 'over' ? (S.res === 'draw' ? 'Ничья!' : S.res === 'win' + me ? 'Вы победили!' : `Победил Игрок ${other}`) : myTurn ? 'Ваш ход' : `Ход Игрока ${other}…`;
-    const style = n === 3 ? 'width:min(100%,340px);gap:8px;--p:18%' : 'width:min(100%,min(520px,62dvh));gap:3px;--p:14%';
+    const style = `grid-template-columns:repeat(${n},1fr);` + (n === 3 ? 'width:min(100%,340px);gap:8px;--p:18%' : 'width:min(100%,min(520px,62dvh));gap:3px;--p:14%');
     ui.innerHTML = `<p class="turn">${status}</p><div class="ttt" style="${style}">${cells}</div>
       <p class="hint">Вы играете ${mark} · ${S.mode === 3 ? '3' : '5'} в ряд · ${sc}</p>` +
       (p === 'over' ? '<button class="start" data-act="again">Играть ещё</button><button class="btn2" data-act="modes">Сменить режим</button>' : '');
