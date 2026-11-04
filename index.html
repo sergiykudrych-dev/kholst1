@@ -60,6 +60,11 @@ html,body,button,input,a{touch-action:manipulation}
     <span><b>Угадай число</b><small>Оба загадывают число и по очереди угадывают чужое</small></span>
     <span class="go">♥&#xFE0E;</span>
   </button>
+  <button class="game" id="egg">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><ellipse cx="22" cy="15" rx="10" ry="12" fill="#FFE08A"/></svg></span>
+    <span><b>Не урони яйцо</b><small>Бросайте кубик по очереди: кто уронит яйцо, выполняет задание</small></span>
+    <span class="go">♥&#xFE0E;</span>
+  </button>
   <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
 </main>
 
@@ -91,6 +96,7 @@ const open = page => {
 $('#paint').onclick = () => open('paint.html');
 $('#word').onclick = () => open('word.html');
 $('#num').onclick = () => open('number.html');
+$('#egg').onclick = () => open('egg.html');
 $('#x').onclick = () => dlg.close();
 dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };
 link.onclick = () => link.select();

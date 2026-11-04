@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Не урони яйцо</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
+*{box-sizing:border-box;margin:0}
+body{display:flex;flex-direction:column;min-height:100dvh;font:500 16px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) 12px 6px;max-width:520px;width:100%;margin:0 auto}
+.chip{padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.78);font-weight:700;font-size:14px;color:var(--deep);text-decoration:none}
+#view{flex:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:520px;margin:0 auto;padding:0 10px max(12px,env(safe-area-inset-bottom))}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;width:100%;text-align:center}
+h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
+.pick{display:grid;gap:12px;width:100%}
+.pick button{padding:20px;border-radius:24px;background:rgba(255,255,255,.82);box-shadow:0 14px 34px -18px rgba(142,15,69,.6);font-size:22px;font-weight:700}
+.pick small{display:block;font-size:13px;font-weight:500;color:var(--mute)}
+.beat{font-size:64px;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.18)}}
+.who,.hint{color:var(--mute);font-size:14px}
+.disp{display:grid;place-items:center;min-height:78px;font:700 clamp(52px,16vw,72px)/1 Manrope,sans-serif;color:var(--deep);letter-spacing:2px}
+.disp.empty{color:rgba(142,15,69,.25)}
+.range{width:100%;text-align:center;padding-top:6px}
+.bar{position:relative;height:10px;margin-top:8px;border-radius:99px;background:rgba(255,255,255,.7);overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--rose)}
+.hist{flex:1;min-height:0;width:100%;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0}
+.try{display:flex;gap:12px;align-items:center;padding:8px 18px;border-radius:999px;background:rgba(255,255,255,.82);font-weight:700;color:var(--deep)}
+.try span{font-weight:500;color:var(--mute)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:340px}
+.pad button{height:54px;border-radius:14px;background:rgba(255,255,255,.9);color:var(--deep);font-weight:700;font-size:24px;box-shadow:0 2px 0 rgba(142,15,69,.2)}
+.start,.again{width:100%;max-width:340px;padding:15px;border-radius:16px;background:var(--rose);color:#fff;font-weight:700;font-size:17px;margin-top:10px}
+.start:disabled{opacity:.4;cursor:default}
+.over{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
+.card{width:100%;max-width:400px;padding:28px 22px 22px;border-radius:28px;background:#FFF8FA;text-align:center;box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
+.card h2{font:400 42px/1.1 'Marck Script',cursive;color:var(--deep)}
+.big{margin:10px 0 14px;font-weight:700;font-size:26px;letter-spacing:2px;text-transform:uppercase;color:var(--rose);word-break:break-word}
+.card a{display:inline-block;margin-top:12px;color:var(--mute);font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){.beat{animation:none}}
+.cols{flex:1;min-height:0;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:8px}
+.col{display:flex;flex-direction:column;align-items:center;gap:6px;overflow-y:auto;min-height:0}
+.col h3{font-size:13px;color:var(--mute);font-weight:700}
+.col .try{width:100%;justify-content:space-between;padding:6px 14px;font-size:15px}
+.turn{font-weight:700;color:var(--deep);text-align:center}
+.mine{margin:6px auto 0;padding:5px 14px;border-radius:999px;background:rgba(255,255,255,.7);font-size:13px;color:var(--mute)}
+.pad button:disabled{opacity:.4;cursor:default}
+html,body,button,input,a{touch-action:manipulation}
+body{-webkit-user-select:none;user-select:none}
+body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+#view,.mid{min-height:0}
+.range,.mine,.disp,.pad,.start{flex-shrink:0}
+.cols{grid-template-rows:minmax(0,1fr);min-height:72px}
+.disp{min-height:clamp(48px,9dvh,78px);font-size:clamp(40px,8dvh,72px)}
+.pad button{height:clamp(42px,6.5dvh,54px)}
+.start{margin-top:8px}
+#scene{width:100%;max-height:40dvh;flex-shrink:0;margin-top:2px}
+#scene[hidden]{display:none}
+#ui{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+textarea{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:14px;background:#fff;font:600 16px Manrope,sans-serif;color:var(--ink);resize:none;-webkit-user-select:text;user-select:text}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chips button{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.85);color:var(--deep);font-size:13px;font-weight:700}
+.dierow{display:flex;align-items:center;gap:14px;justify-content:center;min-height:96px}
+.die{width:84px;height:84px;padding:12px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);border-radius:20px;background:#fff;box-shadow:0 8px 20px -10px rgba(142,15,69,.6),0 3px 0 rgba(142,15,69,.2)}
+.die i{display:block}.die i.p{margin:2px;border-radius:50%;background:var(--rose)}
+.die.roll{animation:roll .6s ease-out}
+@keyframes roll{0%{transform:rotate(-200deg) scale(.6)}60%{transform:rotate(25deg) scale(1.1)}100%{transform:none}}
+.turn{font-weight:700;color:var(--deep);font-size:18px}
+.task{margin:10px 0 16px;font-weight:700;font-size:22px;color:var(--deep);word-break:break-word}
+@media(prefers-reduced-motion:reduce){.die.roll{animation:none}}
+</style>
+</head>
+<body>
+<header>
+  <a class="chip" href="index.html">← Игры</a>
+  <span class="chip" id="me"></span>
+  <button class="chip" id="inv">Пригласить</button>
+</header>
+<div id="view">
+  <svg id="scene" viewBox="0 0 300 260" aria-hidden="true" hidden>
+    <rect x="0" y="236" width="300" height="24" rx="6" fill="#F3B6CC"/>
+    <rect x="36" y="112" width="54" height="124" rx="14" fill="#FF8FB5"/><rect x="48" y="100" width="30" height="14" rx="4" fill="#C2185B"/>
+    <rect x="210" y="112" width="54" height="124" rx="14" fill="#7B8CFF"/><rect x="222" y="100" width="30" height="14" rx="4" fill="#4A4FBF"/>
+    <path d="M122 190h56l-6 46h-44z" fill="#fff" fill-opacity=".55" stroke="#C2185B" stroke-opacity=".5" stroke-width="2.5"/>
+    <path id="paper" d="" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round"/>
+    <ellipse id="egg" cx="150" cy="82" rx="14" ry="17" fill="#FFB347"/>
+  </svg>
+  <div id="ui"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+document.addEventListener('gesturestart', e => e.preventDefault());
+const $ = s => document.querySelector(s), view = $('#view'), ui = $('#ui');
+const room = (location.hash.match(/room=([\w-]+)/) || [])[1];
+if (!room) location.replace('index.html');
+const me = /host=1/.test(location.hash) ? 1 : 2, other = 3 - me;
+$('#me').textContent = 'Вы — Игрок ' + me;
+let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2000); };
+$('#inv').onclick = async () => {
+  const u = location.href.split('#')[0] + '#room=' + room;
+  try { if (navigator.share) await navigator.share({ title: 'Не урони яйцо', url: u }); else { await navigator.clipboard.writeText(u); toast('Ссылка скопирована'); } }
+  catch (e) { if (e.name !== 'AbortError') prompt('Скопируйте ссылку:', u); }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const IDEAS = ['Обнять на минуту', 'Сделать массаж', 'Сказать три комплимента', 'Станцевать', 'Спеть песню', 'Приготовить чай'];
+const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+const die = (n, roll) => `<div class="die ${roll ? 'roll' : ''}" aria-label="Кубик: ${n || 'не брошен'}">` + [...Array(9)].map((_, i) => `<i class="${n && PIPS[n].includes(i) ? 'p' : ''}"></i>`).join('') + '</div>';
+
+/* ---------- сцена: бумажный мостик и яйцо ---------- */
+const paper = $('#paper'), egg = $('#egg'), RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let cam = { sag: 4, fall: 0 }, raf;
+function draw() {
+  const sag = cam.sag, rest = 82 + sag, y = rest + (212 - rest) * cam.fall, sq = Math.max(0, (cam.fall - .9) * 10);
+  paper.setAttribute('d', `M 70 104 Q 150 ${104 + 2 * sag} 230 104`);
+  egg.setAttribute('cy', y); egg.setAttribute('rx', 14 + 4 * sq); egg.setAttribute('ry', 17 - 7 * sq);
+}
+function animateTo(sag, fall, ms) {
+  cancelAnimationFrame(raf); const a = { ...cam }, t0 = performance.now();
+  const step = t => {
+    const k = RM ? 1 : Math.min(1, (t - t0) / ms), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    cam.sag = a.sag + (sag - a.sag) * e; cam.fall = a.fall + (fall - a.fall) * (fall > a.fall ? k * k : e); draw();
+    if (k < 1) raf = requestAnimationFrame(step);
+  };
+  raf = requestAnimationFrame(step);
+}
+draw();
+
+const cfg = window.FIREBASE_CONFIG || {};
+if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
+  ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
+} else {
+  firebase.initializeApp(cfg);
+  const ref = firebase.database().ref('rooms/' + room + '/egg');
+  let S = { phase: 'setup' }, draft = '', prevP = '', prevN = -1, lastTgt = '', showOver = false, overT;
+
+  function render() {
+    const p = S.phase, my = S['task' + me];
+    if (p !== prevP) {
+      if (p === 'setup') draft = '';
+      clearTimeout(overT); showOver = false;
+      if (p === 'over') overT = setTimeout(() => { showOver = true; render(); }, 1700);
+      prevP = p;
+    }
+    $('#scene').hidden = p === 'setup';
+    const tgt = p === 'over' ? 'o' : p === 'play' ? 'p' + S.prog : 's';
+    if (tgt !== lastTgt) {
+      lastTgt = tgt;
+      if (p === 'over') animateTo(72, 1, 1000);
+      else if (p === 'play') animateTo(4 + Math.min(S.prog / S.thr, 1) * 60, 0, 600);
+      else { cancelAnimationFrame(raf); cam = { sag: 4, fall: 0 }; draw(); }
+    }
+    if (p === 'setup' && !my) {
+      ui.innerHTML = `<div class="mid"><h1>Задание для второго</h1><p class="hint">Тот, из-за кого упадёт яйцо, выполнит задание, которое придумал другой.</p>
+        <textarea id="task" maxlength="80" rows="2" placeholder="Например: обнять на минуту">${esc(draft)}</textarea>
+        <div class="chips">${IDEAS.map(t => `<button data-act="chip" data-t="${t}">${t}</button>`).join('')}</div></div>
+        <button class="start" id="saveBtn" data-act="save" ${draft.trim().length < 2 ? 'disabled' : ''}>Готово</button>`;
+    } else if (p === 'setup') {
+      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём Игрока ${other}…</h1><p class="hint">Ваше задание: «${esc(my)}»</p></div>`;
+    } else {
+      const n = S.last ? S.last.r : 0, rolled = (S.n || 0) !== prevN; prevN = S.n || 0;
+      const myTurn = p === 'play' && S.turn === me;
+      const info = S.last ? `Игрок ${S.last.p} бросил ${S.last.r}` : 'Бумага мокнет с каждым броском';
+      let ov = '';
+      if (p === 'over' && showOver) {
+        const l = S.loser;
+        ov = `<div class="over"><div class="card"><h2>Яйцо упало!</h2><p class="hint">Игрок ${l}${l === me ? ' (вы)' : ''} выполняет задание от Игрока ${3 - l}:</p>
+          <div class="task">${esc(S['task' + (3 - l)] || '')}</div><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
+      }
+      ui.innerHTML = `<p class="turn">${p === 'over' ? 'Яйцо упало!' : myTurn ? 'Ваш ход' : `Ход Игрока ${other}…`}</p>
+        <div class="dierow">${die(n, rolled && n)}<p class="hint">${info}</p></div>
+        <button class="start" data-act="roll" ${myTurn ? '' : 'disabled'}>Бросить кубик</button>${ov}`;
+    }
+  }
+  ref.on('value', s => { S = s.val() || { phase: 'setup' }; render(); });
+
+  function saveTask() {
+    const t = draft.trim(); if (t.length < 2) return;
+    ref.transaction(s => {
+      s = { ...(s || { phase: 'setup' }) }; if (s.phase !== 'setup') return;
+      s['task' + me] = t;
+      if (s.task1 && s.task2) { s.phase = 'play'; s.thr = 10 + Math.floor(Math.random() * 15); s.prog = 0; s.turn = 1 + Math.floor(Math.random() * 2); s.n = 0; delete s.last; delete s.loser; }
+      return s;
+    });
+  }
+  function roll() {
+    ref.transaction(s => {
+      if (!s || s.phase !== 'play' || s.turn !== me) return;
+      const r = 1 + Math.floor(Math.random() * 6), prog = s.prog + r, t = { ...s, prog, last: { p: me, r }, n: (s.n || 0) + 1 };
+      if (prog >= s.thr) { t.phase = 'over'; t.loser = me; } else t.turn = 3 - me;
+      return t;
+    });
+  }
+  view.onclick = e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return; const a = b.dataset.act;
+    if (a === 'chip') { draft = b.dataset.t; render(); }
+    else if (a === 'save') saveTask();
+    else if (a === 'roll') roll();
+    else if (a === 'again') ref.set({ phase: 'setup' });
+  };
+  view.oninput = e => { if (e.target.id === 'task') { draft = e.target.value; $('#saveBtn').disabled = draft.trim().length < 2; } };
+}
+</script>
+</body>
+</html>
