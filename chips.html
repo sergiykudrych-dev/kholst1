@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Чипсы-сюрприз</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
+*{box-sizing:border-box;margin:0}
+body{display:flex;flex-direction:column;min-height:100dvh;font:500 16px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) 12px 6px;max-width:520px;width:100%;margin:0 auto}
+.chip{padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.78);font-weight:700;font-size:14px;color:var(--deep);text-decoration:none}
+#view{flex:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:520px;margin:0 auto;padding:0 10px max(12px,env(safe-area-inset-bottom))}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;width:100%;text-align:center}
+h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
+.pick{display:grid;gap:12px;width:100%}
+.pick button{padding:20px;border-radius:24px;background:rgba(255,255,255,.82);box-shadow:0 14px 34px -18px rgba(142,15,69,.6);font-size:22px;font-weight:700}
+.pick small{display:block;font-size:13px;font-weight:500;color:var(--mute)}
+.beat{font-size:64px;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.18)}}
+.who,.hint{color:var(--mute);font-size:14px}
+.disp{display:grid;place-items:center;min-height:78px;font:700 clamp(52px,16vw,72px)/1 Manrope,sans-serif;color:var(--deep);letter-spacing:2px}
+.disp.empty{color:rgba(142,15,69,.25)}
+.range{width:100%;text-align:center;padding-top:6px}
+.bar{position:relative;height:10px;margin-top:8px;border-radius:99px;background:rgba(255,255,255,.7);overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--rose)}
+.hist{flex:1;min-height:0;width:100%;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0}
+.try{display:flex;gap:12px;align-items:center;padding:8px 18px;border-radius:999px;background:rgba(255,255,255,.82);font-weight:700;color:var(--deep)}
+.try span{font-weight:500;color:var(--mute)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:340px}
+.pad button{height:54px;border-radius:14px;background:rgba(255,255,255,.9);color:var(--deep);font-weight:700;font-size:24px;box-shadow:0 2px 0 rgba(142,15,69,.2)}
+.start,.again{width:100%;max-width:340px;padding:15px;border-radius:16px;background:var(--rose);color:#fff;font-weight:700;font-size:17px;margin-top:10px}
+.start:disabled{opacity:.4;cursor:default}
+.over{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
+.card{width:100%;max-width:400px;padding:28px 22px 22px;border-radius:28px;background:#FFF8FA;text-align:center;box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
+.card h2{font:400 42px/1.1 'Marck Script',cursive;color:var(--deep)}
+.big{margin:10px 0 14px;font-weight:700;font-size:26px;letter-spacing:2px;text-transform:uppercase;color:var(--rose);word-break:break-word}
+.card a{display:inline-block;margin-top:12px;color:var(--mute);font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){.beat{animation:none}}
+.cols{flex:1;min-height:0;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:8px}
+.col{display:flex;flex-direction:column;align-items:center;gap:6px;overflow-y:auto;min-height:0}
+.col h3{font-size:13px;color:var(--mute);font-weight:700}
+.col .try{width:100%;justify-content:space-between;padding:6px 14px;font-size:15px}
+.turn{font-weight:700;color:var(--deep);text-align:center}
+.mine{margin:6px auto 0;padding:5px 14px;border-radius:999px;background:rgba(255,255,255,.7);font-size:13px;color:var(--mute)}
+.pad button:disabled{opacity:.4;cursor:default}
+html,body,button,input,a{touch-action:manipulation}
+body{-webkit-user-select:none;user-select:none}
+body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+#view,.mid{min-height:0}
+.range,.mine,.disp,.pad,.start{flex-shrink:0}
+.cols{grid-template-rows:minmax(0,1fr);min-height:72px}
+.disp{min-height:clamp(48px,9dvh,78px);font-size:clamp(40px,8dvh,72px)}
+.pad button{height:clamp(42px,6.5dvh,54px)}
+.start{margin-top:8px}
+#sceneBox{width:100%;height:min(40vh,calc((min(100vw,520px) - 20px)*.867));height:min(40dvh,calc((min(100vw,520px) - 20px)*.867));flex-shrink:0;margin-top:2px}
+#sceneBox[hidden]{display:none}
+#scene{display:block;width:100%;height:100%}
+.die .q{grid-area:1/1/4/4;display:grid;place-items:center;font:700 44px Manrope,sans-serif;color:#E7B1C6}
+#ui{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+textarea{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:14px;background:#fff;font:600 16px Manrope,sans-serif;color:var(--ink);resize:none;-webkit-user-select:text;user-select:text}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chips button{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.85);color:var(--deep);font-size:13px;font-weight:700}
+.dierow{display:flex;align-items:center;gap:14px;justify-content:center;min-height:96px}
+.die{width:84px;height:84px;padding:12px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);border-radius:20px;background:#fff;box-shadow:0 8px 20px -10px rgba(142,15,69,.6),0 3px 0 rgba(142,15,69,.2)}
+.die i{display:block}.die i.p{margin:2px;border-radius:50%;background:var(--rose)}
+.die.roll{animation:roll .6s ease-out}
+@keyframes roll{0%{transform:rotate(-200deg) scale(.6)}60%{transform:rotate(25deg) scale(1.1)}100%{transform:none}}
+.turn{font-weight:700;color:var(--deep);font-size:18px}
+.task{margin:10px 0 16px;font-weight:700;font-size:22px;color:var(--deep);word-break:break-word}
+@media(prefers-reduced-motion:reduce){.die.roll{animation:none}}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;flex-shrink:0}
+.fields h3{margin-bottom:6px;text-align:center;font-size:13px;color:var(--mute);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px;border-radius:20px;background:rgba(255,255,255,.55)}
+.grid.big{width:100%;max-width:320px;gap:8px;padding:14px}
+.cell{position:relative;aspect-ratio:1;display:grid;place-items:center;border-radius:14px}
+button.cell:disabled{cursor:default}
+.cell .c{width:82%;height:64%;border-radius:55% 45% 60% 40%/60% 50% 50% 40%;background:radial-gradient(ellipse at 35% 30%,#FFF1BE,#F6C453 70%,#E3A62C);box-shadow:0 3px 0 rgba(160,110,20,.35);transform:rotate(-12deg);transition:transform .15s}
+.cell:nth-child(3n+2) .c{transform:rotate(8deg)}.cell:nth-child(3n) .c{transform:rotate(-30deg)}
+button.cell:not(:disabled):active .c{transform:scale(.88)}
+.cell.sel{background:rgba(194,24,91,.16);box-shadow:inset 0 0 0 2px var(--rose)}
+.cell .b{position:absolute;top:0;right:2px;font-size:15px}
+.cell .em{font-size:clamp(24px,8vw,34px)}
+.cell .dot{width:10px;height:10px;border-radius:50%;background:rgba(142,15,69,.2)}
+.big2{font-size:64px;line-height:1.1}
+.task{margin:10px 0 16px;font-weight:700;font-size:22px;color:var(--deep);word-break:break-word}
+</style>
+</head>
+<body>
+<header>
+  <a class="chip" href="index.html">← Игры</a>
+  <span class="chip" id="me"></span>
+  <button class="chip" id="inv">Пригласить</button>
+</header>
+<div id="view"><div id="ui"></div></div>
+<div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+document.addEventListener('gesturestart', e => e.preventDefault());
+const $ = s => document.querySelector(s), view = $('#view'), ui = $('#ui');
+const room = (location.hash.match(/room=([\w-]+)/) || [])[1];
+if (!room) location.replace('index.html');
+const me = /host=1/.test(location.hash) ? 1 : 2, other = 3 - me;
+$('#me').textContent = 'Вы — Игрок ' + me;
+let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2000); };
+$('#inv').onclick = async () => {
+  const u = location.href.split('#')[0] + '#room=' + room;
+  try { if (navigator.share) await navigator.share({ title: 'Чипсы-сюрприз', url: u }); else { await navigator.clipboard.writeText(u); toast('Ссылка скопирована'); } }
+  catch (e) { if (e.name !== 'AbortError') prompt('Скопируйте ссылку:', u); }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const EMO = ['🎅', '🎭', '🎁', '💋', '🌹'];
+const TASKS = ['Обнять на минуту', 'Сказать три комплимента', 'Станцевать 20 секунд', 'Сделать массаж плеч', 'Спеть куплет любой песни', 'Поцеловать в щёку', 'Изобразить любое животное', 'Рассказать о вашей первой встрече', 'Назвать три любимые черты партнёра', 'Приготовить напиток для партнёра', 'Сделать смешное лицо на 10 секунд', 'Сказать «я люблю тебя» на трёх языках', 'Рассказать, что вас рассмешило на этой неделе', 'Загадать желание для вас двоих'];
+
+const cfg = window.FIREBASE_CONFIG || {};
+if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
+  ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
+} else {
+  firebase.initializeApp(cfg);
+  const ref = firebase.database().ref('rooms/' + room + '/chips');
+  let S = { phase: 'setup' }, pick = [], prevP = '';
+  const found = (t, f) => Object.values(t['r' + f] || {}).filter(x => x).length;
+  const left = (t, f) => 9 - Object.keys(t['r' + f] || {}).length;
+  function advance(t) {
+    if (found(t, 1) + found(t, 2) >= 6) { t.phase = 'over'; return; }
+    const nx = 3 - t.turn;
+    if (left(t, 3 - nx) > 0) t.turn = nx;
+    else if (left(t, 3 - t.turn) <= 0) t.phase = 'over';
+  }
+  function field(f) {
+    const sur = S['s' + f] || {}, rev = S['r' + f] || {}, own = f === me;
+    const can = !own && S.phase === 'play' && S.turn === me && !S.pend;
+    return [...Array(9).keys()].map(i => {
+      const k = 'c' + i, r = rev[k];
+      if (r !== undefined) return `<div class="cell">${r ? `<span class="em">${r.e}</span>` : '<span class="dot"></span>'}</div>`;
+      return `<button class="cell" data-act="pick" data-f="${f}" data-i="${i}" ${can ? '' : 'disabled'} aria-label="Чипс ${i + 1}"><span class="c"></span>${own && sur[k] ? `<small class="b">${sur[k]}</small>` : ''}</button>`;
+    }).join('');
+  }
+  function render() {
+    const p = S.phase, mine = S['s' + me];
+    if (p !== prevP) { if (p === 'setup') pick = []; prevP = p; }
+    if (p === 'setup' && !mine) {
+      ui.innerHTML = `<div class="mid"><h1>Спрячьте сюрпризы</h1><p class="hint">Нажмите на 3 чипса на своём поле. Игрок ${other} будет их искать.</p>
+        <div class="grid big">${[...Array(9).keys()].map(i => `<button class="cell ${pick.includes(i) ? 'sel' : ''}" data-act="sel" data-i="${i}" aria-label="Чипс ${i + 1}"><span class="c"></span>${pick.includes(i) ? '<small class="b">♥&#xFE0E;</small>' : ''}</button>`).join('')}</div></div>
+        <button class="start" data-act="save" ${pick.length === 3 ? '' : 'disabled'}>Готово (${pick.length}/3)</button>`;
+    } else if (p === 'setup') {
+      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём Игрока ${other}…</h1><p class="hint">Ваши сюрпризы спрятаны</p></div>`;
+    } else {
+      const myTurn = p === 'play' && S.turn === me && !S.pend;
+      const status = p === 'over' ? 'Все сюрпризы найдены!' : S.pend ? (S.pend.by === me ? 'Выполняйте задание' : `Игрок ${S.pend.by} выполняет задание…`) : myTurn ? `Ваш ход: выберите чипс Игрока ${other}` : `Ход Игрока ${other}…`;
+      let ov = '';
+      if (S.pend && p === 'play') {
+        const d = S.pend, mineP = d.by === me;
+        ov = `<div class="over"><div class="card"><div class="big2">${d.e}</div><h2>Сюрприз!</h2><p class="hint">Игрок ${d.by}${mineP ? ' (вы)' : ''} нашёл сюрприз и должен:</p><div class="task">${esc(d.t)}</div>
+          ${mineP ? '<button class="again" data-act="done">Выполнено</button>' : '<p class="hint">Ждём, пока выполнит…</p>'}</div></div>`;
+      } else if (p === 'over') {
+        ov = `<div class="over"><div class="card"><div class="big2">🎉</div><h2>Все найдено!</h2><p class="hint">Заданий выполнено: Игрок 1 — ${found(S, 2)}, Игрок 2 — ${found(S, 1)}</p>
+          <button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
+      }
+      ui.innerHTML = `<p class="turn">${status}</p>
+        <div class="fields"><div><h3>Ваши чипсы</h3><div class="grid">${field(me)}</div></div><div><h3>Чипсы Игрока ${other}</h3><div class="grid">${field(other)}</div></div></div>
+        <p class="hint">Найдено сюрпризов: вы ${found(S, other)}/3 · Игрок ${other} ${found(S, me)}/3</p>${ov}`;
+    }
+  }
+  ref.on('value', s => { S = s.val() || { phase: 'setup' }; render(); });
+
+  function save() {
+    if (pick.length !== 3) return; const m = {}; pick.forEach(i => m['c' + i] = EMO[Math.floor(Math.random() * EMO.length)]);
+    ref.transaction(s => {
+      s = { ...(s || { phase: 'setup' }) }; if (s.phase !== 'setup') return;
+      s['s' + me] = m;
+      if (s.s1 && s.s2) { s.phase = 'play'; s.turn = 1 + Math.floor(Math.random() * 2); s.r1 = {}; s.r2 = {}; delete s.pend; }
+      return s;
+    });
+  }
+  function take(f, i) {
+    ref.transaction(s => {
+      if (!s || s.phase !== 'play' || s.turn !== me || s.pend || f !== 3 - me) return;
+      const k = 'c' + i, rev = { ...(s['r' + f] || {}) }; if (rev[k] !== undefined) return;
+      const e = (s['s' + f] || {})[k], t = { ...s };
+      rev[k] = e ? { e, t: TASKS[Math.floor(Math.random() * TASKS.length)] } : 0; t['r' + f] = rev;
+      if (e) t.pend = { by: me, e, t: rev[k].t }; else advance(t);
+      return t;
+    });
+  }
+  function done() {
+    ref.transaction(s => {
+      if (!s || !s.pend || s.pend.by !== me) return;
+      const t = { ...s }; delete t.pend; advance(t); return t;
+    });
+  }
+  view.onclick = e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return; const a = b.dataset.act, i = +b.dataset.i;
+    if (a === 'sel') { pick.includes(i) ? pick = pick.filter(x => x !== i) : pick.length < 3 && pick.push(i); render(); }
+    else if (a === 'save') save();
+    else if (a === 'pick') take(+b.dataset.f, i);
+    else if (a === 'done') done();
+    else if (a === 'again') ref.set({ phase: 'setup' });
+  };
+}
+</script>
+</body>
+</html>

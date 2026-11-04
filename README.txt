@@ -34,3 +34,4 @@ word.html — игра «Угадай слово».
 number.html — игра «Угадай число».
 Холст (paint.html) теперь один файл: style.css, script.js и sync.js больше не нужны.
 egg.html — игра «Не урони яйцо».
+chips.html — игра «Чипсы-сюрприз».

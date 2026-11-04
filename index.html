@@ -65,6 +65,11 @@ html,body,button,input,a{touch-action:manipulation}
     <span><b>Не урони яйцо</b><small>Бросайте кубик по очереди: кто уронит яйцо, выполняет задание</small></span>
     <span class="go">♥&#xFE0E;</span>
   </button>
+  <button class="game" id="chips">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><path d="M7 20C9 10 18 5 28 7c7 1 10 6 8 12-3 6-13 7-20 4-5-1-9-2-9-3z" fill="#FFE08A"/></svg></span>
+    <span><b>Чипсы-сюрприз</b><small>Прячьте сюрпризы под чипсами и ищите чужие</small></span>
+    <span class="go">♥&#xFE0E;</span>
+  </button>
   <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
 </main>
 
@@ -97,6 +102,7 @@ $('#paint').onclick = () => open('paint.html');
 $('#word').onclick = () => open('word.html');
 $('#num').onclick = () => open('number.html');
 $('#egg').onclick = () => open('egg.html');
+$('#chips').onclick = () => open('chips.html');
 $('#x').onclick = () => dlg.close();
 dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };
 link.onclick = () => link.select();
