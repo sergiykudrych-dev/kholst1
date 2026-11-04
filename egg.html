@@ -60,8 +60,10 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .disp{min-height:clamp(48px,9dvh,78px);font-size:clamp(40px,8dvh,72px)}
 .pad button{height:clamp(42px,6.5dvh,54px)}
 .start{margin-top:8px}
-#scene{width:100%;max-height:40dvh;flex-shrink:0;margin-top:2px}
-#scene[hidden]{display:none}
+#sceneBox{width:100%;height:min(40vh,calc((min(100vw,520px) - 20px)*.867));height:min(40dvh,calc((min(100vw,520px) - 20px)*.867));flex-shrink:0;margin-top:2px}
+#sceneBox[hidden]{display:none}
+#scene{display:block;width:100%;height:100%}
+.die .q{grid-area:1/1/4/4;display:grid;place-items:center;font:700 44px Manrope,sans-serif;color:#E7B1C6}
 #ui{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
 textarea{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:14px;background:#fff;font:600 16px Manrope,sans-serif;color:var(--ink);resize:none;-webkit-user-select:text;user-select:text}
 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
@@ -83,14 +85,14 @@ textarea{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:1
   <button class="chip" id="inv">Пригласить</button>
 </header>
 <div id="view">
-  <svg id="scene" viewBox="0 0 300 260" aria-hidden="true" hidden>
+  <div id="sceneBox" hidden><svg id="scene" viewBox="0 0 300 260" aria-hidden="true">
     <rect x="0" y="236" width="300" height="24" rx="6" fill="#F3B6CC"/>
     <rect x="36" y="112" width="54" height="124" rx="14" fill="#FF8FB5"/><rect x="48" y="100" width="30" height="14" rx="4" fill="#C2185B"/>
     <rect x="210" y="112" width="54" height="124" rx="14" fill="#7B8CFF"/><rect x="222" y="100" width="30" height="14" rx="4" fill="#4A4FBF"/>
     <path d="M122 190h56l-6 46h-44z" fill="#fff" fill-opacity=".55" stroke="#C2185B" stroke-opacity=".5" stroke-width="2.5"/>
     <path id="paper" d="" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round"/>
     <ellipse id="egg" cx="150" cy="82" rx="14" ry="17" fill="#FFB347"/>
-  </svg>
+  </svg></div>
   <div id="ui"></div>
 </div>
 <div class="toast" id="toast"></div>
@@ -113,7 +115,7 @@ $('#inv').onclick = async () => {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const IDEAS = ['Обнять на минуту', 'Сделать массаж', 'Сказать три комплимента', 'Станцевать', 'Спеть песню', 'Приготовить чай'];
 const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
-const die = (n, roll) => `<div class="die ${roll ? 'roll' : ''}" aria-label="Кубик: ${n || 'не брошен'}">` + [...Array(9)].map((_, i) => `<i class="${n && PIPS[n].includes(i) ? 'p' : ''}"></i>`).join('') + '</div>';
+const die = (n, roll) => `<div class="die ${roll ? 'roll' : ''}" aria-label="Кубик: ${n || 'не брошен'}">` + (n ? [...Array(9)].map((_, i) => `<i class="${PIPS[n].includes(i) ? 'p' : ''}"></i>`).join('') : '<b class="q">?</b>') + '</div>';
 
 /* ---------- сцена: бумажный мостик и яйцо ---------- */
 const paper = $('#paper'), egg = $('#egg'), RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -150,7 +152,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       if (p === 'over') overT = setTimeout(() => { showOver = true; render(); }, 1700);
       prevP = p;
     }
-    $('#scene').hidden = p === 'setup';
+    $('#sceneBox').hidden = p === 'setup';
     const tgt = p === 'over' ? 'o' : p === 'play' ? 'p' + S.prog : 's';
     if (tgt !== lastTgt) {
       lastTgt = tgt;
