@@ -35,3 +35,4 @@ number.html — игра «Угадай число».
 Холст (paint.html) теперь один файл: style.css, script.js и sync.js больше не нужны.
 egg.html — игра «Не урони яйцо».
 chips.html — игра «Чипсы-сюрприз».
+tictactoe.html — «Крестики-нолики» (3 или 5 в ряд). chips.html теперь 16 чипсов на общем поле.

@@ -91,6 +91,9 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 .cell .dot{width:10px;height:10px;border-radius:50%;background:rgba(142,15,69,.2)}
 .big2{font-size:64px;line-height:1.1}
 .task{margin:10px 0 16px;font-weight:700;font-size:22px;color:var(--deep);word-break:break-word}
+.board4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px;width:100%;max-width:min(380px,52dvh);border-radius:22px;background:rgba(255,255,255,.55);flex-shrink:0}
+.board4 .cell .em{font-size:clamp(30px,11vw,46px)}
+.board4 .cell .b{top:2px;right:6px;font-size:20px}
 </style>
 </head>
 <body>
@@ -114,95 +117,86 @@ $('#me').textContent = 'Вы — Игрок ' + me;
 let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2000); };
 $('#inv').onclick = async () => {
   const u = location.href.split('#')[0] + '#room=' + room;
-  try { if (navigator.share) await navigator.share({ title: 'Чипсы-сюрприз', url: u }); else { await navigator.clipboard.writeText(u); toast('Ссылка скопирована'); } }
+  try { if (navigator.share) await navigator.share({ title: document.title, url: u }); else { await navigator.clipboard.writeText(u); toast('Ссылка скопирована'); } }
   catch (e) { if (e.name !== 'AbortError') prompt('Скопируйте ссылку:', u); }
 };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const cfg = window.FIREBASE_CONFIG || {};
 const EMO = ['🎅', '🎭', '🎁', '💋', '🌹'];
 const TASKS = ['Обнять на минуту', 'Сказать три комплимента', 'Станцевать 20 секунд', 'Сделать массаж плеч', 'Спеть куплет любой песни', 'Поцеловать в щёку', 'Изобразить любое животное', 'Рассказать о вашей первой встрече', 'Назвать три любимые черты партнёра', 'Приготовить напиток для партнёра', 'Сделать смешное лицо на 10 секунд', 'Сказать «я люблю тебя» на трёх языках', 'Рассказать, что вас рассмешило на этой неделе', 'Загадать желание для вас двоих'];
-
-const cfg = window.FIREBASE_CONFIG || {};
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
   firebase.initializeApp(cfg);
-  const ref = firebase.database().ref('rooms/' + room + '/chips');
-  let S = { phase: 'setup' }, pick = [], prevP = '';
-  const found = (t, f) => Object.values(t['r' + f] || {}).filter(x => x).length;
-  const left = (t, f) => 9 - Object.keys(t['r' + f] || {}).length;
-  function advance(t) {
-    if (found(t, 1) + found(t, 2) >= 6) { t.phase = 'over'; return; }
-    const nx = 3 - t.turn;
-    if (left(t, 3 - nx) > 0) t.turn = nx;
-    else if (left(t, 3 - t.turn) <= 0) t.phase = 'over';
-  }
-  function field(f) {
-    const sur = S['s' + f] || {}, rev = S['r' + f] || {}, own = f === me;
-    const can = !own && S.phase === 'play' && S.turn === me && !S.pend;
-    return [...Array(9).keys()].map(i => {
-      const k = 'c' + i, r = rev[k];
-      if (r !== undefined) return `<div class="cell">${r ? `<span class="em">${r.e}</span>` : '<span class="dot"></span>'}</div>`;
-      return `<button class="cell" data-act="pick" data-f="${f}" data-i="${i}" ${can ? '' : 'disabled'} aria-label="Чипс ${i + 1}"><span class="c"></span>${own && sur[k] ? `<small class="b">${sur[k]}</small>` : ''}</button>`;
+  const ref = firebase.database().ref('rooms/' + room + '/chips16'), CELLS = [...Array(16).keys()];
+  let S = { phase: 'setup' }, pickI = -1, prevP = '';
+  const foundP = (t, p) => { const h = t['h' + p]; return !!h && (t.rv || {})[h.c] !== undefined; };
+  function advance(t) { if (foundP(t, 1) && foundP(t, 2)) t.phase = 'over'; else t.turn = 3 - t.turn; }
+  function board(setup) {
+    const rv = S.rv || {}, my = S['h' + me], can = !setup && S.phase === 'play' && S.turn === me && !S.pend;
+    return CELLS.map(i => {
+      const k = 'c' + i, r = rv[k];
+      if (!setup && r !== undefined) return `<div class="cell">${r ? `<span class="em">${r.e}</span>` : '<span class="dot"></span>'}</div>`;
+      const badge = !setup && my && my.c === k ? `<small class="b">${my.e}</small>` : (setup && pickI === i ? '<small class="b">♥&#xFE0E;</small>' : '');
+      return `<button class="cell ${setup && pickI === i ? 'sel' : ''}" data-act="${setup ? 'sel' : 'pick'}" data-i="${i}" ${setup || can ? '' : 'disabled'} aria-label="Чипс ${i + 1}"><span class="c"></span>${badge}</button>`;
     }).join('');
   }
   function render() {
-    const p = S.phase, mine = S['s' + me];
-    if (p !== prevP) { if (p === 'setup') pick = []; prevP = p; }
-    if (p === 'setup' && !mine) {
-      ui.innerHTML = `<div class="mid"><h1>Спрячьте сюрпризы</h1><p class="hint">Нажмите на 3 чипса на своём поле. Игрок ${other} будет их искать.</p>
-        <div class="grid big">${[...Array(9).keys()].map(i => `<button class="cell ${pick.includes(i) ? 'sel' : ''}" data-act="sel" data-i="${i}" aria-label="Чипс ${i + 1}"><span class="c"></span>${pick.includes(i) ? '<small class="b">♥&#xFE0E;</small>' : ''}</button>`).join('')}</div></div>
-        <button class="start" data-act="save" ${pick.length === 3 ? '' : 'disabled'}>Готово (${pick.length}/3)</button>`;
+    const p = S.phase;
+    if (p !== prevP) { if (p === 'setup') pickI = -1; prevP = p; }
+    if (p === 'setup' && !S['h' + me]) {
+      ui.innerHTML = `<div class="mid"><h1>Спрячьте сюрприз</h1><p class="hint">Выберите один чипс на общем поле. Игрок ${other} выберет свой, а искать вы будете по очереди.</p>
+        <div class="board4">${board(true)}</div></div><button class="start" data-act="save" ${pickI >= 0 ? '' : 'disabled'}>Готово</button>`;
     } else if (p === 'setup') {
-      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём Игрока ${other}…</h1><p class="hint">Ваши сюрпризы спрятаны</p></div>`;
+      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём Игрока ${other}…</h1><p class="hint">Ваш сюрприз спрятан</p></div>`;
     } else {
-      const myTurn = p === 'play' && S.turn === me && !S.pend;
-      const status = p === 'over' ? 'Все сюрпризы найдены!' : S.pend ? (S.pend.by === me ? 'Выполняйте задание' : `Игрок ${S.pend.by} выполняет задание…`) : myTurn ? `Ваш ход: выберите чипс Игрока ${other}` : `Ход Игрока ${other}…`;
+      const myTurn = p === 'play' && S.turn === me && !S.pend, n = [1, 2].filter(x => foundP(S, x)).length;
+      const status = p === 'over' ? 'Оба сюрприза найдены!' : S.pend ? (S.pend.by === me ? 'Выполняйте задание' : `Игрок ${S.pend.by} выполняет задание…`) : myTurn ? 'Ваш ход: выберите чипс' : `Ход Игрока ${other}…`;
       let ov = '';
       if (S.pend && p === 'play') {
-        const d = S.pend, mineP = d.by === me;
-        ov = `<div class="over"><div class="card"><div class="big2">${d.e}</div><h2>Сюрприз!</h2><p class="hint">Игрок ${d.by}${mineP ? ' (вы)' : ''} нашёл сюрприз и должен:</p><div class="task">${esc(d.t)}</div>
+        const d = S.pend, mineP = d.by === me, both = d.o.length === 2, own = d.o.length === 1 && d.o[0] === d.by;
+        const what = both ? 'нашёл оба сюрприза' : own ? 'открыл свой сюрприз' : `нашёл сюрприз Игрока ${3 - d.by}`;
+        ov = `<div class="over"><div class="card"><div class="big2">${d.e}</div><h2>Сюрприз!</h2><p class="hint">Игрок ${d.by}${mineP ? ' (вы)' : ''} ${what} и должен:</p><div class="task">${esc(d.t)}</div>
           ${mineP ? '<button class="again" data-act="done">Выполнено</button>' : '<p class="hint">Ждём, пока выполнит…</p>'}</div></div>`;
       } else if (p === 'over') {
-        ov = `<div class="over"><div class="card"><div class="big2">🎉</div><h2>Все найдено!</h2><p class="hint">Заданий выполнено: Игрок 1 — ${found(S, 2)}, Игрок 2 — ${found(S, 1)}</p>
+        ov = `<div class="over"><div class="card"><div class="big2">🎉</div><h2>Игра окончена</h2><p class="hint">Заданий выполнено: Игрок 1 — ${S.d1 || 0}, Игрок 2 — ${S.d2 || 0}</p>
           <button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
       }
-      ui.innerHTML = `<p class="turn">${status}</p>
-        <div class="fields"><div><h3>Ваши чипсы</h3><div class="grid">${field(me)}</div></div><div><h3>Чипсы Игрока ${other}</h3><div class="grid">${field(other)}</div></div></div>
-        <p class="hint">Найдено сюрпризов: вы ${found(S, other)}/3 · Игрок ${other} ${found(S, me)}/3</p>${ov}`;
+      ui.innerHTML = `<p class="turn">${status}</p><div class="board4">${board(false)}</div>
+        <p class="hint">Ваш спрятанный чипс отмечен смайликом. Найдено сюрпризов: ${n}/2</p>${ov}`;
     }
   }
   ref.on('value', s => { S = s.val() || { phase: 'setup' }; render(); });
-
   function save() {
-    if (pick.length !== 3) return; const m = {}; pick.forEach(i => m['c' + i] = EMO[Math.floor(Math.random() * EMO.length)]);
+    if (pickI < 0) return; const h = { c: 'c' + pickI, e: EMO[Math.floor(Math.random() * EMO.length)] };
     ref.transaction(s => {
       s = { ...(s || { phase: 'setup' }) }; if (s.phase !== 'setup') return;
-      s['s' + me] = m;
-      if (s.s1 && s.s2) { s.phase = 'play'; s.turn = 1 + Math.floor(Math.random() * 2); s.r1 = {}; s.r2 = {}; delete s.pend; }
+      s['h' + me] = h;
+      if (s.h1 && s.h2) { s.phase = 'play'; s.turn = 1 + Math.floor(Math.random() * 2); s.rv = {}; s.d1 = 0; s.d2 = 0; delete s.pend; }
       return s;
     });
   }
-  function take(f, i) {
+  function take(i) {
     ref.transaction(s => {
-      if (!s || s.phase !== 'play' || s.turn !== me || s.pend || f !== 3 - me) return;
-      const k = 'c' + i, rev = { ...(s['r' + f] || {}) }; if (rev[k] !== undefined) return;
-      const e = (s['s' + f] || {})[k], t = { ...s };
-      rev[k] = e ? { e, t: TASKS[Math.floor(Math.random() * TASKS.length)] } : 0; t['r' + f] = rev;
-      if (e) t.pend = { by: me, e, t: rev[k].t }; else advance(t);
+      if (!s || s.phase !== 'play' || s.turn !== me || s.pend) return;
+      const k = 'c' + i, rv = { ...(s.rv || {}) }; if (rv[k] !== undefined) return;
+      const owners = [1, 2].filter(p => s['h' + p] && s['h' + p].c === k), t = { ...s };
+      if (owners.length) { const e = s['h' + owners[0]].e, task = TASKS[Math.floor(Math.random() * TASKS.length)]; rv[k] = { e, t: task, o: owners }; t.rv = rv; t.pend = { by: me, e, t: task, o: owners }; }
+      else { rv[k] = 0; t.rv = rv; advance(t); }
       return t;
     });
   }
   function done() {
     ref.transaction(s => {
       if (!s || !s.pend || s.pend.by !== me) return;
-      const t = { ...s }; delete t.pend; advance(t); return t;
+      const t = { ...s }; delete t.pend; t['d' + me] = (s['d' + me] || 0) + 1; advance(t); return t;
     });
   }
   view.onclick = e => {
     const b = e.target.closest('button'); if (!b || b.disabled) return; const a = b.dataset.act, i = +b.dataset.i;
-    if (a === 'sel') { pick.includes(i) ? pick = pick.filter(x => x !== i) : pick.length < 3 && pick.push(i); render(); }
+    if (a === 'sel') { pickI = pickI === i ? -1 : i; render(); }
     else if (a === 'save') save();
-    else if (a === 'pick') take(+b.dataset.f, i);
+    else if (a === 'pick') take(i);
     else if (a === 'done') done();
     else if (a === 'again') ref.set({ phase: 'setup' });
   };
