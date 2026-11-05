@@ -238,16 +238,11 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     });
   }
   async function saveImg() {
-    const name = S.name || 'Монстр', W = 900, H = 1100;
+    const name = S.name || 'Монстр', W = 800, H = 944;
     try {
       const img = new Image();
       await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg(S.sel || {})); });
-      const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
-      const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#FFEAF1'); bg.addColorStop(.6, '#FFC9DC'); bg.addColorStop(1, '#F8A9C9');
-      g.fillStyle = bg; g.fillRect(0, 0, W, H);
-      g.fillStyle = '#8E0F45'; g.textAlign = 'center'; g.font = '700 78px Manrope, system-ui, sans-serif'; g.fillText(name, W / 2, 150);
-      const h = 800, w = h * 200 / 236; g.drawImage(img, (W - w) / 2, 200, w, h);
-      g.fillStyle = 'rgba(142,15,69,.6)'; g.font = '500 32px Manrope, system-ui, sans-serif'; g.fillText('Во что сыграем? ♥', W / 2, H - 50);
+      const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(img, 0, 0, W, H);
       const blob = await new Promise(r => c.toBlob(r, 'image/png'));
       const file = new File([blob], 'monster.png', { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
