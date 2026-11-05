@@ -83,6 +83,20 @@
     blocked(P.uid ? 'Эта комната занята другим устройством. Создайте новую комнату на главной.' : 'База данных не пускает без входа. Проверьте, что в Firebase включён анонимный вход.');
   };
 
+  /* Подключение к Firebase и анонимный вход (один раз). Возвращает Promise<uid|null>. */
+  P.init = function () {
+    if (P._init) return P._init;
+    P._init = (async () => {
+      const cfg = window.FIREBASE_CONFIG || {};
+      if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) return null;
+      if (!firebase.apps.length) firebase.initializeApp(cfg);
+      if (!firebase.auth) return null;
+      try { P.uid = (await firebase.auth().signInAnonymously()).user.uid; } catch (e) {}
+      return P.uid;
+    })();
+    return P._init;
+  };
+
   /* Игра вызывает Profile.start(room, me, перерисовать) сразу после firebase.initializeApp. */
   P.start = function (room, me, onChange) {
     P.room = room; P.me = me;
@@ -99,7 +113,7 @@
       if (P.uid && P.name()) jobs.push(db.ref('users/' + P.uid).update({ name: P.name(), avatar: P.avatar() || null, updated: TS }).catch(() => {}));
       return Promise.all(jobs);
     };
-    const auth = firebase.auth ? firebase.auth().signInAnonymously().then(c => { P.uid = c.user.uid; }).catch(() => {}) : Promise.resolve();
+    const auth = P.init().then(() => {});
     P.ready = auth.then(() => {
       db.ref('rooms/' + room + '/players').on('value', s => {
         const v = s.val() || {}; P.names = { 1: v.p1 || null, 2: v.p2 || null }; P.notify();

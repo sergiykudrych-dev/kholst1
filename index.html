@@ -29,7 +29,8 @@ h1{font:400 clamp(52px,16vw,84px)/1 'Marck Script',cursive;color:var(--deep);tex
 .game b{display:block;font-size:22px}
 .game small{display:block;color:var(--mute);font-size:14px;line-height:1.35}
 .go{margin-left:auto;color:var(--rose);font-size:24px}
-.who{justify-self:center;margin:-8px 0 4px;padding:9px 16px;border:0;border-radius:999px;background:rgba(255,255,255,.8);color:var(--deep);font:700 14px Manrope,sans-serif;cursor:pointer}
+.toprow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:-8px 0 4px}
+.who{margin:0;padding:9px 16px;border:0;border-radius:999px;background:rgba(255,255,255,.8);color:var(--deep);font:700 14px Manrope,sans-serif;cursor:pointer}
 .soon{padding:18px;border:2px dashed rgba(194,24,91,.35);border-radius:28px;text-align:center;color:var(--mute);font-size:14px}
 dialog{border:0;border-radius:28px;padding:26px 22px 22px;width:min(400px,calc(100vw - 32px));margin:auto;background:#FFF8FA;color:var(--ink);box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
 dialog::backdrop{background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
@@ -51,7 +52,7 @@ html,body,button,input,a{touch-action:manipulation}
 <main>
   <h1>Во что сыграем?</h1>
   <p class="lead">Выберите игру для двоих</p>
-  <button class="who" id="who" type="button"></button>
+  <div class="toprow"><button class="who" id="who" type="button"></button><button class="who" id="fr" type="button">👥 Друзья</button></div>
   <button class="game" id="paint">
     <span class="tile"><svg width="44" height="30" viewBox="0 0 30 20"><circle cx="8" cy="11" r="7" fill="#fff"/><rect x="10" y="4" width="12" height="12" rx="2" fill="#fff" fill-opacity=".6"/><path d="M21 18l4.5-9 4.5 9z" fill="#FFE08A"/></svg></span>
     <span><b>Холст</b><small>Рисуйте вместе: рисунок сразу появляется у второго</small></span>
@@ -105,7 +106,12 @@ html,body,button,input,a{touch-action:manipulation}
   <p class="hint" id="hint" hidden>Ссылка заработает, когда сайт будет опубликован в интернете.</p>
 </dialog>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
 <script src="profile.js"></script>
+<script src="friends.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), dlg = $('#dlg'), link = $('#link');
@@ -115,11 +121,20 @@ for (let i = 0; i < 16; i++) {
   s.style.cssText = `left:${Math.random() * 100}%;font-size:${14 + Math.random() * 34}px;opacity:${.25 + Math.random() * .35};animation-duration:${14 + Math.random() * 16}s;animation-delay:-${Math.random() * 30}s;--y:${y}`;
   $('#hearts').append(s);
 }
-const open = page => {
-  const code = [...crypto.getRandomValues(new Uint8Array(10))].map(n => 'abcdefghijkmnpqrstuvwxyz23456789'[n % 32]).join('');
+const showRoom = (page, code) => {
   link.value = new URL(page + '#room=' + code, location.href).href;
   $('#hint').hidden = location.protocol !== 'file:';
   dlg.showModal();
+};
+const open = page => {
+  const code = [...crypto.getRandomValues(new Uint8Array(10))].map(n => 'abcdefghijkmnpqrstuvwxyz23456789'[n % 32]).join('');
+  if (window.Friends && Friends.target()) {
+    Friends.sendInvite(page, code).then(
+      () => { Friends.clearTarget(); location.href = new URL(page + '#room=' + code + '&host=1', location.href).href; },
+      () => { Friends.clearTarget(); Friends.toast('Не удалось отправить приглашение, отправьте ссылку вручную'); showRoom(page, code); });
+    return;
+  }
+  showRoom(page, code);
 };
 $('#paint').onclick = () => open('paint.html');
 $('#word').onclick = () => open('word.html');
@@ -132,6 +147,8 @@ $('#mons').onclick = () => open('monster.html');
 const paintWho = () => { $('#who').textContent = Profile.has() ? (Profile.avatar() + ' ' + Profile.name() + ' · изменить').trim() : 'Как вас зовут? ✎'; };
 $('#who').onclick = () => Profile.ask().then(paintWho); paintWho();
 if (!Profile.has() && !Profile.skipped()) Profile.ask().then(paintWho);
+$('#fr').onclick = () => Friends.open();
+Friends.init();
 $('#x').onclick = () => dlg.close();
 dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };
 link.onclick = () => link.select();

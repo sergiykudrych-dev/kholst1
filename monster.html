@@ -97,13 +97,15 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 .big2{font-size:64px;line-height:1.1}
 .task{margin:10px 0 16px;font-weight:700;font-size:22px;color:var(--deep);word-break:break-word}
 .mturn{font-weight:700;color:var(--deep);text-align:center;font-size:18px;flex-shrink:0}
-.stage{display:block;width:100%;height:min(36dvh,300px);flex-shrink:0}
+.stage{display:block;width:100%;height:clamp(140px,27dvh,250px);flex-shrink:0}
+#ui{gap:8px;padding-bottom:10px}
+.opts~.hint{flex-shrink:0;margin:0}
 .stage.bob{animation:bob 2.6s ease-in-out infinite}
 .stage.hop{animation:hop .55s ease-out}
 @keyframes bob{50%{transform:translateY(-6px) rotate(-1deg)}}
 @keyframes hop{0%{transform:scale(.9)}50%{transform:scale(1.07)}100%{transform:none}}
-.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:420px;flex-shrink:0}
-.opt{aspect-ratio:1.1;padding:4px;border-radius:18px;background:rgba(255,255,255,.88);box-shadow:0 8px 18px -12px rgba(142,15,69,.7),0 3px 0 rgba(142,15,69,.18)}
+.opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%;max-width:440px;flex:1 1 auto;min-height:0;overflow-y:auto;align-content:start;padding:2px 2px 8px;-webkit-overflow-scrolling:touch}
+.opt{aspect-ratio:1.05;min-width:0;padding:3px;border-radius:16px;background:rgba(255,255,255,.88);box-shadow:0 8px 18px -12px rgba(142,15,69,.7),0 3px 0 rgba(142,15,69,.18)}
 .opt:not(:disabled):active{transform:scale(.94)}
 .opt:disabled{opacity:.55;cursor:default}
 .opt svg{display:block;width:100%;height:100%}
@@ -147,14 +149,19 @@ const cfg = window.FIREBASE_CONFIG || {};
 const KEYS = ['body', 'eyes', 'mouth', 'legs', 'acc'];
 const LABEL = ['тело', 'глаза', 'рот', 'ноги', 'аксессуар'];
 const NAMES = ['Бубля', 'Чпок', 'Хрум', 'Зюзя', 'Мурзик', 'Плюх', 'Квак', 'Бука', 'Ням', 'Тюфяк', 'Пупсик', 'Шмяк'];
-const COL = ['#4FB3E8', '#FFA63D', '#7A5BC7', '#6CC24A', '#EF5B5B', '#FF8FC0'];
-const SHAPE = ['round', 'tall', 'blob', 'round', 'tall', 'blob'];
-const BODYSEL = [[0, 0], [1, 1], [2, 2], [0, 3], [1, 4], [2, 5]];
+const COL = ['#4FB3E8', '#FFA63D', '#7A5BC7', '#6CC24A', '#EF5B5B', '#FF8FC0', '#2EC4B6', '#FFD23F', '#B79CED', '#A9745B'];
+const SHAPE = ['round', 'tall', 'blob', 'square', 'pear', 'wide', 'fuzzy', 'round', 'square', 'pear', 'fuzzy', 'tall'];
+const BODYSEL = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9], [10, 3], [11, 6]];
+const N = 12;
 const INK = '#2B1B3A';
 function shade(h, f) { const n = parseInt(h.slice(1), 16); const c = k => Math.max(0, Math.min(255, Math.round(((n >> k) & 255) * f))); return 'rgb(' + c(16) + ',' + c(8) + ',' + c(0) + ')'; }
 function bodyShape(k) {
   return k === 'round' ? '<ellipse cx="100" cy="130" rx="64" ry="66"/>'
     : k === 'tall' ? '<rect x="52" y="60" width="96" height="136" rx="46"/>'
+    : k === 'square' ? '<rect x="46" y="62" width="108" height="130" rx="30"/>'
+    : k === 'pear' ? '<path d="M100 58C128 58 138 88 150 120C166 160 150 198 100 198C50 198 34 160 50 120C62 88 72 58 100 58Z"/>'
+    : k === 'wide' ? '<ellipse cx="100" cy="134" rx="72" ry="58"/>'
+    : k === 'fuzzy' ? Array.from({ length: 18 }, (_, i) => { const a = i / 18 * Math.PI * 2; return `<circle cx="${(100 + 62 * Math.cos(a)).toFixed(1)}" cy="${(130 + 64 * Math.sin(a)).toFixed(1)}" r="10"/>`; }).join('') + '<ellipse cx="100" cy="130" rx="62" ry="64" stroke="none"/>'
     : '<path d="M100 60C150 56 166 110 160 150C156 185 130 198 100 198C68 198 44 184 40 148C36 108 56 64 100 60Z"/>';
 }
 const eye = (x, y, r, px = 0, py = 0) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${x + px}" cy="${y + py}" r="${r * .45}" fill="${INK}"/><circle cx="${x + px - r * .15}" cy="${y + py - r * .18}" r="${r * .14}" fill="#fff"/>`;
@@ -164,7 +171,13 @@ const EYES = [
   () => eye(66, 110, 11) + eye(100, 96, 11) + eye(134, 110, 11),
   () => eye(76, 106, 18, 3, 3) + eye(126, 102, 11, -2, -2),
   () => `<path d="M62 104q14 14 28 0M110 104q14 14 28 0" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`,
-  () => eye(78, 108, 13, 3, 2) + eye(122, 108, 13, -3, 2) + `<path d="M58 86L94 98M142 86L106 98" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>`
+  () => eye(78, 108, 13, 3, 2) + eye(122, 108, 13, -3, 2) + `<path d="M58 86L94 98M142 86L106 98" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>`,
+  () => eye(76, 106, 19) + eye(124, 106, 19),
+  () => eye(78, 106, 14) + `<path d="M108 106q14-12 28 0" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`,
+  () => `<path d="M66 96l22 20M88 96l-22 20M112 96l22 20M134 96l-22 20" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`,
+  () => [78, 122].map(x => `<path d="M${x} 118C${x - 12} 110 ${x - 14} 98 ${x - 6} 95C${x - 2} 93 ${x} 96 ${x} 98C${x} 96 ${x + 2} 93 ${x + 6} 95C${x + 14} 98 ${x + 12} 110 ${x} 118Z" fill="#E8548C"/>`).join(''),
+  () => `<circle cx="68" cy="108" r="7" fill="${INK}"/><circle cx="132" cy="108" r="7" fill="${INK}"/><circle cx="66" cy="106" r="2" fill="#fff"/><circle cx="130" cy="106" r="2" fill="#fff"/>`,
+  () => eye(68, 102, 9) + eye(89, 98, 9) + eye(111, 98, 9) + eye(132, 102, 9)
 ];
 const MOUTH = [
   () => `<path d="M68 140Q100 182 132 140Z" fill="#5A1030"/><path d="M78 141h13v10h-13zM109 141h13v10h-13z" fill="#fff"/>`,
@@ -172,7 +185,13 @@ const MOUTH = [
   () => `<path d="M68 142Q100 168 132 142" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M80 150l7 14 7-10zM120 150l-7 14-7-10z" fill="#fff" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`,
   () => `<ellipse cx="100" cy="152" rx="30" ry="24" fill="#5A1030"/><ellipse cx="100" cy="165" rx="16" ry="8" fill="#FF6B8B"/><path d="M80 134h40v9q-20 4-40 0z" fill="#fff"/>`,
   () => `<path d="M64 140H136Q132 170 100 170Q68 170 64 140Z" fill="#5A1030"/><path d="M66 140L74 156L82 140L90 156L98 140L106 156L114 140L122 156L130 140Z" fill="#fff"/>`,
-  () => `<ellipse cx="100" cy="152" rx="10" ry="12" fill="#5A1030"/>`
+  () => `<ellipse cx="100" cy="152" rx="10" ry="12" fill="#5A1030"/>`,
+  () => `<path d="M70 144Q100 172 130 144" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>`,
+  () => `<path d="M72 146q14 16 28 0q14 16 28 0" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
+  () => `<path d="M72 144Q100 160 128 144" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><rect x="91" y="152" width="8" height="13" rx="2" fill="#fff" stroke="${INK}" stroke-width="2"/><rect x="101" y="152" width="8" height="13" rx="2" fill="#fff" stroke="${INK}" stroke-width="2"/>`,
+  () => `<path d="M72 162Q100 138 128 162" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>`,
+  () => `<path d="M72 152Q104 164 130 142" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M112 156l5 12 6-14z" fill="#fff" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`,
+  () => `<path d="M74 146Q100 164 126 146" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M102 158q10 0 10 10q-9 7-18 0q0-8 8-10z" fill="#FF6B8B"/>`
 ];
 const rr = (x, y, w, h, c, r = 9) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${c}"/>`;
 const LEGS = [
@@ -181,7 +200,13 @@ const LEGS = [
   c => [74, 100, 126].map((x, i) => `<path d="M${x} 188q${i % 2 ? 12 : -12} 14 0 26t0 20" fill="none" stroke="${c}" stroke-width="13" stroke-linecap="round"/>`).join(''),
   c => rr(88, 186, 24, 30, c, 8) + `<ellipse cx="100" cy="220" rx="32" ry="10" fill="${c}"/>`,
   c => [78, 122].map(x => `<path d="M${x} 190l-9 6 18 6-18 6 18 6-18 6 9 5" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`).join('') + `<ellipse cx="78" cy="232" rx="14" ry="5" fill="${c}"/><ellipse cx="122" cy="232" rx="14" ry="5" fill="${c}"/>`,
-  c => rr(74, 188, 14, 20, c, 6) + rr(112, 188, 14, 20, c, 6) + `<ellipse cx="72" cy="214" rx="24" ry="11" fill="${c}"/><ellipse cx="128" cy="214" rx="24" ry="11" fill="${c}"/>`
+  c => rr(74, 188, 14, 20, c, 6) + rr(112, 188, 14, 20, c, 6) + `<ellipse cx="72" cy="214" rx="24" ry="11" fill="${c}"/><ellipse cx="128" cy="214" rx="24" ry="11" fill="${c}"/>`,
+  c => rr(95, 188, 10, 16, c, 4) + `<circle cx="100" cy="216" r="17" fill="#3A2A5A"/><circle cx="100" cy="216" r="6" fill="#fff" opacity=".6"/>`,
+  c => [80, 120].map(x => `<path d="M${x} 188V224" stroke="${c}" stroke-width="8" stroke-linecap="round"/>`).join('') + `<ellipse cx="74" cy="228" rx="14" ry="6" fill="${c}"/><ellipse cx="126" cy="228" rx="14" ry="6" fill="${c}"/>`,
+  c => [60, 88, 116].map(x => rr(x, 186, 24, 30, c, 10)).join(''),
+  c => `<ellipse cx="72" cy="208" rx="26" ry="10" fill="${c}" transform="rotate(-22 72 208)"/><ellipse cx="128" cy="208" rx="26" ry="10" fill="${c}" transform="rotate(22 128 208)"/>`,
+  c => rr(58, 188, 32, 24, c, 12) + rr(110, 188, 32, 24, c, 12) + `<path d="M68 212v6M74 212v6M80 212v6M120 212v6M126 212v6M132 212v6" stroke="${c}" stroke-width="4" stroke-linecap="round"/>`,
+  c => [50, 69, 88, 107, 126, 145].map(x => rr(x - 1, 188, 12, 24, c, 6)).join('')
 ];
 const ACC = [
   { back: 1, f: () => `<path d="M60 80Q40 52 56 28Q72 52 82 70Z" fill="#F5D76E" stroke="#D9A93A" stroke-width="2"/><path d="M140 80Q160 52 144 28Q128 52 118 70Z" fill="#F5D76E" stroke="#D9A93A" stroke-width="2"/>` },
@@ -189,7 +214,13 @@ const ACC = [
   { f: () => `<path d="M70 68L72 38L86 54L100 32L114 54L128 38L130 68Z" fill="#F6C453" stroke="#D79A1E" stroke-width="3" stroke-linejoin="round"/><circle cx="100" cy="56" r="4.5" fill="#E8548C"/><circle cx="82" cy="60" r="3" fill="#4FB3E8"/><circle cx="118" cy="60" r="3" fill="#4FB3E8"/>` },
   { f: () => rr(78, 22, 44, 40, '#3A2A5A', 4) + rr(78, 46, 44, 8, '#E8548C', 0) + `<ellipse cx="100" cy="62" rx="42" ry="8" fill="#3A2A5A"/>` },
   { f: () => `<path d="M128 64L104 50V78zM128 64L152 50V78z" fill="#FF4F8B" stroke="#C2185B" stroke-width="2" stroke-linejoin="round"/><circle cx="128" cy="64" r="8" fill="#FF8FB5" stroke="#C2185B" stroke-width="2"/>` },
-  { back: 1, f: (c) => `<path d="M62 84L70 46L84 70L94 40L106 70L116 40L130 70L138 46L142 84Z" fill="${c}"/>` }
+  { back: 1, f: (c) => `<path d="M62 84L70 46L84 70L94 40L106 70L116 40L130 70L138 46L142 84Z" fill="${c}"/>` },
+  { f: () => `<path d="M91 68L100 26L109 68Z" fill="#F5D76E" stroke="#D9A93A" stroke-width="2" stroke-linejoin="round"/><path d="M93 56l14-6M94 46l11-4" stroke="#D9A93A" stroke-width="2"/>` },
+  { f: () => [0, 1, 2, 3, 4].map(i => { const a = i / 5 * Math.PI * 2 - 1.57; return `<circle cx="${(130 + 9 * Math.cos(a)).toFixed(1)}" cy="${(64 + 9 * Math.sin(a)).toFixed(1)}" r="7" fill="#FF8FB5" stroke="#E8548C" stroke-width="1.5"/>`; }).join('') + `<circle cx="130" cy="64" r="5.5" fill="#FFD23F"/>` },
+  { f: () => `<path d="M78 66L100 18L122 66Z" fill="#7C5CFF" stroke="#4B2FC2" stroke-width="2" stroke-linejoin="round"/><path d="M86 50l28 0M91 38l18 0" stroke="#FFD23F" stroke-width="4"/><circle cx="100" cy="17" r="6" fill="#FF5C8A"/>` },
+  { f: () => `<path d="M100 66V44" stroke="#3E8E2A" stroke-width="4" stroke-linecap="round"/><path d="M100 50C90 36 76 38 74 46C84 54 96 56 100 50Z" fill="#6CC24A" stroke="#3E8E2A" stroke-width="2"/><path d="M100 46C110 32 124 34 126 42C116 50 104 52 100 46Z" fill="#8BD65F" stroke="#3E8E2A" stroke-width="2"/>` },
+  { f: () => `<path d="M54 112Q52 52 100 52Q148 52 146 112" fill="none" stroke="#3A2A5A" stroke-width="8" stroke-linecap="round"/><rect x="44" y="98" width="18" height="30" rx="8" fill="#FF4F8B" stroke="#3A2A5A" stroke-width="3"/><rect x="138" y="98" width="18" height="30" rx="8" fill="#FF4F8B" stroke="#3A2A5A" stroke-width="3"/>` },
+  { back: 1, f: (c) => `<path d="M58 88L60 38L96 68Z" fill="${c}"/><path d="M142 88L140 38L104 68Z" fill="${c}"/><path d="M66 70L67 52L83 66Z" fill="#FFB3C9"/><path d="M134 70L133 52L117 66Z" fill="#FFB3C9"/>` }
 ];
 function monster(sel) {
   const has = k => sel[k] !== undefined && sel[k] !== null;
@@ -225,7 +256,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     const status = done ? 'Монстр готов!' : mine ? `Ваш ход: выберите ${LABEL[st]}` : `${pn(picker(st))} выбирает ${LABEL[st]}…`;
     let opts = '';
     if (!done) {
-      for (let i = 0; i < 6; i++) opts += `<button class="opt" data-act="pick" data-i="${i}" data-st="${st}" ${mine ? '' : 'disabled'} aria-label="${LABEL[st]} ${i + 1}">${svg({ ...sel, [KEYS[st]]: i }, CROP[st])}</button>`;
+      for (let i = 0; i < N; i++) opts += `<button class="opt" data-act="pick" data-i="${i}" data-st="${st}" ${mine ? '' : 'disabled'} aria-label="${LABEL[st]} ${i + 1}">${svg({ ...sel, [KEYS[st]]: i }, CROP[st])}</button>`;
     }
     let ov = '';
     if (done) ov = `<div class="over"><div class="card"><div class="mname">Знакомьтесь: ${esc(S.name || 'Монстр')}!</div><div style="height:min(34dvh,260px)">${svg(sel).replace('<svg ', '<svg style="width:100%;height:100%" class="bob" ')}</div><button class="again" data-act="save">Сохранить картинку</button><button class="save" data-act="again">Создать ещё</button><a href="index.html">На главную</a></div></div>`;
