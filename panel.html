@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFC9DC">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Панель — Во что сыграем?</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570;--card:rgba(255,255,255,.88)}
+*{box-sizing:border-box;margin:0}
+body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed}
+main{max-width:640px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom))}
+a.back{display:inline-block;margin-bottom:8px;color:var(--deep);font-weight:700;text-decoration:none;font-size:14px}
+h1{font-size:28px;font-weight:800;color:var(--deep);margin-bottom:2px}
+.sub{color:var(--mute);font-size:14px;margin-bottom:16px}
+h2{margin:22px 0 8px;font-size:15px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:.04em}
+.card{padding:16px;border-radius:20px;background:var(--card)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.k{padding:14px;border-radius:18px;background:var(--card)}
+.k b{display:block;font-size:34px;line-height:1.05;font-weight:800;color:var(--deep)}
+.k span{font-size:13px;color:var(--mute)}
+.k.wide{grid-column:1/-1}
+.fun{display:grid;gap:10px}
+.fr{display:grid;grid-template-columns:130px 1fr 52px;gap:8px;align-items:center;font-size:14px}
+.bar{height:16px;border-radius:99px;background:#F7D3E0;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:var(--rose)}
+.fr b{text-align:right;font-weight:800}
+.pc{margin-top:8px;font-size:14px;color:var(--mute)}.pc b{color:var(--deep)}
+.days{display:flex;align-items:flex-end;gap:4px;height:120px;margin-top:6px}
+.d{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:10px;color:var(--mute)}
+.d i{width:100%;min-height:2px;border-radius:6px 6px 2px 2px;background:var(--rose)}
+.d u{margin-bottom:3px;text-decoration:none;font-weight:700;color:var(--deep);font-size:11px}
+.note{margin-top:20px;font-size:12px;color:var(--mute)}
+button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--rose);color:#fff;font:800 17px Manrope,system-ui,sans-serif;cursor:pointer;margin-top:10px}
+.msg{padding:18px;border-radius:20px;background:var(--card);text-align:center}
+.msg p{margin-top:6px;color:var(--mute);font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="index.html">← На сайт</a>
+<h1>Панель владельца</h1>
+<p class="sub" id="sub">Сколько людей играет и во что</p>
+<div id="out"><div class="msg">Загружаем…</div></div>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="profile.js"></script>
+<script>
+const $ = s => document.querySelector(s), out = $('#out');
+const GAMES = { paint: 'Холст', word: 'Угадай слово', number: 'Угадай число', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', tictactoe: 'Крестики-нолики', memory: 'Найди пару', monster: 'Создай монстра' };
+const ymd = d => d.toISOString().slice(0, 10);
+const days = n => Array.from({ length: n }, (_, i) => ymd(new Date(Date.now() - (n - 1 - i) * 864e5)));
+const pct = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
+const fmt = n => new Intl.NumberFormat('ru-RU').format(n || 0);
+
+function login(msg) {
+  out.innerHTML = `<div class="msg"><b>${msg}</b><p>Войдите через Google той же почтой, которая указана в правилах базы.</p><button class="go" id="g">Войти через Google</button><p id="err"></p></div>`;
+  $('#g').onclick = async () => {
+    try { await Profile.linkGoogle(); location.reload(); } catch (e) { $('#err').textContent = Profile.authError(e); }
+  };
+}
+
+function render(daily, total) {
+  const D = k => d => ((daily[d] || {})[k]) || 0;
+  const sum = (k, ds) => ds.reduce((a, d) => a + D(k)(d), 0);
+  const d30 = days(30), d14 = days(14), d7 = days(7), today = ymd(new Date()), yest = ymd(new Date(Date.now() - 864e5));
+  const rooms = sum('room_created', d30), joined = sum('partner_joined', d30), done = sum('game_complete', d30);
+  const gk = Object.keys(GAMES).map(g => ({ g, open: sum('open_' + g, d30), done: sum('done_' + g, d30) })).sort((a, b) => b.open - a.open);
+  const max = Math.max(1, ...gk.map(x => x.open));
+  const maxU = Math.max(1, ...d14.map(D('users')));
+  let h = `<h2>Сегодня</h2><div class="grid">
+<div class="k"><b>${fmt(D('users')(today))}</b><span>человек заходило</span></div>
+<div class="k"><b>${fmt(D('newusers')(today))}</b><span>из них новых</span></div>
+<div class="k"><b>${fmt(D('room_created')(today))}</b><span>комнат создано</span></div>
+<div class="k"><b>${fmt(D('game_complete')(today))}</b><span>партий доиграно</span></div>
+<div class="k wide"><b>${fmt(total)}</b><span>всего разных людей с начала подсчёта</span></div></div>`;
+  h += `<h2>За 30 дней: дошли ли до игры вдвоём</h2><div class="card"><div class="fun">
+<div class="fr"><span>Создали комнату</span><div class="bar"><i style="width:100%"></i></div><b>${fmt(rooms)}</b></div>
+<div class="fr"><span>Второй игрок зашёл</span><div class="bar"><i style="width:${rooms ? Math.min(100, joined / rooms * 100) : 0}%"></i></div><b>${fmt(joined)}</b></div>
+<div class="fr"><span>Партию доиграли</span><div class="bar"><i style="width:${rooms ? Math.min(100, done / rooms * 100) : 0}%"></i></div><b>${fmt(done)}</b></div></div>
+<p class="pc">До второго игрока доходит <b>${pct(joined, rooms)}</b> комнат, до конца партии — <b>${pct(done, rooms)}</b>. Если первая цифра низкая, значит, людям сложно позвать второго.</p></div>`;
+  h += `<h2>Самые популярные игры (30 дней)</h2><div class="card"><div class="fun">` + gk.map(x => `<div class="fr"><span>${GAMES[x.g]}</span><div class="bar"><i style="width:${x.open / max * 100}%"></i></div><b>${fmt(x.open)}</b></div>`).join('') + `</div><p class="pc">Число — сколько раз открывали игру. Доиграно партий: ${gk.filter(x => x.done).map(x => `${GAMES[x.g]} <b>${x.done}</b>`).join(', ') || 'пока нет'}.</p></div>`;
+  h += `<h2>Люди по дням (14 дней)</h2><div class="card"><div class="days">` + d14.map(d => `<div class="d"><u>${D('users')(d) || ''}</u><i style="height:${D('users')(d) / maxU * 80}%"></i><span>${d.slice(8)}</span></div>`).join('') + `</div><p class="pc">За вчера: <b>${fmt(D('users')(yest))}</b>. В среднем в день за неделю: <b>${(sum('users', d7) / 7).toFixed(1)}</b>.</p></div>`;
+  h += `<h2>Другое (30 дней)</h2><div class="grid">
+<div class="k"><b>${fmt(sum('invite_sent', d30))}</b><span>приглашений другу</span></div>
+<div class="k"><b>${fmt(sum('friend_added', d30))}</b><span>подружились</span></div>
+<div class="k"><b>${fmt(sum('profile_saved', d30))}</b><span>сохранили профиль</span></div>
+<div class="k"><b>${fmt(sum('views', d30))}</b><span>открытий страниц</span></div></div>
+<p class="note">Считаются только те, кто нажал «Принять» на баннере. Дни по времени UTC. Время на сайте, устройства и источники рекламы смотрите в Google Analytics.</p>`;
+  out.innerHTML = h;
+}
+
+(async () => {
+  const uid = await Profile.init();
+  if (!uid) { out.innerHTML = '<div class="msg"><b>Нет связи с базой</b><p>Проверьте интернет и настройки Firebase.</p></div>'; return; }
+  if (!Profile.isLinked()) return login('Нужен вход');
+  try {
+    await firebase.auth().currentUser.getIdToken(true);
+    const db = firebase.database();
+    const [daily, total] = await Promise.all([db.ref('stats/daily').once('value'), db.ref('stats/total/users').once('value')]);
+    render(daily.val() || {}, total.val() || 0);
+  } catch (e) { login('Нет доступа'); }
+})();
+</script>
+</body>
+</html>

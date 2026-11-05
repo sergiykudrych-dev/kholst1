@@ -14,6 +14,31 @@
   const status = () => (optedOut() ? 'denied' : store.get());   /* granted | denied | null */
   const queue = []; let loaded = false;
 
+  /* Собственные обезличенные счётчики для панели владельца: только числа по дням, без имён и кодов комнат. */
+  const OWN = {
+    page_view: () => 'views',
+    game_open: p => p.game && 'open_' + p.game,
+    game_complete: p => p.host && p.game && ['game_complete', 'done_' + p.game],   /* считает только хозяин комнаты, чтобы не удваивать */
+    room_created: () => 'room_created', partner_joined: () => 'partner_joined', invite_sent: () => 'invite_sent',
+    friend_added: () => 'friend_added', profile_saved: () => 'profile_saved', name_set: () => 'name_set'
+  };
+  async function own(name, params) {
+    try {
+      const f = OWN[name], keys = f && f(params || {}); if (!keys) return;
+      if (!(window.Profile && window.firebase && firebase.database && Profile.init)) return;
+      const uid = await Profile.init(); if (!uid) return;
+      const db = firebase.database(), inc = firebase.database.ServerValue.increment(1), day = new Date().toISOString().slice(0, 10);
+      const add = k => db.ref('stats/daily/' + day + '/' + k).set(inc).catch(() => {});
+      let last = null; try { last = localStorage.getItem('kh_seen_day'); } catch (e) {}
+      if (last !== day) {
+        try { localStorage.setItem('kh_seen_day', day); } catch (e) {}
+        db.ref('stats/users/' + day + '/' + uid).set(1).then(() => add('users')).catch(() => {});
+        db.ref('stats/seen/' + uid).set(1).then(() => { add('newusers'); db.ref('stats/total/users').set(inc).catch(() => {}); }).catch(() => {});
+      }
+      [].concat(keys).forEach(add);
+    } catch (e) {}
+  }
+
   function load() {
     if (loaded || !ID || status() !== 'granted') return;
     loaded = true;
@@ -25,7 +50,8 @@
     s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ID);
     document.head.appendChild(s);
     gtag('event', 'page_view', { page_title: document.title, page_location: cleanUrl(), page_path: location.pathname });
-    queue.splice(0).forEach(e => gtag('event', e[0], e[1]));
+    own('page_view');
+    queue.splice(0).forEach(e => { gtag('event', e[0], e[1]); own(e[0], e[1]); });
   }
 
   const T = window.Track = {
@@ -34,7 +60,7 @@
     event(name, params) {
       if (!ID || status() === 'denied') return;
       const p = Object.assign({ screen: pageName() }, params || {});
-      if (loaded) gtag('event', name, p); else if (queue.length < 50) queue.push([name, p]);
+      if (loaded) { gtag('event', name, p); own(name, p); } else if (queue.length < 50) queue.push([name, p]);
     },
     set(v) {
       store.set(v);

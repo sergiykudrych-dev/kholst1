@@ -179,6 +179,6 @@
   P.on = (ref, cb) => P.ready.then(() => ref.on('value', s => {
     P.gotData = true; cb(s);
     const v = s.val();
-    if (v && P.tracker) { let r = null; try { r = P.tracker.calc(v); } catch (e) {} if (r) { ev('game_complete', { game: P.tracker.game, result: r }); P.record(P.tracker.game, v, r); } }
+    if (v && P.tracker) { let r = null; try { r = P.tracker.calc(v); } catch (e) {} if (r) { ev('game_complete', { game: P.tracker.game, result: r, host: P.me === 1 }); P.record(P.tracker.game, v, r); } }
   }, P.denied));
 })();
