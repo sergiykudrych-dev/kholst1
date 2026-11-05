@@ -80,6 +80,16 @@ html,body,button,input,a{touch-action:manipulation}
     <span><b>Крестики-нолики</b><small>3 в ряд или 5 в ряд на выбор</small></span>
     <span class="go">♥&#xFE0E;</span>
   </button>
+  <button class="game" id="memo">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><rect x="4" y="4" width="16" height="22" rx="4" fill="#fff"/><rect x="24" y="4" width="16" height="22" rx="4" fill="#FFE08A"/><path d="M12 11c-3-3-6 1-3 4l3 3 3-3c3-3 0-7-3-4z" fill="#C2185B"/></svg></span>
+    <span><b>Найди пару</b><small>Открывайте по две карточки и ищите одинаковые</small></span>
+    <span class="go">♥&#xFE0E;</span>
+  </button>
+  <button class="game" id="mons">
+    <span class="tile"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M10 12L7 3l7 5M30 12l3-9-7 5" fill="#FFD166"/><ellipse cx="20" cy="19" rx="13" ry="13" fill="#6CC24A"/><circle cx="15" cy="16" r="4" fill="#fff"/><circle cx="25" cy="16" r="4" fill="#fff"/><circle cx="15" cy="16" r="1.8" fill="#2B1B3A"/><circle cx="25" cy="16" r="1.8" fill="#2B1B3A"/><path d="M13 23q7 7 14 0z" fill="#5A1030"/></svg></span>
+    <span><b>Создай монстра</b><small>По очереди выбирайте глаза, рот, тело, ноги и аксессуары</small></span>
+    <span class="go">♥&#xFE0E;</span>
+  </button>
   <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
 </main>
 
@@ -114,6 +124,8 @@ $('#num').onclick = () => open('number.html');
 $('#egg').onclick = () => open('egg.html');
 $('#chips').onclick = () => open('chips.html');
 $('#ttt').onclick = () => open('tictactoe.html');
+$('#memo').onclick = () => open('memory.html');
+$('#mons').onclick = () => open('monster.html');
 $('#x').onclick = () => dlg.close();
 dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };
 link.onclick = () => link.select();
