@@ -138,7 +138,7 @@
       if (onChange && P.gotData) { try { onChange(); } catch (e) {} }
     };
     P.publish = () => {
-      const rec = { t: TS }; if (P.uid) rec.uid = P.uid;
+      const rec = { t: TS, left: null }; if (P.uid) rec.uid = P.uid;
       if (P.name()) rec.name = P.name(); if (P.avatar()) rec.avatar = P.avatar();
       const jobs = [db.ref('rooms/' + room + '/players/p' + me).update(rec).catch(P.denied)];
       if (P.uid && P.name()) jobs.push(db.ref('users/' + P.uid).update({ name: P.name(), avatar: P.avatar() || null, updated: TS }).catch(() => {}));
@@ -148,6 +148,7 @@
     P.ready = auth.then(() => {
       db.ref('rooms/' + room + '/players').on('value', s => {
         const v = s.val() || {}; P.names = { 1: v.p1 || null, 2: v.p2 || null }; P.notify(); flush();
+        leftNote(v['p' + (3 - me)]);
         if (me === 1 && v.p1 && v.p2 && !P._pj) { P._pj = 1; ev('partner_joined'); }
       }, P.denied);
       return P.publish();
@@ -157,6 +158,27 @@
     P.notify();
     return P.ready;
   };
+
+  /* Партнёр вышел из игры: при нажатии «← Игры» ставим метку left, второму показываем плашку сверху. */
+  function leftNote(o) {
+    let el = document.querySelector('.pf-left');
+    if (!o || !o.left) { if (el) el.remove(); P._ln = 0; return; }
+    if (P._ln) return; P._ln = 1;
+    if (!document.getElementById('pf-left-css')) { const st = document.createElement('style'); st.id = 'pf-left-css';
+      st.textContent = '.pf-left{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:10px;max-width:92vw;padding:11px 14px;border-radius:16px;background:#4A1236;color:#fff;font:700 15px Manrope,system-ui,sans-serif;box-shadow:0 8px 24px rgba(74,18,54,.35);animation:pfl .3s ease}.pf-left button{border:0;background:rgba(255,255,255,.2);color:#fff;border-radius:99px;width:26px;height:26px;font-size:15px;cursor:pointer}@keyframes pfl{from{opacity:0;transform:translate(-50%,-14px)}}';
+      document.head.appendChild(st); }
+    el = document.createElement('div'); el.className = 'pf-left'; el.setAttribute('role', 'status');
+    const t = document.createElement('span'); t.textContent = ((o.avatar ? o.avatar + ' ' : '') + (o.name || 'Партнёр')) + ' вышел(а) из игры';
+    const b = document.createElement('button'); b.textContent = '×'; b.setAttribute('aria-label', 'Закрыть'); b.onclick = () => el.remove();
+    el.append(t, b); document.body.appendChild(el);
+  }
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href="index.html"]');
+    if (!a || !P.room || !P.me || e.defaultPrevented || e.metaKey || e.ctrlKey) return;
+    e.preventDefault(); let go = false; const nav = () => { if (!go) { go = true; location.href = a.href; } };
+    setTimeout(nav, 700);
+    try { firebase.database().ref('rooms/' + P.room + '/players/p' + P.me).update({ left: firebase.database.ServerValue.TIMESTAMP }).then(nav, nav); } catch (x) { nav(); }
+  }, true);
 
   /* История партий: каждый пишет результат только в свою ветку history/<uid>. */
   const hash = t => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
