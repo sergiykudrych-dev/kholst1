@@ -70,6 +70,7 @@
   }
 
   St.open = async function () {
+    try { window.Track && Track.event('stats_open'); } catch (e) {}
     if (!dlg) {
       dlg = document.createElement('dialog'); dlg.id = 'sdlg';
       dlg.innerHTML = '<button class="x" type="button" aria-label="Закрыть">✕</button><h2>Статистика</h2><p id="sme"></p><div id="sbody"></div>';

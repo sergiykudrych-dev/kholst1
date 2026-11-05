@@ -6,5 +6,6 @@ window.FIREBASE_CONFIG = {
   projectId: "kholst-1f465",
   storageBucket: "kholst-1f465.firebasestorage.app",
   messagingSenderId: "804326345109",
+  measurementId: "G-1FT0VMKQPK",   // для статистики: Firebase → Project settings → Integrations → Google Analytics, формат G-XXXXXXXXXX
   appId: "1:804326345109:web:89cbb90a38e2fae1c28e9c"
 };

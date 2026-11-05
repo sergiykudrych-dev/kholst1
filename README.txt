@@ -42,3 +42,4 @@ profile.js — имя и аватарка игрока (хранятся в те
 friends.js — друзья (код, запросы, приглашения) на главной.
 Сохранение профиля через Google: кнопка в окне «Друзья» (нужен включённый Google в Firebase Authentication и домен сайта в Authorized domains).
 stats.js — статистика (история партий, счёт с друзьями). Правила базы: firebase-rules.txt.
+analytics.js + privacy.html — статистика Google Analytics с баннером согласия. Работает, когда в firebase-config.js заполнен measurementId (G-XXXXXXXXXX).

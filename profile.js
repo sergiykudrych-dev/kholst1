@@ -8,6 +8,7 @@
   };
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const clean = s => String(s || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
+  const ev = (n, p) => { try { window.Track && Track.event(n, p); } catch (e) {} };
   const P = window.Profile = { AV, uid: null, me: 0, names: { 1: null, 2: null }, gotData: false, ready: Promise.resolve() };
 
   P.name = () => clean(store.get('kh_name'));
@@ -44,7 +45,7 @@
 
   P.save = function (name, avatar) {
     store.set('kh_name', clean(name)); store.set('kh_avatar', avatar || ''); store.set('kh_skip', '');
-    if (P.notify) P.notify();
+    ev('name_set'); if (P.notify) P.notify();
   };
 
   /* Окно «Как вас зовут?». Возвращает Promise<boolean>: true — имя сохранено. */
@@ -129,6 +130,7 @@
   /* Игра вызывает Profile.start(room, me, перерисовать) сразу после firebase.initializeApp. */
   P.start = function (room, me, onChange) {
     P.room = room; P.me = me;
+    if (me === 2) ev('room_joined');
     const db = firebase.database(), TS = firebase.database.ServerValue.TIMESTAMP;
     const chip = document.getElementById('me');
     P.notify = () => {
@@ -146,6 +148,7 @@
     P.ready = auth.then(() => {
       db.ref('rooms/' + room + '/players').on('value', s => {
         const v = s.val() || {}; P.names = { 1: v.p1 || null, 2: v.p2 || null }; P.notify(); flush();
+        if (me === 1 && v.p1 && v.p2 && !P._pj) { P._pj = 1; ev('partner_joined'); }
       }, P.denied);
       return P.publish();
     });
@@ -176,6 +179,6 @@
   P.on = (ref, cb) => P.ready.then(() => ref.on('value', s => {
     P.gotData = true; cb(s);
     const v = s.val();
-    if (v && P.tracker) { let r = null; try { r = P.tracker.calc(v); } catch (e) {} if (r) P.record(P.tracker.game, v, r); }
+    if (v && P.tracker) { let r = null; try { r = P.tracker.calc(v); } catch (e) {} if (r) { ev('game_complete', { game: P.tracker.game, result: r }); P.record(P.tracker.game, v, r); } }
   }, P.denied));
 })();

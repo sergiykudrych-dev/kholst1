@@ -31,6 +31,7 @@ h1{font:400 clamp(52px,16vw,84px)/1 'Marck Script',cursive;color:var(--deep);tex
 .go{margin-left:auto;color:var(--rose);font-size:24px}
 .toprow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:-8px 0 4px}
 .who{margin:0;padding:9px 16px;border:0;border-radius:999px;background:rgba(255,255,255,.8);color:var(--deep);font:700 14px Manrope,sans-serif;cursor:pointer}
+.foot{text-align:center;font-size:12px}.foot a{color:var(--mute)}
 .soon{padding:18px;border:2px dashed rgba(194,24,91,.35);border-radius:28px;text-align:center;color:var(--mute);font-size:14px}
 dialog{border:0;border-radius:28px;padding:26px 22px 22px;width:min(400px,calc(100vw - 32px));margin:auto;background:#FFF8FA;color:var(--ink);box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
 dialog::backdrop{background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
@@ -94,6 +95,7 @@ html,body,button,input,a{touch-action:manipulation}
     <span class="go">♥&#xFE0E;</span>
   </button>
   <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
+  <p class="foot"><a href="privacy.html">Конфиденциальность</a></p>
 </main>
 
 <dialog id="dlg">
@@ -110,6 +112,7 @@ html,body,button,input,a{touch-action:manipulation}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="stats.js"></script>
 <script src="friends.js"></script>
@@ -128,6 +131,7 @@ const showRoom = (page, code) => {
   dlg.showModal();
 };
 const open = page => {
+  if (window.Track) Track.event('room_created', { game: page.replace(/\.html$/, '') });
   const code = [...crypto.getRandomValues(new Uint8Array(10))].map(n => 'abcdefghijkmnpqrstuvwxyz23456789'[n % 32]).join('');
   if (window.Friends && Friends.target()) {
     Friends.sendInvite(page, code).then(

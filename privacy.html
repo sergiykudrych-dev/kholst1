@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="theme-color" content="#FFC9DC">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Конфиденциальность — Во что сыграем?</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
+*{box-sizing:border-box;margin:0}
+body{min-height:100dvh;font:500 16px/1.55 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed}
+main{max-width:600px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 20px max(40px,env(safe-area-inset-bottom))}
+a.back{display:inline-block;margin-bottom:12px;color:var(--deep);font-weight:700;text-decoration:none}
+h1{font:400 clamp(38px,11vw,54px)/1.1 'Marck Script',cursive;color:var(--deep);margin-bottom:14px}
+h2{margin:22px 0 6px;font-size:18px;color:var(--deep)}
+p,li{color:var(--ink)}ul{padding-left:22px}li{margin:4px 0}
+.card{margin-top:22px;padding:18px;border-radius:22px;background:rgba(255,255,255,.85)}
+.row{display:flex;gap:8px;margin-top:12px}
+button{flex:1;padding:12px;border-radius:14px;border:1.5px solid var(--rose);background:#fff;color:var(--rose);font:700 15px Manrope,system-ui,sans-serif;cursor:pointer}
+button.y{background:var(--rose);color:#fff}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="index.html">← Игры</a>
+<h1>Конфиденциальность</h1>
+<p>Сайт «Во что сыграем?» — игры для двоих. Вот что с вашими данными.</p>
+
+<h2>Что нужно, чтобы игры работали</h2>
+<ul>
+<li>Имя и аватарка, которые вы выбрали, — они видны второму игроку.</li>
+<li>Ход игры, результаты партий и список друзей — они хранятся в базе Firebase (Google).</li>
+<li>Если вы сохранили профиль через Google, входом служит ваш аккаунт Google (почту видите только вы).</li>
+</ul>
+
+<h2>Статистика посещений (по вашему согласию)</h2>
+<p>Если вы нажали «Принять», мы используем Google Analytics, чтобы понимать, сколько людей заходит, во что играют и как долго. Передаются только обезличенные события: открытие страницы и игры, окончание партии, приглашение друга. Имена, почты и коды комнат не передаются, рекламные функции Google отключены, IP-адреса анонимизируются. Analytics использует cookies (например, <code>_ga</code>).</p>
+<p>Если вы нажали «Отказаться» или в браузере включён запрет отслеживания (Do Not Track / Global Privacy Control), статистика не подключается вообще.</p>
+
+<div class="card">
+<b id="st">Статистика: —</b>
+<div class="row"><button type="button" data-v="denied">Отказаться</button><button type="button" class="y" data-v="granted">Принять</button></div>
+</div>
+</main>
+<script src="firebase-config.js"></script>
+<script src="analytics.js"></script>
+<script>
+const st = document.getElementById('st');
+const paint = () => {
+  if (!window.Track || !Track.enabled) { st.textContent = 'Статистика сейчас не подключена: ничего не собирается.'; document.querySelector('.row').hidden = true; return; }
+  const v = Track.status();
+  st.textContent = 'Статистика: ' + (v === 'granted' ? 'включена' : v === 'denied' ? 'выключена' : 'вы ещё не выбрали');
+};
+document.querySelectorAll('.row button').forEach(b => b.onclick = () => Track.set(b.dataset.v));
+document.addEventListener('kh-consent', paint); paint();
+</script>
+</body>
+</html>

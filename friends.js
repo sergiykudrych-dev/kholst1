@@ -7,6 +7,7 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const $ = s => document.querySelector(s);
   const F = window.Friends = { off: false };
+  const ev = (n, p) => { try { window.Track && Track.event(n, p); } catch (e) {} };
   let db, me = null, myCode = '', list = {}, U = {}, target = null, dlg = null, ready = null, bar = null, tt;
 
   const css = document.createElement('style');
@@ -107,7 +108,7 @@
         up['friends/' + me + '/' + uid] = { status: 'out', name: u.name || null, avatar: u.avatar || null, t };
         up['friends/' + uid + '/' + me] = { status: 'in', name: P.name(), avatar: P.avatar() || null, t };
       }
-      await db.ref().update(up);
+      await db.ref().update(up); ev(cur && cur.status === 'in' ? 'friend_added' : 'friend_request');
       const i = $('#fin'); if (i) i.value = '';
       say(cur && cur.status === 'in' ? 'Вы теперь друзья!' : 'Запрос отправлен');
     } catch (e) { say('Не получилось. Проверьте интернет и правила базы.'); }
@@ -164,7 +165,7 @@
         else if (a === 'copy') { try { await navigator.clipboard.writeText(myCode); } catch (_) { const i = $('#fcode'); getSelection().selectAllChildren(i); document.execCommand('copy'); } say('Код скопирован'); }
         else if (a === 'share') { if (navigator.share) { try { await navigator.share({ title: 'Во что сыграем?', text: shareText(), url: shareUrl() }); } catch (_) {} } else { await navigator.clipboard.writeText(shareText() + ' ' + shareUrl()); say('Ссылка скопирована'); } }
         else if (a === 'add') await addByCode($('#fin').value);
-        else if (a === 'accept') { await ensureName(); const up = {}; up['friends/' + me + '/' + u + '/status'] = 'ok'; up['friends/' + u + '/' + me + '/status'] = 'ok'; await db.ref().update(up); }
+        else if (a === 'accept') { await ensureName(); const up = {}; up['friends/' + me + '/' + u + '/status'] = 'ok'; up['friends/' + u + '/' + me + '/status'] = 'ok'; await db.ref().update(up); ev('friend_added'); }
         else if (a === 'remove') await unlink(u);
         else if (a === 'google') {
           say('Открываем вход…');
@@ -173,7 +174,7 @@
             const u = (await firebase.database().ref('users/' + firebase.auth().currentUser.uid).once('value')).val() || {};
             if (u.name) P.save(u.name, u.avatar || '');
             say('Профиль найден, загружаем…'); setTimeout(() => location.reload(), 600);
-          } else { say('Профиль сохранён ✓'); renderAcc(); }
+          } else { ev('profile_saved'); say('Профиль сохранён ✓'); renderAcc(); }
         }
         else if (a === 'signout') {
           if (!outAsk) { outAsk = true; renderAcc(); return; }
@@ -196,9 +197,9 @@
 
   F.target = () => target;
   F.clearTarget = () => { target = null; hideTarget(); };
-  F.sendInvite = (page, room) => Promise.resolve(db.ref('invites/' + target.uid).push({
+  F.sendInvite = (page, room) => (ev('invite_sent', { game: String(page).replace(/\.html$/, '') }), Promise.resolve(db.ref('invites/' + target.uid).push({
     from: me, name: P.name() || null, avatar: P.avatar() || null, page: String(page).replace(/\.html$/, ''), room, t: Date.now()
-  }));
+  })));
 
   F.open = async function () {
     if (!ready) F.init();
