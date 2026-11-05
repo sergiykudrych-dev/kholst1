@@ -12,6 +12,9 @@
   const css = document.createElement('style');
   css.textContent = `#fdlg{max-height:88dvh;overflow:auto}
 .fcode{margin:2px 0 8px;text-align:center;font:700 36px/1.1 Manrope,system-ui,sans-serif;letter-spacing:6px;color:#8E0F45;-webkit-user-select:all;user-select:all}
+.facc{margin:4px 0 12px;padding:12px;border-radius:16px;background:#fff;text-align:center;font-size:14px}
+.facc p{margin:0 0 8px;font-size:13px}.facc .btn{width:100%}
+.facc.ok{background:#EAF8EE;color:#1F6B3A;font-weight:700}.facc.ok .fb{margin-top:8px}
 .fadd{display:grid;grid-template-columns:1fr auto;gap:8px;margin:14px 0 4px}
 .fadd .link{text-transform:uppercase;letter-spacing:2px;text-align:center}
 #flist h3{margin:14px 0 2px;font-size:13px;color:#8A5570;font-weight:700}
@@ -111,8 +114,20 @@
 
   const unlink = uid => { const up = {}; up['friends/' + me + '/' + uid] = null; up['friends/' + uid + '/' + me] = null; return db.ref().update(up); };
 
+  let outAsk = false;
+  function renderAcc() {
+    const e = $('#facc'); if (!e) return;
+    if (P.isLinked()) {
+      e.className = 'facc ok';
+      e.innerHTML = `✓ Профиль сохранён${P.email() ? ': ' + esc(P.email()) : ''}<br><button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут, пока не войдёте снова' : 'Выйти из аккаунта'}</button>`;
+    } else {
+      e.className = 'facc';
+      e.innerHTML = `<p>Профиль не сохранён: если очистить данные сайта, друзья пропадут.</p><button class="btn" type="button" data-a="google">Сохранить через Google</button><p class="hint">Уже сохраняли раньше? Нажмите ту же кнопку, и профиль вернётся.</p>`;
+    }
+  }
   function render() {
     if (!dlg) return;
+    renderAcc();
     $('#fcode').textContent = myCode;
     const g = { in: [], ok: [], out: [] };
     Object.keys(list).forEach(u => (g[list[u].status] || g.out).push(u));
@@ -132,6 +147,7 @@
     if (dlg) return dlg;
     dlg = document.createElement('dialog'); dlg.id = 'fdlg';
     dlg.innerHTML = `<button class="x" type="button" data-a="close" aria-label="Закрыть">✕</button><h2>Друзья</h2>
+<div class="facc" id="facc"></div>
 <p>Ваш код. Отправьте его другу, и он сможет вас добавить.</p><div class="fcode" id="fcode"></div>
 <div class="two"><button class="btn" type="button" data-a="copy">Копировать</button><button class="btn" type="button" data-a="share">Поделиться</button></div>
 <div class="fadd"><input class="link" id="fin" placeholder="Код друга" maxlength="10" autocapitalize="characters" autocomplete="off" aria-label="Код друга"><button class="btn" type="button" data-a="add">Добавить</button></div>
@@ -148,8 +164,21 @@
         else if (a === 'add') await addByCode($('#fin').value);
         else if (a === 'accept') { await ensureName(); const up = {}; up['friends/' + me + '/' + u + '/status'] = 'ok'; up['friends/' + u + '/' + me + '/status'] = 'ok'; await db.ref().update(up); }
         else if (a === 'remove') await unlink(u);
+        else if (a === 'google') {
+          say('Открываем вход…');
+          const r = await P.linkGoogle();
+          if (r === 'switched') {
+            const u = (await firebase.database().ref('users/' + firebase.auth().currentUser.uid).once('value')).val() || {};
+            if (u.name) P.save(u.name, u.avatar || '');
+            say('Профиль найден, загружаем…'); setTimeout(() => location.reload(), 600);
+          } else { say('Профиль сохранён ✓'); renderAcc(); }
+        }
+        else if (a === 'signout') {
+          if (!outAsk) { outAsk = true; renderAcc(); return; }
+          await P.signOut(); location.reload();
+        }
         else if (a === 'invite') { target = { uid: u, name: who(u) }; dlg.close(); showTarget(); }
-      } catch (err) { say('Не получилось. Проверьте интернет и правила базы.'); }
+      } catch (err) { say(a === 'google' ? P.authError(err) : 'Не получилось. Проверьте интернет и правила базы.'); }
     };
     dlg.querySelector('#fin').onkeydown = e => { if (e.key === 'Enter') addByCode(e.target.value); };
     return dlg;

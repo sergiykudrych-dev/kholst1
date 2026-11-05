@@ -91,10 +91,39 @@
       if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) return null;
       if (!firebase.apps.length) firebase.initializeApp(cfg);
       if (!firebase.auth) return null;
-      try { P.uid = (await firebase.auth().signInAnonymously()).user.uid; } catch (e) {}
+      const auth = firebase.auth();
+      /* Сначала ждём сохранённого входа: иначе анонимный вход подменил бы аккаунт Google. */
+      let u = await new Promise(res => { const off = auth.onAuthStateChanged(x => { off(); res(x); }); });
+      if (!u) { try { u = (await auth.signInAnonymously()).user; } catch (e) {} }
+      P.uid = u ? u.uid : null;
       return P.uid;
     })();
     return P._init;
+  };
+
+  /* Сохранение профиля через Google: анонимный аккаунт превращается в постоянный (uid тот же). */
+  const cu = () => (window.firebase && firebase.auth && firebase.apps.length) ? firebase.auth().currentUser : null;
+  P.isLinked = () => { const u = cu(); return !!(u && !u.isAnonymous); };
+  P.email = () => { const u = cu(); return (u && u.email) || ''; };
+  P.linkGoogle = async function () {
+    const auth = firebase.auth(), u = auth.currentUser, prov = new firebase.auth.GoogleAuthProvider();
+    try {
+      if (u && u.isAnonymous) await u.linkWithPopup(prov); else await auth.signInWithPopup(prov);
+      return 'linked';
+    } catch (e) {
+      if (e && e.code === 'auth/credential-already-in-use' && e.credential) { await auth.signInWithCredential(e.credential); return 'switched'; }
+      throw e;
+    }
+  };
+  P.signOut = async function () { await firebase.auth().signOut(); };
+  P.authError = function (e) {
+    const c = (e && e.code) || '';
+    if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return '';
+    if (c === 'auth/popup-blocked') return 'Браузер заблокировал окно входа. Разрешите всплывающие окна для сайта.';
+    if (c === 'auth/unauthorized-domain') return 'Домен сайта не добавлен в Firebase (Authentication → Settings → Authorized domains).';
+    if (c === 'auth/operation-not-allowed') return 'Вход через Google не включён в Firebase.';
+    if (c === 'auth/network-request-failed') return 'Нет связи. Проверьте интернет.';
+    return 'Не получилось войти' + (c ? ' (' + c.replace('auth/', '') + ')' : '') + '.';
   };
 
   /* Игра вызывает Profile.start(room, me, перерисовать) сразу после firebase.initializeApp. */
