@@ -132,7 +132,9 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="profile.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), view = $('#view'), ui = $('#ui');
@@ -152,7 +154,8 @@ const EMO = ['🐰', '🦆', '🌳', '🍎', '🐞', '☀️', '🐘', '🌷'];
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
-  firebase.initializeApp(cfg);
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
   const ref = firebase.database().ref('rooms/' + room + '/memory');
   let S = null, prevFace = null, prevId = 0, tn = -1;
   const fresh = () => { const d = [...EMO, ...EMO]; for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; } return { id: Date.now(), phase: 'play', deck: d, turn: 1 + Math.floor(Math.random() * 2), n: 0, s1: 0, s2: 0 }; };
@@ -166,17 +169,17 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       return `<button class="${cls}" data-act="pick" data-i="${i}" ${myTurn && !face[i] ? '' : 'disabled'} aria-label="Карточка ${i + 1}"><span class="in"><span class="bk">♥&#xFE0E;</span><span class="fr">${e}</span></span></button>`;
     }).join('');
     prevFace = face;
-    const st = over ? 'Все пары найдены!' : S.turn === me ? (up.length === 2 ? 'Не совпало…' : 'Ваш ход') : (up.length === 2 ? 'Не совпало…' : `Ход Игрока ${other}…`);
-    const chip = p => `<div class="sc ${!over && S.turn === p ? 'act' : ''}"><i style="background:${p === 1 ? '#C2185B' : '#6D5BFF'}"></i>${p === me ? 'Вы' : 'Игрок ' + p}<b>${S['s' + p] || 0}</b></div>`;
+    const st = over ? 'Все пары найдены!' : S.turn === me ? (up.length === 2 ? 'Не совпало…' : 'Ваш ход') : (up.length === 2 ? 'Не совпало…' : `Ходит ${pn(other)}…`);
+    const chip = p => `<div class="sc ${!over && S.turn === p ? 'act' : ''}"><i style="background:${p === 1 ? '#C2185B' : '#6D5BFF'}"></i>${pn(p)}${p === me ? ' (вы)' : ''}<b>${S['s' + p] || 0}</b></div>`;
     let ov = '';
     if (over) {
       const a = S.s1 || 0, b = S.s2 || 0, w = a === b ? 0 : a > b ? 1 : 2;
-      ov = `<div class="over"><div class="over" style="animation:none"><div class="card"><div class="big2">${w === 0 ? '🤝' : w === me ? '🎉' : '💌'}</div><h2>${w === 0 ? 'Ничья!' : w === me ? 'Победа!' : 'Не в этот раз'}</h2><p class="hint">Пар найдено: Игрок 1 — ${a}, Игрок 2 — ${b}</p><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div></div>`;
+      ov = `<div class="over"><div class="over" style="animation:none"><div class="card"><div class="big2">${w === 0 ? '🤝' : w === me ? '🎉' : '💌'}</div><h2>${w === 0 ? 'Ничья!' : w === me ? 'Победа!' : 'Не в этот раз'}</h2><p class="hint">Пар найдено: ${pn(1)} — ${a}, ${pn(2)} — ${b}</p><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div></div>`;
     }
     ui.innerHTML = `<p class="turn">${st}</p><div class="score">${chip(1)}${chip(2)}</div><div class="mgrid">${cards}</div><p class="hint">Найдите две одинаковые картинки. Нашли пару — ходите ещё раз.</p>${ov}`;
     if (up.length === 2 && S.n !== tn) { tn = S.n; const n = S.n; setTimeout(() => resolve(n), 1500); }
   }
-  ref.on('value', s => { S = s.val(); if (!S) { ref.transaction(x => x || fresh()); return; } render(); });
+  Profile.on(ref, s => { S = s.val(); if (!S) { ref.transaction(x => x || fresh()); return; } render(); });
   function resolve(n) {
     ref.transaction(s => { if (!s || (s.n || 0) !== n || (s.up || []).length !== 2) return; return { ...s, up: [], turn: 3 - s.turn }; });
   }

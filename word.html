@@ -69,7 +69,9 @@ body{-webkit-user-select:none;user-select:none}
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="profile.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), view = $('#view');
@@ -91,7 +93,8 @@ const cfg = window.FIREBASE_CONFIG || {};
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   view.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
-  firebase.initializeApp(cfg);
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
   const ref = firebase.database().ref('rooms/' + room + '/word');
   let S = { phase: 'pick' }, draft = '', lives = 7, prev = '';
 
@@ -112,9 +115,9 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     const p = S.phase;
     if (p === 'pick') {
       view.innerHTML = `<div class="mid"><h1>Кто загадывает слово?</h1><div class="pick">` +
-        [1, 2].map(n => `<button data-act="setter" data-v="${n}">Игрок ${n}<small>${n === me ? 'это вы' : n === 1 ? 'создатель комнаты' : 'зашёл по ссылке'}</small></button>`).join('') + '</div></div>';
+        [1, 2].map(n => `<button data-act="setter" data-v="${n}">${pn(n)}<small>${n === me ? 'это вы' : n === 1 ? 'создатель комнаты' : 'зашёл по ссылке'}</small></button>`).join('') + '</div></div>';
     } else if (p === 'write' && S.setter !== me) {
-      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Игрок ${S.setter} загадывает слово…</h1></div>`;
+      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>${pn(S.setter)} загадывает слово…</h1></div>`;
     } else if (p === 'write') {
       view.innerHTML = `<div class="mid"><h1>Загадайте слово</h1>
         <div class="lv"><button data-act="lm" aria-label="Меньше">−</button><span>Сердечек: ${lives}</span><button data-act="lp" aria-label="Больше">+</button></div>
@@ -124,13 +127,13 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       const g = S.guessed || [], isSetter = me === S.setter, over = p !== 'guess';
       const arr = [...S.word].map(ch => g.includes(ch) ? { l: ch } : (p === 'lost' || isSetter) ? { l: ch, g: 1 } : { l: '' });
       view.innerHTML = `<div class="hearts">${Array.from({ length: S.maxLives }, (_, i) => heart(i < S.lives)).join('')}</div>
-        <div class="mid"><p class="who">${isSetter ? `Игрок ${3 - S.setter} угадывает` : 'Угадайте слово'}</p>${cells(arr)}</div>${kb('guess')}` +
+        <div class="mid"><p class="who">${isSetter ? `${pn(3 - S.setter)} угадывает` : 'Угадайте слово'}</p>${cells(arr)}</div>${kb('guess')}` +
         (over ? `<div class="over"><div class="card"><h2>${p === 'won' ? 'Поздравляем!' : 'Не угадали'}</h2>
           <p class="hint">${p === 'won' ? 'Слово угадано' : 'Сердечки закончились. Слово было'}</p><div class="big">${S.word}</div>
           <button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>` : '');
     }
   }
-  ref.on('value', s => { S = s.val() || { phase: 'pick' }; render(); });
+  Profile.on(ref, s => { S = s.val() || { phase: 'pick' }; render(); });
 
   function press(l) {
     if (S.phase === 'write' && S.setter === me) { if (draft.length < 14) { draft += l; render(); } }

@@ -147,7 +147,9 @@ button{-webkit-tap-highlight-color:transparent}
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="profile.js"></script>
 <script>
 'use strict';
 const $ = s => document.querySelector(s);
@@ -491,7 +493,8 @@ setTool('select'); ui(); btns(); fit();
   if (!room) { room = uid() + uid() + uid(); history.replaceState(null, '', '#room=' + room); }
   addEventListener('hashchange', () => location.reload());
 
-  firebase.initializeApp(cfg);
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, /host=1/.test(location.hash) ? 1 : 2, null);
   const box = firebase.database().ref('rooms/' + room + '/objs'), known = {};
   const canon = o => JSON.stringify(o, Object.keys(o).sort());
   const ser = o => {
@@ -512,11 +515,13 @@ setTool('select'); ui(); btns(); fit();
     if (sel && sel.id === id) sel = o;
     objs.sort((a, b) => a.ts - b.ts); render();
   };
-  box.on('child_added', apply);
+  Profile.ready.then(() => {
+  box.on('child_added', apply, Profile.denied);
   box.on('child_changed', apply);
   box.on('child_removed', s => {
     delete known[s.key]; const i = objs.findIndex(x => x.id === s.key); if (i < 0) return;
     if (sel && sel.id === s.key) sel = null; objs.splice(i, 1); render();
+  });
   });
   syncLocal = () => {
     const ids = {};

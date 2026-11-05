@@ -126,7 +126,9 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="profile.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), view = $('#view'), ui = $('#ui');
@@ -208,7 +210,8 @@ const CROP = ['0 30 200 190', '30 66 140 84', '40 112 120 80', '10 150 180 92', 
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
-  firebase.initializeApp(cfg);
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
   const ref = firebase.database().ref('rooms/' + room + '/monster');
   let S = null, prevStep = -1, prevId = 0;
   const fresh = () => ({ id: Date.now(), phase: 'play', step: 0, name: NAMES[Math.floor(Math.random() * NAMES.length)] });
@@ -219,7 +222,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     const hop = S.id === prevId && st !== prevStep && prevStep >= 0;
     prevStep = st; prevId = S.id;
     const dots = KEYS.map((_, i) => `<i class="${i < st ? 'on' : i === st && !done ? 'now' : ''}"></i>`).join('');
-    const status = done ? 'Монстр готов!' : mine ? `Ваш ход: выберите ${LABEL[st]}` : `Игрок ${picker(st)} выбирает ${LABEL[st]}…`;
+    const status = done ? 'Монстр готов!' : mine ? `Ваш ход: выберите ${LABEL[st]}` : `${pn(picker(st))} выбирает ${LABEL[st]}…`;
     let opts = '';
     if (!done) {
       for (let i = 0; i < 6; i++) opts += `<button class="opt" data-act="pick" data-i="${i}" data-st="${st}" ${mine ? '' : 'disabled'} aria-label="${LABEL[st]} ${i + 1}">${svg({ ...sel, [KEYS[st]]: i }, CROP[st])}</button>`;
@@ -228,7 +231,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     if (done) ov = `<div class="over"><div class="card"><div class="mname">Знакомьтесь: ${esc(S.name || 'Монстр')}!</div><div style="height:min(34dvh,260px)">${svg(sel).replace('<svg ', '<svg style="width:100%;height:100%" class="bob" ')}</div><button class="again" data-act="save">Сохранить картинку</button><button class="save" data-act="again">Создать ещё</button><a href="index.html">На главную</a></div></div>`;
     ui.innerHTML = `<div class="steps">${dots}</div><p class="mturn">${status}</p><svg class="stage ${hop ? 'hop' : 'bob'}" viewBox="0 6 200 236" xmlns="http://www.w3.org/2000/svg">${monster(sel)}</svg>${done ? '' : `<div class="opts">${opts}</div><p class="hint">Игроки выбирают по очереди: тело, глаза, рот, ноги и аксессуар.</p>`}${ov}`;
   }
-  ref.on('value', s => { S = s.val(); if (!S) { ref.transaction(x => x || fresh()); return; } render(); });
+  Profile.on(ref, s => { S = s.val(); if (!S) { ref.transaction(x => x || fresh()); return; } render(); });
   function pick(i, st) {
     ref.transaction(s => {
       if (!s || s.phase !== 'play' || (s.step || 0) !== st || picker(st) !== me) return;

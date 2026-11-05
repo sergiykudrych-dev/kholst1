@@ -1,0 +1,67 @@
+ПРАВИЛА БАЗЫ FIREBASE (Realtime Database → Rules)
+==================================================
+
+ПОРЯДОК (важно — иначе игры перестанут открываться):
+ 1. Firebase → Build → Authentication → Get started → Sign-in method →
+    включите «Anonymous» (анонимный вход).
+ 2. Загрузите новые файлы сайта на GitHub и проверьте, что игры работают
+    и имена показываются.
+ 3. Только потом вставьте правила ниже (Realtime Database → Rules → Publish).
+
+Пока вы не вставили новые правила, сайт работает со старыми открытыми правилами.
+
+
+ВАРИАНТ 1 (рекомендую сейчас) — «только со входом»
+--------------------------------------------------
+Базой могут пользоваться только те, у кого есть анонимный вход (то есть
+открывшие ваш сайт). Профиль может менять только его владелец.
+
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "rooms": {
+      "$room": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}
+
+
+ВАРИАНТ 2 (строгий) — «только двое участников комнаты»
+------------------------------------------------------
+Комнату читают и меняют только те два устройства, которые заняли места
+Игрока 1 и Игрока 2. Минус: если стереть данные сайта или открыть ссылку
+в другом браузере (например, из Safari вместо иконки на экране «Домой»),
+вход в ту же комнату закроется — придётся создать новую.
+
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "rooms": {
+      "$room": {
+        "players": {
+          ".read": "auth != null",
+          "$slot": {
+            ".write": "auth != null && newData.child('uid').val() === auth.uid && (!data.exists() || data.child('uid').val() === auth.uid)"
+          }
+        },
+        "$game": {
+          ".read": "auth != null && $game !== 'players' && (root.child('rooms').child($room).child('players/p1/uid').val() === auth.uid || root.child('rooms').child($room).child('players/p2/uid').val() === auth.uid)",
+          ".write": "auth != null && $game !== 'players' && (root.child('rooms').child($room).child('players/p1/uid').val() === auth.uid || root.child('rooms').child($room).child('players/p2/uid').val() === auth.uid)"
+        }
+      }
+    }
+  }
+}

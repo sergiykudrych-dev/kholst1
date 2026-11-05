@@ -77,7 +77,9 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="profile.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), view = $('#view');
@@ -97,7 +99,8 @@ const cfg = window.FIREBASE_CONFIG || {};
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   view.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
-  firebase.initializeApp(cfg);
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
   const ref = firebase.database().ref('rooms/' + room + '/duel'), other = 3 - me;
   let S = { phase: 'write' }, draft = '', prev = '';
   const valid = () => +draft >= 1 && +draft <= 100;
@@ -111,10 +114,10 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     if (key !== prev) { draft = ''; prev = key; }
     const p = S.phase, my = S['n' + me];
     if (p === 'write' && !my) {
-      view.innerHTML = `<div class="mid"><h1>Загадайте число</h1><p class="hint">От 1 до 100. Игрок ${other} его не увидит</p>${disp()}</div>${pad(false)}
+      view.innerHTML = `<div class="mid"><h1>Загадайте число</h1><p class="hint">От 1 до 100. ${pn(other)} его не увидит</p>${disp()}</div>${pad(false)}
         <button class="start" data-act="start" ${valid() ? '' : 'disabled'}>Загадать</button>`;
     } else if (p === 'write') {
-      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём Игрока ${other}…</h1><p class="hint">Вы загадали ${my}</p></div>`;
+      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём: ${pn(other)}…</h1><p class="hint">Вы загадали ${my}</p></div>`;
     } else {
       const mine = S['t' + me] || [], theirs = S['t' + other] || [], myTurn = p === 'guess' && S.turn === me;
       let lo = 1, hi = 100;
@@ -123,18 +126,18 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       if (p === 'over') {
         const w = S.winner, cnt = w === 0 ? (S.t1 || []).length : (S['t' + w] || []).length;
         const title = w === 0 ? 'Ничья!' : w === me ? 'Победа!' : 'Не в этот раз';
-        const sub = w === 0 ? `Оба угадали за ${cnt} ${pl(cnt)}` : w === me ? `Вы угадали число Игрока ${other} за ${cnt} ${pl(cnt)}` : `Игрок ${other} угадал ваше число за ${cnt} ${pl(cnt)}`;
-        over = `<div class="over"><div class="card"><h2>${title}</h2><p class="hint">${sub}</p><p class="hint">Числа: Игрок 1 и Игрок 2</p>
+        const sub = w === 0 ? `Оба угадали за ${cnt} ${pl(cnt)}` : w === me ? `Вы угадали число (${pn(other)}) за ${cnt} ${pl(cnt)}` : `${pn(other)} угадал(а) ваше число за ${cnt} ${pl(cnt)}`;
+        over = `<div class="over"><div class="card"><h2>${title}</h2><p class="hint">${sub}</p><p class="hint">Числа: ${pn(1)} и ${pn(2)}</p>
           <div class="big">${S.n1} и ${S.n2}</div><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
       }
-      view.innerHTML = `<div class="range"><p class="turn">${p === 'over' ? 'Игра окончена' : myTurn ? 'Ваш ход' : `Ход Игрока ${other}…`}</p>
-        <p class="who">Число Игрока ${other}: от <b>${lo}</b> до <b>${hi}</b></p><div class="bar"><i style="left:${lo - 1}%;width:${hi - lo + 1}%"></i></div></div>
-        <div class="cols"><div class="col"><h3>Ваши попытки</h3>${col(mine)}</div><div class="col"><h3>Попытки Игрока ${other}</h3>${col(theirs)}</div></div>
+      view.innerHTML = `<div class="range"><p class="turn">${p === 'over' ? 'Игра окончена' : myTurn ? 'Ваш ход' : `Ходит ${pn(other)}…`}</p>
+        <p class="who">Число (${pn(other)}): от <b>${lo}</b> до <b>${hi}</b></p><div class="bar"><i style="left:${lo - 1}%;width:${hi - lo + 1}%"></i></div></div>
+        <div class="cols"><div class="col"><h3>Ваши попытки</h3>${col(mine)}</div><div class="col"><h3>Попытки: ${pn(other)}</h3>${col(theirs)}</div></div>
         <p class="mine">Ваше число: ${my}</p>${disp()}${pad(!myTurn)}
         <button class="start" data-act="check" ${myTurn && valid() ? '' : 'disabled'}>Проверить</button>${over}`;
     }
   }
-  ref.on('value', s => { S = s.val() || { phase: 'write' }; render(); });
+  Profile.on(ref, s => { S = s.val() || { phase: 'write' }; render(); });
 
   function press(d) {
     const can = (S.phase === 'write' && !S['n' + me]) || (S.phase === 'guess' && S.turn === me);

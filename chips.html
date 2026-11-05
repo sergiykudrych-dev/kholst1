@@ -111,7 +111,9 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="profile.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), view = $('#view'), ui = $('#ui');
@@ -131,7 +133,8 @@ const EMO = ['🎅', '🎭', '🎁', '💋', '🌹'];
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
-  firebase.initializeApp(cfg);
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
   const ref = firebase.database().ref('rooms/' + room + '/chips16'), CELLS = [...Array(16).keys()];
   let S = { phase: 'setup' }, pickI = -1, prevP = '';
   const foundP = (t, p) => { const h = t['h' + p]; return !!h && (t.rv || {})[h.c] !== undefined; };
@@ -154,17 +157,17 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     const p = S.phase;
     if (p !== prevP) { if (p === 'setup') pickI = -1; prevP = p; }
     if (p === 'setup' && !S['h' + me]) {
-      ui.innerHTML = `<div class="mid"><h1>Спрячьте сюрприз</h1><p class="hint">Выберите один чипс на общем поле. Игрок ${other} выберет свой, а искать вы будете по очереди.</p>
+      ui.innerHTML = `<div class="mid"><h1>Спрячьте сюрприз</h1><p class="hint">Выберите один чипс на общем поле. ${pn(other)} выберет свой, а искать вы будете по очереди.</p>
         <div class="board4">${board(true)}</div></div><button class="start" data-act="save" ${pickI >= 0 ? '' : 'disabled'}>Готово</button>`;
     } else if (p === 'setup') {
-      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём Игрока ${other}…</h1><p class="hint">Ваш сюрприз спрятан</p></div>`;
+      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём: ${pn(other)}…</h1><p class="hint">Ваш сюрприз спрятан</p></div>`;
     } else {
       const myTurn = p === 'play' && S.turn === me && !S.pend, n = [1, 2].filter(x => foundP(S, x)).length;
-      const status = p === 'over' ? 'Оба сюрприза найдены!' : S.pend ? 'Придумайте приз сами' : myTurn ? 'Ваш ход: выберите чипс' : `Ход Игрока ${other}…`;
+      const status = p === 'over' ? 'Оба сюрприза найдены!' : S.pend ? 'Придумайте приз сами' : myTurn ? 'Ваш ход: выберите чипс' : `Ходит ${pn(other)}…`;
       let ov = '';
       if (S.pend && p === 'play') {
         const d = S.pend;
-        ov = `<div class="over"><div class="card"><div class="big2">${d.e}</div><h2>Сюрприз!</h2><p class="hint">Игрок ${d.by}${d.by === me ? ' (вы)' : ''} нашёл сюрприз Игрока ${d.o}</p><p class="task">Придумайте приз сами</p>
+        ov = `<div class="over"><div class="card"><div class="big2">${d.e}</div><h2>Сюрприз!</h2><p class="hint">Спрятал(а): ${pn(d.o)}. Нашёл(а): ${pn(d.by)}${d.by === me ? ' (вы)' : ''}</p><p class="task">Придумайте приз сами</p>
           <button class="again" data-act="done">Продолжить</button></div></div>`;
       } else if (p === 'over') {
         ov = `<div class="over"><div class="card"><div class="big2">🎉</div><h2>Игра окончена</h2><p class="hint">Оба сюрприза найдены</p>
@@ -174,7 +177,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
         <p class="hint">Свой чипс (со смайликом) открывать нельзя. Найдено сюрпризов: ${n}/2</p>${ov}`;
     }
   }
-  ref.on('value', s => { S = s.val() || { phase: 'setup' }; render(); });
+  Profile.on(ref, s => { S = s.val() || { phase: 'setup' }; render(); });
   function save() {
     if (pickI < 0) return; const h = { c: 'c' + pickI, e: EMO[Math.floor(Math.random() * EMO.length)] }; let clash = false;
     ref.transaction(s => {

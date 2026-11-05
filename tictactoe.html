@@ -116,7 +116,9 @@ button.t{cursor:pointer}
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="profile.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), view = $('#view'), ui = $('#ui');
@@ -137,7 +139,8 @@ const SO = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" stroke="#6D5B
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
-  firebase.initializeApp(cfg);
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
   const ref = firebase.database().ref('rooms/' + room + '/ttt');
   let S = { phase: 'mode' };
   const dims = m => m === 3 ? { n: 3, k: 3 } : { n: 13, k: 5 };
@@ -151,7 +154,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     return null;
   }
   function render() {
-    const p = S.phase, sc = `Счёт: Игрок 1 — ${S.w1 || 0}, Игрок 2 — ${S.w2 || 0}`;
+    const p = S.phase, sc = `Счёт: ${pn(1)} — ${S.w1 || 0}, ${pn(2)} — ${S.w2 || 0}`;
     if (p === 'mode') {
       ui.innerHTML = `<div class="mid"><h1>Крестики-нолики</h1><p class="hint">Выберите режим</p><div class="pick">
         <button data-act="mode" data-m="3">3 в ряд<small>поле 3×3, быстрая партия</small></button>
@@ -165,13 +168,13 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       if (ch === 'O') return `<div class="${cls}">${SO}</div>`;
       return myTurn ? `<button class="${cls}" data-act="mv" data-i="${i}" aria-label="Клетка ${i + 1}"></button>` : `<div class="${cls}"></div>`;
     }).join('');
-    const status = p === 'over' ? (S.res === 'draw' ? 'Ничья!' : S.res === 'win' + me ? 'Вы победили!' : `Победил Игрок ${other}`) : myTurn ? 'Ваш ход' : `Ход Игрока ${other}…`;
+    const status = p === 'over' ? (S.res === 'draw' ? 'Ничья!' : S.res === 'win' + me ? 'Вы победили!' : `Победа: ${pn(other)}`) : myTurn ? 'Ваш ход' : `Ходит ${pn(other)}…`;
     const style = `grid-template-columns:repeat(${n},1fr);` + (n === 3 ? 'width:min(100%,340px);gap:8px;--p:18%' : 'width:min(100%,min(520px,62dvh));gap:3px;--p:14%');
     ui.innerHTML = `<p class="turn">${status}</p><div class="ttt" style="${style}">${cells}</div>
       <p class="hint">Вы играете ${mark} · ${S.mode === 3 ? '3' : '5'} в ряд · ${sc}</p>` +
       (p === 'over' ? '<button class="start" data-act="again">Играть ещё</button><button class="btn2" data-act="modes">Сменить режим</button>' : '');
   }
-  ref.on('value', s => { S = s.val() || { phase: 'mode' }; render(); });
+  Profile.on(ref, s => { S = s.val() || { phase: 'mode' }; render(); });
   function pickMode(m) {
     ref.transaction(s => {
       s = s || {}; if (s.phase && s.phase !== 'mode') return; const { n } = dims(m);

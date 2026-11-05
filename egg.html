@@ -103,7 +103,9 @@ textarea{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:1
 <div class="toast" id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="profile.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), view = $('#view'), ui = $('#ui');
@@ -145,7 +147,8 @@ const cfg = window.FIREBASE_CONFIG || {};
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
-  firebase.initializeApp(cfg);
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
   const ref = firebase.database().ref('rooms/' + room + '/egg');
   let S = { phase: 'setup' }, draft = '', prevP = '', prevN = -1, lastTgt = '', showOver = false, overT;
 
@@ -171,23 +174,23 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
         <div class="chips">${IDEAS.map(t => `<button data-act="chip" data-t="${t}">${t}</button>`).join('')}</div></div>
         <button class="start" id="saveBtn" data-act="save" ${draft.trim().length < 2 ? 'disabled' : ''}>Готово</button>`;
     } else if (p === 'setup') {
-      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём Игрока ${other}…</h1><p class="hint">Ваше задание: «${esc(my)}»</p></div>`;
+      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём: ${pn(other)}…</h1><p class="hint">Ваше задание: «${esc(my)}»</p></div>`;
     } else {
       const n = S.last ? S.last.r : 0, rolled = (S.n || 0) !== prevN; prevN = S.n || 0;
       const myTurn = p === 'play' && S.turn === me;
-      const info = S.last ? `Игрок ${S.last.p} бросил ${S.last.r}` : 'Бумага мокнет с каждым броском';
+      const info = S.last ? `Бросок (${pn(S.last.p)}): ${S.last.r}` : 'Бумага мокнет с каждым броском';
       let ov = '';
       if (p === 'over' && showOver) {
         const l = S.loser;
-        ov = `<div class="over"><div class="card"><h2>Яйцо упало!</h2><p class="hint">Игрок ${l}${l === me ? ' (вы)' : ''} выполняет задание от Игрока ${3 - l}:</p>
+        ov = `<div class="over"><div class="card"><h2>Яйцо упало!</h2><p class="hint">Выполняет: ${pn(l)}${l === me ? ' (вы)' : ''}. Задание от: ${pn(3 - l)}</p>
           <div class="task">${esc(S['task' + (3 - l)] || '')}</div><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
       }
-      ui.innerHTML = `<p class="turn">${p === 'over' ? 'Яйцо упало!' : myTurn ? 'Ваш ход' : `Ход Игрока ${other}…`}</p>
+      ui.innerHTML = `<p class="turn">${p === 'over' ? 'Яйцо упало!' : myTurn ? 'Ваш ход' : `Ходит ${pn(other)}…`}</p>
         <div class="dierow">${die(n, rolled && n)}<p class="hint">${info}</p></div>
         <button class="start" data-act="roll" ${myTurn ? '' : 'disabled'}>Бросить кубик</button>${ov}`;
     }
   }
-  ref.on('value', s => { S = s.val() || { phase: 'setup' }; render(); });
+  Profile.on(ref, s => { S = s.val() || { phase: 'setup' }; render(); });
 
   function saveTask() {
     const t = draft.trim(); if (t.length < 2) return;
