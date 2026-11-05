@@ -95,6 +95,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Profile.track('word', S => S.phase === 'won' || S.phase === 'lost' ? ((S.phase === 'won') === (me !== S.setter) ? 'win' : 'loss') : null);
   const ref = firebase.database().ref('rooms/' + room + '/word');
   let S = { phase: 'pick' }, draft = '', lives = 7, prev = '';
 

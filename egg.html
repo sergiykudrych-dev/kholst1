@@ -149,6 +149,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Profile.track('egg', S => S.phase === 'over' && S.loser ? (S.loser === me ? 'loss' : 'win') : null);
   const ref = firebase.database().ref('rooms/' + room + '/egg');
   let S = { phase: 'setup' }, draft = '', prevP = '', prevN = -1, lastTgt = '', showOver = false, overT;
 

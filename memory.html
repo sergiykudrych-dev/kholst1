@@ -156,6 +156,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Profile.track('memory', S => S.phase === 'over' ? ((S.s1 || 0) === (S.s2 || 0) ? 'draw' : ((S.s1 || 0) > (S.s2 || 0) ? 1 : 2) === me ? 'win' : 'loss') : null);
   const ref = firebase.database().ref('rooms/' + room + '/memory');
   let S = null, prevFace = null, prevId = 0, tn = -1;
   const fresh = () => { const d = [...EMO, ...EMO]; for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; } return { id: Date.now(), phase: 'play', deck: d, turn: 1 + Math.floor(Math.random() * 2), n: 0, s1: 0, s2: 0 }; };

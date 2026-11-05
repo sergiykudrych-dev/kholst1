@@ -243,6 +243,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Profile.track('monster', S => S.phase === 'done' ? 'coop' : null);
   const ref = firebase.database().ref('rooms/' + room + '/monster');
   let S = null, prevStep = -1, prevId = 0;
   const fresh = () => ({ id: Date.now(), phase: 'play', step: 0, name: NAMES[Math.floor(Math.random() * NAMES.length)] });

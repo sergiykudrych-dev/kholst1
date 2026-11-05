@@ -141,6 +141,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Profile.track('tictactoe', S => S.phase === 'over' ? (S.res === 'draw' ? 'draw' : S.res === 'win' + me ? 'win' : 'loss') : null);
   const ref = firebase.database().ref('rooms/' + room + '/ttt');
   let S = { phase: 'mode' };
   const dims = m => m === 3 ? { n: 3, k: 3 } : { n: 13, k: 5 };

@@ -135,6 +135,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Profile.track('chips', S => S.phase === 'over' ? 'coop' : null);
   const ref = firebase.database().ref('rooms/' + room + '/chips16'), CELLS = [...Array(16).keys()];
   let S = { phase: 'setup' }, pickI = -1, prevP = '';
   const foundP = (t, p) => { const h = t['h' + p]; return !!h && (t.rv || {})[h.c] !== undefined; };

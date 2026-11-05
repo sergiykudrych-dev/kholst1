@@ -69,6 +69,7 @@
   }
 
   function listen() {
+    if (window.Stats) Stats.load().then(render).catch(() => {});
     db.ref('friends/' + me).on('value', s => { list = s.val() || {}; Object.keys(list).forEach(fetchUser); render(); badge(); }, () => {});
     const inv = db.ref('invites/' + me);
     inv.on('child_added', s => {
@@ -131,7 +132,8 @@
     $('#fcode').textContent = myCode;
     const g = { in: [], ok: [], out: [] };
     Object.keys(list).forEach(u => (g[list[u].status] || g.out).push(u));
-    const row = (u, b) => `<div class="frow"><span class="fn">${esc(who(u))}</span>${b}</div>`;
+    const score = u => { const c = window.Stats && Stats.score(u); return c && (c.w + c.l + c.d) ? ` · ${c.w}:${c.l}` : ''; };
+    const row = (u, b) => `<div class="frow"><span class="fn">${esc(who(u))}${g.ok.includes(u) ? esc(score(u)) : ''}</span>${b}</div>`;
     const btn = (a, u, t, c) => `<button class="fb ${c || ''}" type="button" data-a="${a}" data-u="${esc(u)}">${t}</button>`;
     let h = '';
     if (g.in.length) h += '<h3>Хотят дружить</h3>' + g.in.map(u => row(u, btn('accept', u, 'Принять', 'ok') + btn('remove', u, '✕'))).join('');

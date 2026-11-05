@@ -7,7 +7,7 @@
  2. Потом загрузите новые файлы сайта на GitHub.
 
 Что добавилось: codes (коды друзей), friends (списки друзей), invites
-(приглашения в игру). Анонимный вход должен быть включён
+(приглашения в игру), history (история партий для статистики). Анонимный вход должен быть включён
 (Authentication → Sign-in method → Anonymous).
 
 
@@ -40,6 +40,15 @@
         ".read": "auth != null && auth.uid === $uid",
         "$id": {
           ".write": "auth != null && (auth.uid === $uid || root.child('friends').child($uid).child(auth.uid).child('status').val() === 'ok')"
+        }
+      }
+    },
+    "history": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$id": {
+          ".validate": "newData.hasChildren(['game', 'res', 't']) && (newData.child('res').val() === 'win' || newData.child('res').val() === 'loss' || newData.child('res').val() === 'draw' || newData.child('res').val() === 'coop')"
         }
       }
     },
@@ -87,6 +96,15 @@
         ".read": "auth != null && auth.uid === $uid",
         "$id": {
           ".write": "auth != null && (auth.uid === $uid || root.child('friends').child($uid).child(auth.uid).child('status').val() === 'ok')"
+        }
+      }
+    },
+    "history": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$id": {
+          ".validate": "newData.hasChildren(['game', 'res', 't']) && (newData.child('res').val() === 'win' || newData.child('res').val() === 'loss' || newData.child('res').val() === 'draw' || newData.child('res').val() === 'coop')"
         }
       }
     },

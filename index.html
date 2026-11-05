@@ -52,7 +52,7 @@ html,body,button,input,a{touch-action:manipulation}
 <main>
   <h1>Во что сыграем?</h1>
   <p class="lead">Выберите игру для двоих</p>
-  <div class="toprow"><button class="who" id="who" type="button"></button><button class="who" id="fr" type="button">👥 Друзья</button></div>
+  <div class="toprow"><button class="who" id="who" type="button"></button><button class="who" id="fr" type="button">👥 Друзья</button><button class="who" id="st" type="button">📊 Статистика</button></div>
   <button class="game" id="paint">
     <span class="tile"><svg width="44" height="30" viewBox="0 0 30 20"><circle cx="8" cy="11" r="7" fill="#fff"/><rect x="10" y="4" width="12" height="12" rx="2" fill="#fff" fill-opacity=".6"/><path d="M21 18l4.5-9 4.5 9z" fill="#FFE08A"/></svg></span>
     <span><b>Холст</b><small>Рисуйте вместе: рисунок сразу появляется у второго</small></span>
@@ -111,6 +111,7 @@ html,body,button,input,a{touch-action:manipulation}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="profile.js"></script>
+<script src="stats.js"></script>
 <script src="friends.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -148,6 +149,7 @@ const paintWho = () => { $('#who').textContent = Profile.has() ? (Profile.avatar
 $('#who').onclick = () => Profile.ask().then(paintWho); paintWho();
 if (!Profile.has() && !Profile.skipped()) Profile.ask().then(paintWho);
 $('#fr').onclick = () => Friends.open();
+$('#st').onclick = () => Stats.open();
 Friends.init();
 $('#x').onclick = () => dlg.close();
 dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };

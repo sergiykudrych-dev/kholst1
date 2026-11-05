@@ -101,6 +101,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Profile.track('number', S => S.phase === 'over' ? (S.winner === 0 ? 'draw' : S.winner === me ? 'win' : 'loss') : null);
   const ref = firebase.database().ref('rooms/' + room + '/duel'), other = 3 - me;
   let S = { phase: 'write' }, draft = '', prev = '';
   const valid = () => +draft >= 1 && +draft <= 100;

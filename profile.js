@@ -145,7 +145,7 @@
     const auth = P.init().then(() => {});
     P.ready = auth.then(() => {
       db.ref('rooms/' + room + '/players').on('value', s => {
-        const v = s.val() || {}; P.names = { 1: v.p1 || null, 2: v.p2 || null }; P.notify();
+        const v = s.val() || {}; P.names = { 1: v.p1 || null, 2: v.p2 || null }; P.notify(); flush();
       }, P.denied);
       return P.publish();
     });
@@ -155,6 +155,27 @@
     return P.ready;
   };
 
+  /* История партий: каждый пишет результат только в свою ветку history/<uid>. */
+  const hash = t => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+  let pending = []; const seen = new Set();
+  function flush() {
+    if (!P.uid || !pending.length) return;
+    const opp = P.names[3 - P.me]; if (!opp || !opp.uid) return;
+    const db = firebase.database(), list = pending; pending = [];
+    list.forEach(r => db.ref('history/' + P.uid + '/' + r.key).transaction(x => x === null
+      ? { game: r.game, res: r.res, opp: opp.uid, oppName: opp.name || null, oppAvatar: opp.avatar || null, t: Date.now() } : undefined).catch(() => {}));
+  }
+  P.flush = flush;
+  P.track = (game, calc) => { P.tracker = { game, calc }; };
+  P.record = function (game, state, res) {
+    const key = game + '_' + P.room + '_' + hash(JSON.stringify(state));
+    if (seen.has(key)) return; seen.add(key); pending.push({ key, game, res }); flush();
+  };
+
   /* Подписка на состояние игры — только после входа и записи имени в комнату. */
-  P.on = (ref, cb) => P.ready.then(() => ref.on('value', s => { P.gotData = true; cb(s); }, P.denied));
+  P.on = (ref, cb) => P.ready.then(() => ref.on('value', s => {
+    P.gotData = true; cb(s);
+    const v = s.val();
+    if (v && P.tracker) { let r = null; try { r = P.tracker.calc(v); } catch (e) {} if (r) P.record(P.tracker.game, v, r); }
+  }, P.denied));
 })();
