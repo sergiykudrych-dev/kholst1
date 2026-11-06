@@ -146,7 +146,9 @@ function adAdmin() {
   ['#at', '#ax', '#au'].forEach(i => $(i).oninput = preview);
   $('#aadd').onclick = async () => {
     const m = $('#amsg'), t = type(), url = fixUrl(v('#au'));
-    if (!imgData) return m.textContent = 'Выберите картинку.';
+    const only = $('#pg').checked && !$('#ph').checked && !$('#pe').checked;
+    if (!imgData && t === 'image' && imgGame && only) imgData = imgGame;
+    if (!imgData) return m.textContent = t === 'image' && imgGame ? 'Для главной и конца партии нужна основная картинка (1200×400). Или оставьте только «В играх, сверху».' : 'Выберите картинку.';
     if (!/^https:\/\/[^\s.]+\.[^\s]+/.test(url)) return m.textContent = 'Укажите ссылку, куда ведёт реклама.';
     if (t === 'card' && !v('#at')) return m.textContent = 'Для варианта с текстом нужен заголовок.';
     const places = {}; if ($('#ph').checked) places.home = true; if ($('#pg').checked) places.game = true; if ($('#pe').checked) places.end = true;
@@ -200,4 +202,3 @@ function adAdmin() {
 </script>
 </body>
 </html>
-
