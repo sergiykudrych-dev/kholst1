@@ -193,7 +193,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     const cards = S.deck.map((e, i) => {
       const mo = m['c' + i], was = prevFace ? prevFace[i] : face[i];
       const cls = ['mc', face[i] ? 'flip' : '', mo ? 'own' + mo : '', face[i] && !was ? 'anim' : '', !face[i] && was ? 'anim2' : '', mo && !was && !up.length ? 'pop' : ''].join(' ');
-      return `<button class="${cls}" data-act="pick" data-i="${i}" ${myTurn && !face[i] ? '' : 'disabled'} aria-label="Карточка ${i + 1}"><span class="in"><span class="bk">♥&#xFE0E;</span><span class="fr">${e}</span></span></button>`;
+      return `<button class="${cls}" data-act="pick" data-i="${i}" ${myTurn && !face[i] ? '' : 'disabled'} aria-label="Карточка ${i + 1}"><span class="in"><span class="bk">♥&#xFE0E;</span><span class="fr">${face[i] || was ? e : ''}</span></span></button>`;
     }).join('');
     prevFace = face;
     const st = over ? 'Все пары найдены!' : S.turn === me ? (up.length === 2 ? 'Не совпало…' : 'Ваш ход') : (up.length === 2 ? 'Не совпало…' : `Ходит ${pn(other)}…`);
