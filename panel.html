@@ -32,6 +32,7 @@ h2{margin:22px 0 8px;font-size:15px;font-weight:800;color:var(--deep);text-trans
 .d{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:10px;color:var(--mute)}
 .d i{width:100%;min-height:2px;border-radius:6px 6px 2px 2px;background:var(--rose)}
 .d u{margin-bottom:3px;text-decoration:none;font-weight:700;color:var(--deep);font-size:11px}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}.hd .sub{margin:0}.rf{flex:none;padding:9px 14px;border:0;border-radius:999px;background:#fff;color:var(--deep);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(142,15,69,.15)}.rf:disabled{opacity:.6}
 .note{margin-top:20px;font-size:12px;color:var(--mute)}
 button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--rose);color:#fff;font:800 17px Manrope,system-ui,sans-serif;cursor:pointer;margin-top:10px}
 .seg{display:grid;gap:6px;margin-bottom:10px}.seg label,.chk label{display:flex;gap:8px;align-items:center;font-size:15px}
@@ -50,7 +51,7 @@ button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--r
 <main>
 <a class="back" href="index.html">← На сайт</a>
 <h1>Панель владельца</h1>
-<p class="sub" id="sub">Сколько людей играет и во что</p>
+<div class="hd"><p class="sub" id="sub">Сколько людей играет и во что</p><button type="button" class="rf" id="rf" hidden>↻ Обновить</button></div>
 <div id="out"><div class="msg">Загружаем…</div></div>
 <div id="adm"></div>
 </main>
@@ -93,7 +94,7 @@ function render(daily, total) {
 <div class="fr"><span>Создали комнату</span><div class="bar"><i style="width:100%"></i></div><b>${fmt(rooms)}</b></div>
 <div class="fr"><span>Второй игрок зашёл</span><div class="bar"><i style="width:${rooms ? Math.min(100, joined / rooms * 100) : 0}%"></i></div><b>${fmt(joined)}</b></div>
 <div class="fr"><span>Партию доиграли</span><div class="bar"><i style="width:${rooms ? Math.min(100, done / rooms * 100) : 0}%"></i></div><b>${fmt(done)}</b></div></div>
-<p class="pc">До второго игрока доходит <b>${pct(joined, rooms)}</b> комнат, до конца партии — <b>${pct(done, rooms)}</b>. Если первая цифра низкая, значит, людям сложно позвать второго.</p></div>`;
+<p class="pc">До второго игрока доходит <b>${pct(joined, rooms)}</b> комнат. Партий доиграно: <b>${fmt(done)}</b> (в одной комнате можно сыграть несколько партий подряд). Если первая цифра низкая, значит, людям сложно позвать второго.</p></div>`;
   h += `<h2>Самые популярные игры (30 дней)</h2><div class="card"><div class="fun">` + gk.map(x => `<div class="fr"><span>${GAMES[x.g]}</span><div class="bar"><i style="width:${x.open / max * 100}%"></i></div><b>${fmt(x.open)}</b></div>`).join('') + `</div><p class="pc">Число — сколько раз открывали игру. Доиграно партий: ${gk.filter(x => x.done).map(x => `${GAMES[x.g]} <b>${x.done}</b>`).join(', ') || 'пока нет'}.</p></div>`;
   h += `<h2>Люди по дням (14 дней)</h2><div class="card"><div class="days">` + d14.map(d => `<div class="d"><u>${D('users')(d) || ''}</u><i style="height:${D('users')(d) / maxU * 80}%"></i><span>${d.slice(8)}</span></div>`).join('') + `</div><p class="pc">За вчера: <b>${fmt(D('users')(yest))}</b>. В среднем в день за неделю: <b>${(sum('users', d7) / 7).toFixed(1)}</b>.</p></div>`;
   h += `<h2>Другое (30 дней)</h2><div class="grid">
@@ -107,10 +108,11 @@ function render(daily, total) {
 
 
 function adAdmin() {
-  const db = firebase.database(), box = $('#adm'); let imgData = null;
+  const db = firebase.database(), box = $('#adm'); let imgData = null, imgGame = null, lastGame = null;
   box.innerHTML = `<h2>Реклама</h2><div class="card">
 <div class="seg"><label><input type="radio" name="t" value="image" checked> Только картинка</label><label><input type="radio" name="t" value="card"> Картинка + заголовок и описание</label></div>
 <label class="fl">Картинка <small id="ahint">(лучше 3:1, например 1200×400)</small><input type="file" id="af" accept="image/*"></label>
+<label class="fl" id="gwrap">Узкая версия для игр <small>(необязательно, 1200×220)</small><input type="file" id="afg" accept="image/*"></label>
 <div id="cardf" hidden><input id="at" maxlength="40" placeholder="Заголовок"><input id="ax" maxlength="90" placeholder="Описание (коротко)"></div>
 <input id="au" type="url" inputmode="url" placeholder="Ссылка (https://…)">
 <div class="chk"><label><input type="checkbox" id="ph" checked> Главная, после 3-й игры</label><label><input type="checkbox" id="pg" checked> В играх, сверху</label><label><input type="checkbox" id="pe" checked> После партии</label></div>
@@ -120,7 +122,7 @@ function adAdmin() {
 <h2>Ваши баннеры</h2><div id="alist"><div class="msg">Загружаем…</div></div>`;
   const type = () => box.querySelector('input[name=t]:checked').value, v = id => $(id).value.trim();
   const fixUrl = u => /^https?:\/\//i.test(u) ? u.replace(/^http:/i, 'https:') : (u ? 'https://' + u : '');
-  const cur = () => ({ id: 'pv', type: type(), img: imgData, title: v('#at'), text: v('#ax'), url: fixUrl(v('#au')) || 'https://example.com' });
+  const cur = () => ({ id: 'pv', type: type(), img: imgData, imgGame, title: v('#at'), text: v('#ax'), url: fixUrl(v('#au')) || 'https://example.com' });
   function preview() {
     const pv = $('#apv'); if (!imgData) { pv.hidden = true; return; }
     pv.hidden = false; pv.innerHTML = '<small>Так будет на главной и после партии</small><div id="p1"></div><small>Так будет в играх сверху</small><div id="p2"></div>';
@@ -129,7 +131,7 @@ function adAdmin() {
   const proc = (file, t) => new Promise((res, rej) => {
     const u = URL.createObjectURL(file), im = new Image();
     im.onload = () => {
-      const [W, H] = t === 'card' ? [200, 200] : [900, 300], c = document.createElement('canvas'); c.width = W; c.height = H;
+      const [W, H] = t === 'card' ? [200, 200] : t === 'game' ? [900, 164] : [900, 300], c = document.createElement('canvas'); c.width = W; c.height = H;
       const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
       const r = Math.max(W / im.width, H / im.height), w = im.width * r, h = im.height * r; x.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); URL.revokeObjectURL(u);
       let q = .85, d = c.toDataURL('image/jpeg', q); while (d.length > 110000 && q > .4) { q -= .1; d = c.toDataURL('image/jpeg', q); } res(d);
@@ -138,8 +140,9 @@ function adAdmin() {
   });
   let lastFile = null;
   async function reimg() { if (!lastFile) return; try { imgData = await proc(lastFile, type()); } catch (e) { imgData = null; $('#amsg').textContent = e.message; } preview(); }
-  box.querySelectorAll('input[name=t]').forEach(r => r.onchange = () => { $('#cardf').hidden = type() !== 'card'; $('#ahint').textContent = type() === 'card' ? '(квадратная миниатюра)' : '(лучше 3:1, например 1200×400)'; reimg(); });
+  box.querySelectorAll('input[name=t]').forEach(r => r.onchange = () => { $('#cardf').hidden = type() !== 'card'; $('#gwrap').hidden = type() === 'card'; $('#ahint').textContent = type() === 'card' ? '(квадратная миниатюра)' : '(лучше 3:1, например 1200×400)'; reimg(); });
   $('#af').onchange = e => { lastFile = e.target.files[0] || null; reimg(); };
+  $('#afg').onchange = async e => { lastGame = e.target.files[0] || null; imgGame = null; if (lastGame) { try { imgGame = await proc(lastGame, 'game'); } catch (x) { $('#amsg').textContent = x.message; } } preview(); };
   ['#at', '#ax', '#au'].forEach(i => $(i).oninput = preview);
   $('#aadd').onclick = async () => {
     const m = $('#amsg'), t = type(), url = fixUrl(v('#au'));
@@ -149,9 +152,9 @@ function adAdmin() {
     const places = {}; if ($('#ph').checked) places.home = true; if ($('#pg').checked) places.game = true; if ($('#pe').checked) places.end = true;
     if (!Object.keys(places).length) return m.textContent = 'Выберите, где показывать.';
     const rec = { type: t, img: imgData, url, places, on: true, t: firebase.database.ServerValue.TIMESTAMP };
-    if (t === 'card') { rec.title = v('#at'); if (v('#ax')) rec.text = v('#ax'); }
+    if (t === 'card') { rec.title = v('#at'); if (v('#ax')) rec.text = v('#ax'); } else if (imgGame) rec.imgGame = imgGame;
     if ($('#d1').value) rec.from = $('#d1').value; if ($('#d2').value) rec.to = $('#d2').value;
-    try { await db.ref('ads').push(rec); m.textContent = 'Добавлено ✓'; imgData = null; lastFile = null; $('#af').value = ''; ['#at', '#ax', '#au', '#d1', '#d2'].forEach(i => $(i).value = ''); preview(); list(); }
+    try { await db.ref('ads').push(rec); m.textContent = 'Добавлено ✓'; imgData = null; lastFile = null; imgGame = null; lastGame = null; $('#af').value = ''; $('#afg').value = ''; ['#at', '#ax', '#au', '#d1', '#d2'].forEach(i => $(i).value = ''); preview(); list(); }
     catch (e) { m.textContent = 'Не сохранилось: проверьте правила базы (блок ads) и вход той же почтой.'; }
   };
   async function list() {
@@ -166,7 +169,7 @@ function adAdmin() {
         const row = document.createElement('div'); row.className = 'card ar' + (ad.on ? '' : ' off');
         row.appendChild(Ads.render(ad, 'home', { preview: true }));
         const info = document.createElement('div'); info.className = 'st';
-        info.innerHTML = `Места: <b>${Object.keys(ad.places || {}).map(k => names[k]).join(', ') || '—'}</b>${ad.from || ad.to ? ` · ${ad.from || '…'} — ${ad.to || '…'}` : ''}<br>Показов: <b>${imp}</b> · Кликов: <b>${clk}</b> · Клики: <b>${imp ? (clk / imp * 100).toFixed(1) + '%' : '—'}</b>${ad.on ? '' : ' · <b>выключен</b>'}`;
+        info.innerHTML = `Места: <b>${Object.keys(ad.places || {}).map(k => names[k]).join(', ') || '—'}</b>${ad.imgGame ? ' · есть версия для игр' : ''}${ad.from || ad.to ? ` · ${ad.from || '…'} — ${ad.to || '…'}` : ''}<br>Показов: <b>${imp}</b> · Кликов: <b>${clk}</b> · Клики: <b>${imp ? (clk / imp * 100).toFixed(1) + '%' : '—'}</b>${ad.on ? '' : ' · <b>выключен</b>'}`;
         const bar = document.createElement('div'); bar.className = 'ab';
         const tg = document.createElement('button'); tg.textContent = ad.on ? 'Выключить' : 'Включить'; tg.onclick = () => db.ref('ads/' + id + '/on').set(!ad.on).then(list);
         const dl = document.createElement('button'); dl.className = 'd'; dl.textContent = 'Удалить'; let sure = false;
@@ -182,12 +185,17 @@ function adAdmin() {
   const uid = await Profile.init();
   if (!uid) { out.innerHTML = '<div class="msg"><b>Нет связи с базой</b><p>Проверьте интернет и настройки Firebase.</p></div>'; return; }
   if (!Profile.isLinked()) return login('Нужен вход');
-  try {
-    await firebase.auth().currentUser.getIdToken(true);
+  const rf = $('#rf'); let first = true;
+  async function load() {
     const db = firebase.database();
+    await firebase.auth().currentUser.getIdToken(true);
     const [daily, total] = await Promise.all([db.ref('stats/daily').once('value'), db.ref('stats/total/users').once('value')]);
-    render(daily.val() || {}, total.val() || 0); adAdmin();
-  } catch (e) { login('Нет доступа'); }
+    render(daily.val() || {}, total.val() || 0);
+    if (first) { first = false; adAdmin(); }
+    const t = new Date(); $('#sub').textContent = 'Обновлено в ' + String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+  }
+  rf.onclick = async () => { rf.disabled = true; rf.textContent = '↻ Обновляем…'; try { await load(); } catch (e) { $('#sub').textContent = 'Не удалось обновить'; } rf.disabled = false; rf.textContent = '↻ Обновить'; };
+  try { await load(); rf.hidden = false; } catch (e) { login('Нет доступа'); }
 })();
 </script>
 </body>

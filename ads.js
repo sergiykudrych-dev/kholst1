@@ -59,7 +59,7 @@
     opts = opts || {}; css();
     const el = document.createElement('div'); el.className = 'adx adx-' + size + ' adx-' + (ad.type === 'card' ? 'card' : 'image'); el.dataset.adId = ad.id || '';
     const a = document.createElement('a'); a.href = okUrl(ad.url) ? ad.url : '#'; a.target = '_blank'; a.rel = 'noopener noreferrer sponsored';
-    const img = document.createElement('img'); img.src = ad.img; img.alt = ad.title || 'Реклама'; img.className = ad.type === 'card' ? 'adx-th' : '';
+    const img = document.createElement('img'); img.src = (size === 'game' && ad.type !== 'card' && /^data:image\//.test(ad.imgGame || '')) ? ad.imgGame : ad.img; img.alt = ad.title || 'Реклама'; img.className = ad.type === 'card' ? 'adx-th' : '';
     a.appendChild(img);
     if (ad.type === 'card') {
       const tx = document.createElement('div'); tx.className = 'adx-tx';
