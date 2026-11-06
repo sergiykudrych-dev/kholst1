@@ -80,3 +80,10 @@ header .chip.has{pointer-events:none}
 .k-mode b{font-weight:800;font-size:21px;color:var(--deep);letter-spacing:-.3px}
 .k-mode small{font-size:13px;font-weight:600;color:var(--mute);line-height:1.25}
 .k-mode u{text-decoration:none;margin-top:8px;padding:5px 12px;border-radius:99px;background:#FFE3EE;font-size:12px;font-weight:800;color:var(--rose)}
+
+.k-w{font-style:normal;margin-left:2px;padding:1px 8px;border-radius:99px;background:#FFE3EE;font-weight:800;font-size:13px;color:var(--rose)}
+.k-acts{display:flex;gap:10px;width:100%;max-width:420px}
+.k-acts .start{flex:1;margin-top:0;width:auto}
+.k-acts .btn2{flex:none;width:auto;margin-top:0;padding:0 22px;border-radius:99px;background:#fff;border:2px solid var(--rose);color:var(--rose);font-weight:800}
+
+.k-p{gap:6px;padding:0 10px 0 6px}

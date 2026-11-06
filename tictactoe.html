@@ -126,7 +126,7 @@ button.t{cursor:pointer}
 </style>
 <link rel="stylesheet" href="gamehead.css?v=2">
 <style>header #inv.has{display:none}</style>
-<link rel="stylesheet" href="gamekit.css?v=3">
+<link rel="stylesheet" href="gamekit.css?v=5">
 </head>
 <body>
 <header>
@@ -190,7 +190,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       const m5 = `<svg viewBox="0 0 120 120">${d5}${[0, 1, 2, 3, 4].map(i => X(28 + i * 16, 28 + i * 16)).join('')}${O(60, 28)}${O(92, 44)}${O(44, 76)}${O(76, 92)}<path d="M22 22L86 86" stroke="#8E0F45" stroke-width="3" stroke-linecap="round" opacity=".5"/></svg>`;
       ui.innerHTML = `<div class="mid"><h1 class="k-ttl">Крестики-нолики</h1><p class="hint">Выберите поле</p><div class="k-modes">
         <button class="k-mode" data-act="mode" data-m="3"><span class="mini">${m3}</span><b>3 в ряд</b><small>Быстрая партия</small><u>~1 мин</u></button>
-        <button class="k-mode" data-act="mode" data-m="5"><span class="mini">${m5}</span><b>5 в ряд</b><small>Большое поле 13×13</small><u>~5 мин</u></button></div>${S.games ? `<p class="hint">${sc}</p>` : ''}</div>`;
+        <button class="k-mode" data-act="mode" data-m="5"><span class="mini">${m5}</span><b>5 в ряд</b><small>Большое поле 13×13</small><u>~5 мин</u></button></div></div>`;
       return;
     }
     const { n } = dims(S.mode), b = S.b || '', line = S.line || [], myTurn = p === 'play' && S.turn === me, mark = me === 1 ? '<span class="sym sx">✕</span>' : '<span class="sym so">○</span>';
@@ -203,15 +203,16 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     const won = p === 'over' && S.res === 'win' + me;
     const status = p === 'over' ? (S.res === 'draw' ? 'Ничья! 🤝' : won ? 'Вы победили! 🎉' : `Победа: ${esc(Kit.nm(other))}`) : myTurn ? 'Ваш ход ✨' : `Ход: ${esc(Kit.nm(other))}…`;
     const style = `grid-template-columns:repeat(${n},1fr);` + (n === 3 ? 'width:min(100%,340px);gap:12px;--p:18%' : 'width:min(100%,min(520px,58dvh));gap:3px;--p:14%');
-    const pl = q => `<span class="k-p ${p === 'play' && S.turn === q ? 'act' : ''}"><i>${esc(Kit.av(q))}</i><span>${esc(Kit.nm(q))}</span> <b class="sym ${q === 1 ? 'sx' : 'so'}">${q === 1 ? '✕' : '○'}</b></span>`;
-    ui.innerHTML = `<div class="k-pl">${pl(1)}${pl(2)}</div><div class="ttt ${n === 3 ? '' : 'n13'}" style="${style}">${cells}<svg class="wl"></svg></div>
-      <div class="k-pill ${p === 'over' && S.res !== 'draw' ? (won ? 'ok k-pop' : 'no k-pop') : ''}" id="st">${status}</div>
-      <p class="hint">${S.mode === 3 ? '3' : '5'} в ряд · ${sc}</p>` +
-      (p === 'over' ? '<button class="start" data-act="again">Играть ещё</button><button class="btn2" data-act="modes">Сменить режим</button>' : '');
+    const pl = q => `<span class="k-p ${p === 'play' && S.turn === q ? 'act' : ''}"><i>${esc(Kit.av(q))}</i><span>${esc(Kit.nm(q))}</span> <b class="sym ${q === 1 ? 'sx' : 'so'}">${q === 1 ? '✕' : '○'}</b>${S.games ? `<em class="k-w">${S['w' + q] || 0}</em>` : ''}</span>`;
+    clearTimeout(overT); if (p !== 'over') showOver = false;
+    const ov = p === 'over' && showOver ? `<div class="over"><div class="card" id="ovc"><div class="big2">${S.res === 'draw' ? '🤝' : won ? '🎉' : '💌'}</div><h2 class="k-h2">${S.res === 'draw' ? 'Ничья' : won ? 'Вы победили!' : 'Победил ' + esc(Kit.nm(other))}</h2><button class="again start" data-act="again">Играть ещё</button></div></div>` : '';
+    ui.innerHTML = `<div class="k-pl">${pl(1)}${pl(2)}</div><div class="ttt ${n === 3 ? '' : 'n13'}" style="${style}">${cells}<svg class="wl"></svg></div>` +
+      (p === 'over' ? '' : `<div class="k-pill" id="st">${status}</div>`) + ov;
+    if (p === 'over' && !showOver) overT = setTimeout(() => { showOver = true; render(); }, S.res === 'draw' ? 500 : 1300);
     drawWin(line);
-    if (won && wonKey !== S.games) { wonKey = S.games; const el = document.getElementById('st'); if (el) { const r = el.getBoundingClientRect(); setTimeout(() => Kit.burst(r.left + r.width / 2, r.top + r.height / 2, 40), 350); } }
+    if (won && showOver && wonKey !== S.games) { wonKey = S.games; const el = document.getElementById('ovc'); if (el) { const r = el.getBoundingClientRect(); setTimeout(() => Kit.burst(r.left + r.width / 2, r.top + r.height / 2, 40), 350); } }
   }
-  let wonKey = -1;
+  let wonKey = -1, showOver = false, overT;
   function drawWin(line) {
     const bd = ui.querySelector('.ttt'), svg = bd && bd.querySelector('.wl'); if (!svg || !line || line.length < 2) return;
     const a = bd.querySelector('[data-i="' + Math.min(...line) + '"]'), z = bd.querySelector('[data-i="' + Math.max(...line) + '"]'); if (!a || !z) return;

@@ -118,9 +118,13 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 .board4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px;width:100%;max-width:min(380px,52dvh);border-radius:22px;background:rgba(255,255,255,.55);flex-shrink:0}
 .board4 .cell .em{font-size:clamp(30px,11vw,46px)}
 .board4 .cell .b{top:2px;right:6px;font-size:20px}
+.board4.b3{grid-template-columns:repeat(3,1fr);max-width:min(300px,36dvh);gap:8px}
+.board4.b3.sm{max-width:min(150px,17dvh);gap:4px;padding:8px;border-radius:16px}
+.board4.b3.sm .cell .em{font-size:20px}.board4.b3.sm .cell .b{font-size:14px;top:0;right:3px}
+.cap{font-weight:800;font-size:14px;color:var(--mute);text-align:center}
 </style>
 <link rel="stylesheet" href="gamehead.css?v=2">
-<link rel="stylesheet" href="gamestyle.css?v=2">
+<link rel="stylesheet" href="gamestyle.css?v=4">
 </head>
 <body>
 <header>
@@ -161,84 +165,91 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
   Kit.attach();
-  Profile.track('chips', S => S.phase === 'over' ? 'coop' : null);
-  const ref = firebase.database().ref('rooms/' + room + '/chips16'), CELLS = [...Array(16).keys()];
-  let S = { phase: 'setup' }, pickI = -1, prevP = '';
-  const foundP = (t, p) => { const h = t['h' + p]; return !!h && (t.rv || {})[h.c] !== undefined; };
-  const open = (t, p) => CELLS.filter(i => (t.rv || {})['c' + i] === undefined && 'c' + i !== (t['h' + p] || {}).c).length;
-  function advance(t) {
-    if (foundP(t, 1) && foundP(t, 2)) { t.phase = 'over'; return; }
-    const nx = 3 - t.turn;
-    if (open(t, nx) > 0) t.turn = nx; else if (open(t, t.turn) <= 0) t.phase = 'over';
+  Profile.track('chips', S => S.phase === 'over' ? (S.win ? (S.win === me ? 'win' : 'loss') : 'draw') : null);
+  const ref = firebase.database().ref('rooms/' + room + '/chips16');
+  let S = { phase: 'mode' }, pickI = -1, prevP = '';
+  const MODE = () => S.mode === 3 ? 3 : 4, NC = m => m === 3 ? 9 : 16;
+  const key = (o, i) => (MODE() === 3 ? o + '_' : '') + 'c' + i;
+  const cellsOf = (m) => [...Array(NC(m)).keys()];
+  const cellHtml = (r, extra) => r !== undefined ? `<div class="cell">${r ? `<span class="em">${r.e}</span>` : '<span class="dot"></span>'}</div>` : extra;
+  /* поле для выбора своего места */
+  function setupBoard() {
+    return cellsOf(MODE()).map(i => `<button class="cell ${pickI === i ? 'sel' : ''}" data-act="sel" data-i="${i}" aria-label="Чипс ${i + 1}"><span class="c"></span>${pickI === i ? '<small class="b">♥&#xFE0E;</small>' : ''}</button>`).join('');
   }
-  function board(setup) {
-    const rv = S.rv || {}, my = S['h' + me], can = !setup && S.phase === 'play' && S.turn === me && !S.pend;
-    return CELLS.map(i => {
-      const k = 'c' + i, r = rv[k];
-      if (!setup && r !== undefined) return `<div class="cell">${r ? `<span class="em">${r.e}</span>` : '<span class="dot"></span>'}</div>`;
-      const badge = !setup && my && my.c === k ? `<small class="b">${my.e}</small>` : (setup && pickI === i ? '<small class="b">♥&#xFE0E;</small>' : '');
-      return `<button class="cell ${setup && pickI === i ? 'sel' : ''}" data-act="${setup ? 'sel' : 'pick'}" data-i="${i}" ${setup || (can && !(my && my.c === k)) ? '' : 'disabled'} aria-label="Чипс ${i + 1}"><span class="c"></span>${badge}</button>`;
+  /* режим 4×4: общее поле; режим 3×3: owner — чьё поле */
+  function playBoard(owner, clickable) {
+    const rv = S.rv || {}, my = S['h' + me];
+    return cellsOf(MODE()).map(i => {
+      const k = key(owner, i), badge = owner === me && my && my.c === 'c' + i && (MODE() === 3 || true) ? `<small class="b">${my.e}</small>` : '';
+      return cellHtml(rv[k], clickable ? `<button class="cell" data-act="pick" data-i="${i}" aria-label="Чипс ${i + 1}"><span class="c"></span>${badge}</button>` : `<div class="cell"><span class="c"></span>${badge}</div>`);
     }).join('');
   }
+  const cls3 = 'board4 b3';
   function render() {
     const p = S.phase;
     if (p !== prevP) { if (p === 'setup') pickI = -1; prevP = p; }
-    if (p === 'setup' && !S['h' + me]) {
-      ui.innerHTML = `<div class="mid"><h1>Спрячьте сюрприз</h1><p class="hint">Выберите один чипс на общем поле. ${pn(other)} выберет свой, а искать вы будете по очереди.</p>
-        <div class="board4">${board(true)}</div></div><button class="start" data-act="save" ${pickI >= 0 ? '' : 'disabled'}>Готово</button>`;
+    const m = MODE(), boardCls = m === 3 ? 'board4 b3' : 'board4';
+    if (p === 'mode') {
+      const chipsSvg = (x, y, n, s) => { let o = ''; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) o += `<ellipse cx="${x + j * s}" cy="${y + i * s}" rx="${s * .36}" ry="${s * .28}" fill="#F6C453" transform="rotate(-12 ${x + j * s} ${y + i * s})"/>`; return o; };
+      const m4 = `<svg viewBox="0 0 120 120">${chipsSvg(21, 21, 4, 26)}<text x="73" y="78" font-size="22" text-anchor="middle">🎁</text></svg>`;
+      const m3 = `<svg viewBox="0 0 120 120"><rect x="4" y="34" width="52" height="52" rx="10" fill="#fff" opacity=".6"/><rect x="64" y="34" width="52" height="52" rx="10" fill="#fff" opacity=".6"/>${chipsSvg(15, 45, 3, 15)}${chipsSvg(75, 45, 3, 15)}<text x="30" y="27" font-size="16" text-anchor="middle">🐻</text><text x="90" y="27" font-size="16" text-anchor="middle">🐰</text><text x="90" y="112" font-size="16" text-anchor="middle">🎁</text><text x="30" y="112" font-size="16" text-anchor="middle">🎁</text></svg>`;
+      ui.innerHTML = `<div class="mid"><h1>Фишки</h1><p class="hint">Выберите поле</p><div class="k-modes">
+        <button class="k-mode" data-act="mode" data-m="4"><span class="mini">${m4}</span><b>Общее поле</b><small>4×4, одно на двоих</small></button>
+        <button class="k-mode" data-act="mode" data-m="3"><span class="mini">${m3}</span><b>Два поля</b><small>3×3, у каждого своё</small></button></div></div>`;
+    } else if (p === 'setup' && !S['h' + me]) {
+      ui.innerHTML = `<div class="mid"><h1>Спрячьте сюрприз</h1><p class="hint">${m === 3 ? 'На вашем поле — партнёр будет искать' : 'Потом будете искать сюрприз друг друга'}</p>
+        <div class="${boardCls}">${setupBoard()}</div></div><button class="start" data-act="save" ${pickI >= 0 ? '' : 'disabled'}>Готово</button>`;
     } else if (p === 'setup') {
-      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём: ${pn(other)}…</h1><p class="hint">Ваш сюрприз спрятан</p></div>`;
+      ui.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Ждём: ${pn(other)}…</h1></div>`;
     } else {
-      const myTurn = p === 'play' && S.turn === me && !S.pend, n = [1, 2].filter(x => foundP(S, x)).length;
-      const status = p === 'over' ? 'Оба сюрприза найдены!' : S.pend ? 'Придумайте приз сами' : myTurn ? 'Ваш ход: выберите чипс' : `Ходит ${pn(other)}…`;
-      let ov = '';
-      if (S.pend && p === 'play') {
-        const d = S.pend;
-        ov = `<div class="over"><div class="card"><div class="big2">${d.e}</div><h2>Сюрприз!</h2><p class="hint">Спрятал(а): ${pn(d.o)}. Нашёл(а): ${pn(d.by)}${d.by === me ? ' (вы)' : ''}</p><p class="task">Придумайте приз сами</p>
-          <button class="again" data-act="done">Продолжить</button></div></div>`;
-      } else if (p === 'over') {
-        ov = `<div class="over"><div class="card"><div class="big2">🎉</div><h2>Игра окончена</h2><p class="hint">Оба сюрприза найдены</p>
-          <button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
+      const myTurn = p === 'play' && S.turn === me;
+      const status = p === 'over' ? '' : myTurn ? 'Ваш ход: найдите сюрприз' : `Ходит ${pn(other)}…`;
+      const draw = p === 'over' && !S.win;
+      const ov = p === 'over' ? `<div class="over"><div class="card"><div class="big2">${draw ? '🤝' : S.we || '🎁'}</div><h2>${draw ? 'Ничья' : S.win === me ? 'Вы победили!' : 'Победил ' + Kit.esc(Kit.nm(S.win))}</h2>
+          <button class="again" data-act="again">Играть ещё</button></div></div>` : '';
+      const st = status ? `<p class="turn">${status}</p>` : '';
+      if (m === 3) {
+        ui.innerHTML = `${st}<p class="cap">Поле: ${Kit.esc(Kit.nm(other))}</p><div class="${boardCls}">${playBoard(other, myTurn)}</div>
+          <p class="cap">Ваше поле</p><div class="${boardCls} sm">${playBoard(me, false)}</div>${ov}`;
+      } else {
+        ui.innerHTML = `${st}<div class="${boardCls}">${playBoard(0, myTurn)}</div>${ov}`;
       }
-      ui.innerHTML = `<p class="turn">${status}</p><div class="board4">${board(false)}</div>
-        <p class="hint">Свой чипс (со смайликом) открывать нельзя. Найдено сюрпризов: ${n}/2</p>${ov}`;
     }
   }
-  Profile.on(ref, s => { S = s.val() || { phase: 'setup' }; render(); });
+  Profile.on(ref, s => { S = s.val() || { phase: 'mode' }; render(); });
+  function pickMode(m) {
+    ref.transaction(s => { if (s && s.phase && s.phase !== 'mode') return; return { phase: 'setup', mode: m }; });
+  }
   function save() {
-    if (pickI < 0) return; const h = { c: 'c' + pickI, e: EMO[Math.floor(Math.random() * EMO.length)] }; let clash = false;
+    if (pickI < 0) return; const h = { c: 'c' + pickI, e: EMO[Math.floor(Math.random() * EMO.length)] };
     ref.transaction(s => {
-      clash = false; s = { ...(s || { phase: 'setup' }) }; if (s.phase !== 'setup') return;
-      const o = s['h' + other]; if (o && o.c === h.c) { clash = true; return; }
+      s = { ...(s || { phase: 'setup' }) }; if (s.phase !== 'setup') return;
       s['h' + me] = h;
-      if (s.h1 && s.h2) { s.phase = 'play'; s.turn = 1 + Math.floor(Math.random() * 2); s.rv = {}; delete s.pend; }
+      if (s.h1 && s.h2) { s.phase = 'play'; s.turn = 1 + Math.floor(Math.random() * 2); s.rv = {}; }
       return s;
-    }, (err, ok) => { if (!ok && clash) { pickI = -1; toast('Этот чипс уже выбран, выберите другой'); render(); } });
+    }, () => {});
   }
   function take(i) {
     ref.transaction(s => {
-      if (!s || s.phase !== 'play' || s.turn !== me || s.pend) return;
-      const k = 'c' + i, rv = { ...(s.rv || {}) }, mine = s['h' + me], theirs = s['h' + other];
-      if (rv[k] !== undefined || (mine && mine.c === k)) return;
+      if (!s || s.phase !== 'play' || s.turn !== me) return;
+      const m = s.mode === 3 ? 3 : 4, k = (m === 3 ? other + '_' : '') + 'c' + i, rv = { ...(s.rv || {}) }, theirs = s['h' + other];
+      if (rv[k] !== undefined) return;
       const t = { ...s };
-      if (theirs && theirs.c === k) { rv[k] = { e: theirs.e, o: other }; t.rv = rv; t.pend = { by: me, e: theirs.e, o: other }; }
-      else { rv[k] = 0; t.rv = rv; advance(t); }
+      if (theirs && theirs.c === 'c' + i) { rv[k] = { e: theirs.e, o: other }; t.rv = rv; t.phase = 'over'; t.win = me; t.we = theirs.e; }
+      else { rv[k] = 0; t.rv = rv; t.turn = other; if (m === 4 && Object.keys(rv).length >= 16) t.phase = 'over'; }
       return t;
     });
   }
-  function done() {
-    ref.transaction(s => {
-      if (!s || !s.pend) return;
-      const t = { ...s }; delete t.pend; advance(t); return t;
-    });
+  function again() {
+    ref.transaction(s => { if (!s || s.phase !== 'over') return; return { phase: 'setup', mode: s.mode === 3 ? 3 : 4 }; });
   }
   view.onclick = e => {
     const b = e.target.closest('button'); if (!b || b.disabled) return; const a = b.dataset.act, i = +b.dataset.i;
     if (a === 'sel') { pickI = pickI === i ? -1 : i; render(); }
     else if (a === 'save') save();
     else if (a === 'pick') take(i);
-    else if (a === 'done') done();
-    else if (a === 'again') ref.set({ phase: 'setup' });
+    else if (a === 'mode') pickMode(+b.dataset.m);
+    else if (a === 'again') again();
   };
 }
 </script>

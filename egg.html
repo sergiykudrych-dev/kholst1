@@ -102,7 +102,7 @@ textarea{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:1
 @media(prefers-reduced-motion:reduce){.die.roll{animation:none}}
 </style>
 <link rel="stylesheet" href="gamehead.css?v=2">
-<link rel="stylesheet" href="gamestyle.css?v=2">
+<link rel="stylesheet" href="gamestyle.css?v=4">
 </head>
 <body>
 <header>
@@ -209,8 +209,8 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       let ov = '';
       if (p === 'over' && showOver) {
         const l = S.loser;
-        ov = `<div class="over"><div class="card"><h2>Яйцо упало!</h2><p class="hint">Выполняет: ${pn(l)}${l === me ? ' (вы)' : ''}. Задание от: ${pn(3 - l)}</p>
-          <div class="task">${esc(S['task' + (3 - l)] || '')}</div><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
+        ov = `<div class="over"><div class="card"><div class="big2">🥚</div><h2>${l === me ? 'Ваше задание' : 'Задание для ' + esc(Kit.nm(l))}</h2>
+          <div class="task">${esc(S['task' + (3 - l)] || '')}</div><button class="again" data-act="again">Играть ещё</button></div></div>`;
       }
       ui.innerHTML = `<p class="turn">${p === 'over' ? 'Яйцо упало!' : myTurn ? 'Ваш ход' : `Ходит ${pn(other)}…`}</p>
         <div class="dierow">${die(n, rolled && n)}<p class="hint">${info}</p></div>
