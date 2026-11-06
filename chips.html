@@ -119,12 +119,22 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 .board4 .cell .em{font-size:clamp(30px,11vw,46px)}
 .board4 .cell .b{top:2px;right:6px;font-size:20px}
 .board4.b3{grid-template-columns:repeat(3,1fr);max-width:min(300px,36dvh);gap:8px}
-.board4.b3.sm{max-width:min(150px,17dvh);gap:4px;padding:8px;border-radius:16px}
-.board4.b3.sm .cell .em{font-size:20px}.board4.b3.sm .cell .b{font-size:14px;top:0;right:3px}
+.b3row{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%}
+.b3col{--bw:min(250px,28dvh);width:calc(var(--bw) + 24px);max-width:100%;display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:26px;background:rgba(255,255,255,.6);transition:box-shadow .2s,background .2s}
+.b3col:not(.act){--bw:min(160px,18dvh)}
+.b3col.act{background:#fff;box-shadow:0 0 0 4px #E8548C,0 14px 26px -16px rgba(142,15,69,.6)}
+.b3col .ph{display:flex;align-items:center;gap:8px;min-width:0;font-weight:800;font-size:14px;color:var(--deep)}
+.b3col .ph i{flex:none;font-style:normal;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#FFE3EE;font-size:15px}
+.b3col .ph span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.b3col .board4.b3{max-width:none;gap:5px;padding:0;border-radius:0;background:none}
+.b3col .board4.b3 .cell{border-radius:14px}
+.b3col .board4.b3 .cell .em{font-size:clamp(20px,7vw,30px)}.b3col .board4.b3 .cell .b{font-size:15px;top:0;right:3px}
+.board4 .cell:not(.sel){background:#FFF1F6}
+.b3col .board4 .cell .c{width:70%;height:54%}
 .cap{font-weight:800;font-size:14px;color:var(--mute);text-align:center}
 </style>
 <link rel="stylesheet" href="gamehead.css?v=2">
-<link rel="stylesheet" href="gamestyle.css?v=4">
+<link rel="stylesheet" href="gamestyle.css?v=5">
 </head>
 <body>
 <header>
@@ -207,12 +217,12 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       const draw = p === 'over' && !S.win;
       const ov = p === 'over' ? `<div class="over"><div class="card"><div class="big2">${draw ? '🤝' : S.we || '🎁'}</div><h2>${draw ? 'Ничья' : S.win === me ? 'Вы победили!' : 'Победил ' + Kit.esc(Kit.nm(S.win))}</h2>
           <button class="again" data-act="again">Играть ещё</button></div></div>` : '';
-      const st = status ? `<p class="turn">${status}</p>` : '';
+      const st = status ? `<div class="k-pill sm">${status}</div>` : '';
       if (m === 3) {
-        ui.innerHTML = `${st}<p class="cap">Поле: ${Kit.esc(Kit.nm(other))}</p><div class="${boardCls}">${playBoard(other, myTurn)}</div>
-          <p class="cap">Ваше поле</p><div class="${boardCls} sm">${playBoard(me, false)}</div>${ov}`;
+        const pnl = (o, act) => `<div class="b3col ${act ? 'act' : ''}"><div class="ph"><i>${Kit.esc(Kit.av(o))}</i><span>${o === me ? 'Ваше поле' : 'Поле: ' + Kit.esc(Kit.nm(o))}</span></div><div class="${boardCls}">${playBoard(o, act && myTurn)}</div></div>`;
+        ui.innerHTML = `<div class="mid">${st}<div class="b3row">${pnl(other, true)}${pnl(me, false)}</div></div>${ov}`;
       } else {
-        ui.innerHTML = `${st}<div class="${boardCls}">${playBoard(0, myTurn)}</div>${ov}`;
+        ui.innerHTML = `<div class="mid">${st}<div class="${boardCls}">${playBoard(0, myTurn)}</div></div>${ov}`;
       }
     }
   }
