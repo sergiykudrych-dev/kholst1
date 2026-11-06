@@ -34,6 +34,14 @@ h2{margin:22px 0 8px;font-size:15px;font-weight:800;color:var(--deep);text-trans
 .d u{margin-bottom:3px;text-decoration:none;font-weight:700;color:var(--deep);font-size:11px}
 .note{margin-top:20px;font-size:12px;color:var(--mute)}
 button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--rose);color:#fff;font:800 17px Manrope,system-ui,sans-serif;cursor:pointer;margin-top:10px}
+.seg{display:grid;gap:6px;margin-bottom:10px}.seg label,.chk label{display:flex;gap:8px;align-items:center;font-size:15px}
+.card input[type=text],.card input[type=url],.card input:not([type]),.card input[type=date]{width:100%;margin:6px 0;padding:11px 12px;border:1.5px solid #E8B7CB;border-radius:12px;font:500 15px Manrope,system-ui,sans-serif;color:var(--ink);background:#fff}
+.card input[type=file]{display:block;width:100%;margin:6px 0 10px;font-size:14px}.fl{font-size:14px;font-weight:700}.fl small{font-weight:500;color:var(--mute)}
+.chk{display:grid;gap:6px;margin:8px 0}.dts{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px}
+.pv{margin:12px 0;padding:10px;border-radius:14px;background:#FFE3EE;display:grid;gap:8px}.pv small{color:var(--mute)}
+.ar{margin-bottom:12px}.ar .st{margin:8px 0 2px;font-size:14px;color:var(--mute)}.ar .st b{color:var(--deep)}
+.ab{display:flex;gap:8px;margin-top:8px}.ab button{flex:1;padding:10px;border:1.5px solid var(--rose);border-radius:12px;background:#fff;color:var(--rose);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer}.ab button.d{color:#b00020;border-color:#b00020}
+.off{opacity:.55}
 .msg{padding:18px;border-radius:20px;background:var(--card);text-align:center}
 .msg p{margin-top:6px;color:var(--mute);font-size:14px}
 </style>
@@ -44,12 +52,14 @@ button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--r
 <h1>Панель владельца</h1>
 <p class="sub" id="sub">Сколько людей играет и во что</p>
 <div id="out"><div class="msg">Загружаем…</div></div>
+<div id="adm"></div>
 </main>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="profile.js"></script>
+<script src="ads.js"></script>
 <script>
 const $ = s => document.querySelector(s), out = $('#out');
 const GAMES = { paint: 'Холст', word: 'Угадай слово', number: 'Угадай число', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', tictactoe: 'Крестики-нолики', memory: 'Найди пару', monster: 'Создай монстра' };
@@ -95,6 +105,79 @@ function render(daily, total) {
   out.innerHTML = h;
 }
 
+
+function adAdmin() {
+  const db = firebase.database(), box = $('#adm'); let imgData = null;
+  box.innerHTML = `<h2>Реклама</h2><div class="card">
+<div class="seg"><label><input type="radio" name="t" value="image" checked> Только картинка</label><label><input type="radio" name="t" value="card"> Картинка + заголовок и описание</label></div>
+<label class="fl">Картинка <small id="ahint">(лучше 3:1, например 1200×400)</small><input type="file" id="af" accept="image/*"></label>
+<div id="cardf" hidden><input id="at" maxlength="40" placeholder="Заголовок"><input id="ax" maxlength="90" placeholder="Описание (коротко)"></div>
+<input id="au" type="url" inputmode="url" placeholder="Ссылка (https://…)">
+<div class="chk"><label><input type="checkbox" id="ph" checked> Главная, после 3-й игры</label><label><input type="checkbox" id="pg" checked> В играх, сверху</label><label><input type="checkbox" id="pe" checked> После партии</label></div>
+<div class="dts"><label>Показывать с<input type="date" id="d1"></label><label>по<input type="date" id="d2"></label></div>
+<div class="pv" id="apv" hidden></div>
+<button class="go" id="aadd">Добавить рекламу</button><p class="pc" id="amsg"></p></div>
+<h2>Ваши баннеры</h2><div id="alist"><div class="msg">Загружаем…</div></div>`;
+  const type = () => box.querySelector('input[name=t]:checked').value, v = id => $(id).value.trim();
+  const fixUrl = u => /^https?:\/\//i.test(u) ? u.replace(/^http:/i, 'https:') : (u ? 'https://' + u : '');
+  const cur = () => ({ id: 'pv', type: type(), img: imgData, title: v('#at'), text: v('#ax'), url: fixUrl(v('#au')) || 'https://example.com' });
+  function preview() {
+    const pv = $('#apv'); if (!imgData) { pv.hidden = true; return; }
+    pv.hidden = false; pv.innerHTML = '<small>Так будет на главной и после партии</small><div id="p1"></div><small>Так будет в играх сверху</small><div id="p2"></div>';
+    $('#p1').appendChild(Ads.render(cur(), 'home', { preview: true })); $('#p2').appendChild(Ads.render(cur(), 'game', { preview: true }));
+  }
+  const proc = (file, t) => new Promise((res, rej) => {
+    const u = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      const [W, H] = t === 'card' ? [200, 200] : [900, 300], c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+      const r = Math.max(W / im.width, H / im.height), w = im.width * r, h = im.height * r; x.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); URL.revokeObjectURL(u);
+      let q = .85, d = c.toDataURL('image/jpeg', q); while (d.length > 110000 && q > .4) { q -= .1; d = c.toDataURL('image/jpeg', q); } res(d);
+    };
+    im.onerror = () => rej(new Error('Не удалось открыть картинку')); im.src = u;
+  });
+  let lastFile = null;
+  async function reimg() { if (!lastFile) return; try { imgData = await proc(lastFile, type()); } catch (e) { imgData = null; $('#amsg').textContent = e.message; } preview(); }
+  box.querySelectorAll('input[name=t]').forEach(r => r.onchange = () => { $('#cardf').hidden = type() !== 'card'; $('#ahint').textContent = type() === 'card' ? '(квадратная миниатюра)' : '(лучше 3:1, например 1200×400)'; reimg(); });
+  $('#af').onchange = e => { lastFile = e.target.files[0] || null; reimg(); };
+  ['#at', '#ax', '#au'].forEach(i => $(i).oninput = preview);
+  $('#aadd').onclick = async () => {
+    const m = $('#amsg'), t = type(), url = fixUrl(v('#au'));
+    if (!imgData) return m.textContent = 'Выберите картинку.';
+    if (!/^https:\/\/[^\s.]+\.[^\s]+/.test(url)) return m.textContent = 'Укажите ссылку, куда ведёт реклама.';
+    if (t === 'card' && !v('#at')) return m.textContent = 'Для варианта с текстом нужен заголовок.';
+    const places = {}; if ($('#ph').checked) places.home = true; if ($('#pg').checked) places.game = true; if ($('#pe').checked) places.end = true;
+    if (!Object.keys(places).length) return m.textContent = 'Выберите, где показывать.';
+    const rec = { type: t, img: imgData, url, places, on: true, t: firebase.database.ServerValue.TIMESTAMP };
+    if (t === 'card') { rec.title = v('#at'); if (v('#ax')) rec.text = v('#ax'); }
+    if ($('#d1').value) rec.from = $('#d1').value; if ($('#d2').value) rec.to = $('#d2').value;
+    try { await db.ref('ads').push(rec); m.textContent = 'Добавлено ✓'; imgData = null; lastFile = null; $('#af').value = ''; ['#at', '#ax', '#au', '#d1', '#d2'].forEach(i => $(i).value = ''); preview(); list(); }
+    catch (e) { m.textContent = 'Не сохранилось: проверьте правила базы (блок ads) и вход той же почтой.'; }
+  };
+  async function list() {
+    const L = $('#alist');
+    try {
+      const [a, s] = await Promise.all([db.ref('ads').once('value'), db.ref('stats/ads').once('value').catch(() => null)]);
+      const ads = a.val() || {}, st = (s && s.val()) || {}, ids = Object.keys(ads).sort((x, y) => (ads[y].t || 0) - (ads[x].t || 0));
+      if (!ids.length) { L.innerHTML = '<div class="msg">Пока нет баннеров.</div>'; return; }
+      L.innerHTML = ''; const names = { home: 'главная', game: 'игры сверху', end: 'после партии' };
+      ids.forEach(id => {
+        const ad = Object.assign({ id }, ads[id]), imp = (st[id] || {}).imp || 0, clk = (st[id] || {}).clk || 0;
+        const row = document.createElement('div'); row.className = 'card ar' + (ad.on ? '' : ' off');
+        row.appendChild(Ads.render(ad, 'home', { preview: true }));
+        const info = document.createElement('div'); info.className = 'st';
+        info.innerHTML = `Места: <b>${Object.keys(ad.places || {}).map(k => names[k]).join(', ') || '—'}</b>${ad.from || ad.to ? ` · ${ad.from || '…'} — ${ad.to || '…'}` : ''}<br>Показов: <b>${imp}</b> · Кликов: <b>${clk}</b> · Клики: <b>${imp ? (clk / imp * 100).toFixed(1) + '%' : '—'}</b>${ad.on ? '' : ' · <b>выключен</b>'}`;
+        const bar = document.createElement('div'); bar.className = 'ab';
+        const tg = document.createElement('button'); tg.textContent = ad.on ? 'Выключить' : 'Включить'; tg.onclick = () => db.ref('ads/' + id + '/on').set(!ad.on).then(list);
+        const dl = document.createElement('button'); dl.className = 'd'; dl.textContent = 'Удалить'; let sure = false;
+        dl.onclick = () => { if (!sure) { sure = true; dl.textContent = 'Точно удалить?'; return; } db.ref('ads/' + id).remove().then(list); };
+        bar.append(tg, dl); row.append(info, bar); L.appendChild(row);
+      });
+    } catch (e) { L.innerHTML = '<div class="msg">Не удалось загрузить: обновите правила базы (блок ads).</div>'; }
+  }
+  list();
+}
+
 (async () => {
   const uid = await Profile.init();
   if (!uid) { out.innerHTML = '<div class="msg"><b>Нет связи с базой</b><p>Проверьте интернет и настройки Firebase.</p></div>'; return; }
@@ -103,7 +186,7 @@ function render(daily, total) {
     await firebase.auth().currentUser.getIdToken(true);
     const db = firebase.database();
     const [daily, total] = await Promise.all([db.ref('stats/daily').once('value'), db.ref('stats/total/users').once('value')]);
-    render(daily.val() || {}, total.val() || 0);
+    render(daily.val() || {}, total.val() || 0); adAdmin();
   } catch (e) { login('Нет доступа'); }
 })();
 </script>

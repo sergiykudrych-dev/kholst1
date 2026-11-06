@@ -165,12 +165,12 @@
     if (!o || !o.left) { if (el) el.remove(); P._ln = 0; return; }
     if (P._ln) return; P._ln = 1;
     if (!document.getElementById('pf-left-css')) { const st = document.createElement('style'); st.id = 'pf-left-css';
-      st.textContent = '.pf-left{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:10px;max-width:92vw;padding:11px 14px;border-radius:16px;background:#4A1236;color:#fff;font:700 15px Manrope,system-ui,sans-serif;box-shadow:0 8px 24px rgba(74,18,54,.35);animation:pfl .3s ease}.pf-left button{border:0;background:rgba(255,255,255,.2);color:#fff;border-radius:99px;width:26px;height:26px;font-size:15px;cursor:pointer}@keyframes pfl{from{opacity:0;transform:translate(-50%,-14px)}}';
+      st.textContent = '.pf-left{position:fixed;left:0;right:0;top:0;z-index:60;display:flex;align-items:center;justify-content:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;border-radius:0 0 18px 18px;background:#4A1236;color:#fff;font:700 15px Manrope,system-ui,sans-serif;box-shadow:0 8px 24px rgba(74,18,54,.35);animation:pfl .3s ease}.pf-left span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pf-left button{flex:none;border:0;background:rgba(255,255,255,.2);color:#fff;border-radius:99px;width:26px;height:26px;font-size:15px;cursor:pointer}@keyframes pfl{from{opacity:0;transform:translateY(-100%)}}';
       document.head.appendChild(st); }
     el = document.createElement('div'); el.className = 'pf-left'; el.setAttribute('role', 'status');
     const t = document.createElement('span'); t.textContent = ((o.avatar ? o.avatar + ' ' : '') + (o.name || 'Партнёр')) + ' вышел(а) из игры';
     const b = document.createElement('button'); b.textContent = '×'; b.setAttribute('aria-label', 'Закрыть'); b.onclick = () => el.remove();
-    el.append(t, b); document.body.appendChild(el);
+    el.append(t, b); document.body.appendChild(el); setTimeout(() => el.remove(), 8000);
   }
   document.addEventListener('click', e => {
     const a = e.target.closest && e.target.closest('a[href="index.html"]');

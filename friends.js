@@ -55,7 +55,7 @@
 
   function badge() {
     const n = Object.keys(list).filter(u => list[u].status === 'in').length;
-    const b = $('#fr'); if (b) b.textContent = '👥 Друзья' + (n ? ' · ' + n : '');
+    const b = $('#fr'); if (b) b.textContent = '👥' + (n ? ' ' + n : '');
   }
 
   function banner(key, v, ref) {

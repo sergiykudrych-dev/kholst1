@@ -7,7 +7,7 @@
  2. Потом загрузите новые файлы сайта на GitHub.
 
 Что добавилось: codes (коды друзей), friends (списки друзей), invites
-(приглашения в игру), history (история партий для статистики), stats (счётчики для панели владельца;
+(приглашения в игру), history (история партий для статистики), ads (рекламные баннеры; пишет только владелец), stats (счётчики для панели владельца;
 замените ВАША_ПОЧТА@gmail.com на почту вашего Google-аккаунта). Анонимный вход должен быть включён
 (Authentication → Sign-in method → Anonymous).
 
@@ -74,11 +74,22 @@
           }
         }
       },
+      "ads": {
+        "$id": {
+          "$k": {
+            ".write": "auth != null && ($k === 'imp' || $k === 'clk') && newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+          }
+        }
+      },
       "seen": {
         "$uid": {
           ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.val() === 1"
         }
       }
+    },
+    "ads": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true"
     },
     "rooms": {
       "$room": {
@@ -157,11 +168,22 @@
           }
         }
       },
+      "ads": {
+        "$id": {
+          "$k": {
+            ".write": "auth != null && ($k === 'imp' || $k === 'clk') && newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+          }
+        }
+      },
       "seen": {
         "$uid": {
           ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.val() === 1"
         }
       }
+    },
+    "ads": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true"
     },
     "rooms": {
       "$room": {
