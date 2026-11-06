@@ -26,7 +26,7 @@
 <meta name="twitter:image" content="https://twosome.games/og.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Marck+Script&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
 *{box-sizing:border-box;margin:0}
@@ -92,6 +92,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .rv small{display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--mute)}
 .res{font-weight:800;font-size:20px;color:var(--rose);text-align:center}
 </style>
+<link rel="stylesheet" href="gamekit.css?v=1">
 </head>
 <body>
 <header>
@@ -108,6 +109,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="fx.js"></script>
+<script src="gamekit.js?v=1"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -144,6 +146,12 @@ const QS = [
 ['Свадьба в большой компании','Свадьба только вдвоём'],['Остров с пальмами','Домик в снегах'],['Подарить песню','Подарить фото'],
 ['Рассказать самый стыдный секрет','Услышать самый стыдный секрет'],['Вечер настольных игр','Вечер с видеоиграми']
 ];
+const EM = [['🕯️','🍽️'],['🌊','⛰️'],['🛋️','🎬'],['🔮','⏪'],['🤝','💐'],['🏙️','🏡'],['☕','🍷'],['🎁','📝'],['☀️','❄️'],['🧠','🕊️'],
+['🌧️','🍵'],['🐶','🐱'],['🌲','🌆'],['🍕','🍣'],['🙊','🕊️'],['🛌','🧳'],['🎲','🗓️'],['🏖️','🌳'],['✉️','📞'],['💐','🥞'],
+['🎸','💃'],['📚','🎶'],['⚡','📅'],['📸','🧘'],['🐢','⏱️'],['🌦️','🔥'],['👫','🦋'],['🍰','🥨'],['🎉','🌙'],['💭','😌'],
+['🌍','🏠'],['😂','😢'],['🌅','🌃'],['🎁','🎄'],['🎈','📆'],['🍳','🥡'],['🌌','🏝️'],['☔','🧣'],['🤗','💞'],['📲','⏳'],
+['🎞️','🧸'],['🎪','🏕️'],['🛠️','🛋️'],['✨','🗺️'],['😴','🌄'],['🔗','🧍'],['🧺','🍿'],['🌇','🌄'],['🗣️','🍲'],['🌃','🌿'],
+['🕺','🚗'],['💞','🚉'],['💌','🧩'],['🍫','🍋'],['🥳','💍'],['🌴','🏔️'],['🎵','🖼️'],['🤫','👂'],['🎲','🎮']];
 const N = 12;
 const cfg = window.FIREBASE_CONFIG || {};
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
@@ -151,6 +159,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Kit.attach();
   Profile.track('questions', S => S.phase === 'over' ? 'coop' : null);
   const ref = firebase.database().ref('rooms/' + room + '/qs'), other = 3 - me;
   let S = null;
@@ -160,31 +169,33 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     return { phase: 'play', order: a.slice(0, N), i: 0, m: 0 };
   };
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  let burstKey = -1, endBurst = false;
   function render() {
     if (!S) return;
     if (S.phase === 'over') {
       const m = S.m || 0, r = m / N;
       const txt = r >= .75 ? 'Вы почти читаете мысли друг друга ♥' : r >= .5 ? 'Вы очень похожи — и это здорово' : r >= .3 ? 'Вы разные, и в этом интерес' : 'Противоположности притягиваются!';
-      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Готово</h1></div>
-        <div class="over"><div class="card"><h2>Вы совпали в ${m} из ${N}</h2><p class="hint">${txt}</p><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
+      view.innerHTML = `<div class="mid"><div class="k-bigheart">♥&#xFE0E;</div><h1 class="k-ttl">Готово</h1></div>
+        <div class="over"><div class="card"><div class="k-bigheart">♥&#xFE0E;</div><h2 class="k-h2">Вы совпали в ${m} из ${N}</h2><p class="hint" style="margin-top:8px">${txt}</p><button class="again start" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
+      if (!endBurst && r >= .5) { endBurst = true; setTimeout(() => Kit.burst(innerWidth / 2, innerHeight * .35, 44), 250); }
       return;
     }
-    const q = QS[S.order[S.i]], mine = S['a' + me], theirs = S['a' + other], both = mine && theirs;
-    let body;
-    if (!mine) {
-      body = `<div class="mid"><p class="qt">Что вам ближе?</p><div class="opts"><button class="opt" data-c="1">${esc(q[0])}</button><button class="opt" data-c="2">${esc(q[1])}</button></div>
-        <p class="hint">${theirs ? esc(pnRaw(other)) + ' уже выбрал(а)' : 'Ответы откроются, когда выберете оба'}</p></div>`;
-    } else if (!both) {
-      body = `<div class="mid"><p class="qt">Что вам ближе?</p><div class="opts"><button class="opt ${mine === 1 ? 'sel' : 'dim'}" disabled>${esc(q[0])}</button><button class="opt ${mine === 2 ? 'sel' : 'dim'}" disabled>${esc(q[1])}</button></div>
-        <p class="hint">Ждём: ${esc(pnRaw(other))}…</p></div>`;
-    } else {
-      const same = mine === theirs, last = S.i + 1 >= N;
-      body = `<div class="mid"><p class="res">${same ? 'Совпали! ♥&#xFE0E;' : 'Мнения разошлись'}</p>
-        <div class="rv"><div><small>Вы</small>${esc(q[mine - 1])}</div><div><small>${esc(pnRaw(other))}</small>${esc(q[theirs - 1])}</div></div>
-        <p class="hint">${same ? 'Расскажите друг другу, почему' : 'Расскажите друг другу, почему вы так выбрали'}</p></div>
-        <button class="start" data-act="next">${last ? 'Результат' : 'Дальше'}</button>`;
-    }
-    view.innerHTML = `<p class="qn">Вопрос ${S.i + 1} из ${N} · совпадений: ${S.m || 0}</p>` + body;
+    endBurst = false;
+    const qi = S.order[S.i], q = QS[qi], em = EM[qi] || ['💗', '💗'], mine = S['a' + me], theirs = S['a' + other], both = mine && theirs, same = both && mine === theirs, last = S.i + 1 >= N;
+    const dots = Array.from({ length: N }, (_, i) => `<i class="${i < S.i || (i === S.i && both) ? 'on' : ''}"></i>`).join('');
+    const opt = i => {
+      const c = i + 1; let cls = 'k-opt'; if (mine === c) cls += ' me'; if (both && mine !== c && theirs !== c) cls += ' dim';
+      const avs = both ? [me, other].filter(p => S['a' + p] === c).map(p => `<u>${Kit.esc(Kit.av(p))}</u>`).join('') : '';
+      return `<button class="${cls}" data-c="${c}"${mine ? ' disabled' : ''}><span class="e">${em[i]}</span><span>${esc(q[i])}</span>${avs ? `<div class="av">${avs}</div>` : ''}</button>`;
+    };
+    let status;
+    if (!mine) status = `<div class="k-pill sm">${theirs ? esc(Kit.nm(other)) + ' уже выбрал(а)' : 'Ответы откроются, когда выберете оба'}</div>`;
+    else if (!both) status = `<div class="k-pill">Ждём ${esc(Kit.nm(other))}<span class="k-d3"><span>.</span><span>.</span><span>.</span></span></div>`;
+    else status = `<div class="k-pill ${same ? 'ok' : 'no'} k-pop" id="res">${same ? 'Совпали! 💗' : 'Мнения разошлись 😅'}</div><p class="hint">${same ? 'Расскажите друг другу, почему' : 'Расскажите друг другу, почему вы так выбрали'}</p>`;
+    view.innerHTML = `<div class="k-top"><div class="k-dots">${dots}</div><div class="k-pill sm">Вопрос ${S.i + 1} из ${N} · совпали: ${S.m || 0} 💗</div></div>
+      <div class="mid k-mid"><p class="k-q">Что вам ближе?</p><div class="k-opts">${opt(0)}${opt(1)}</div>${status}</div>` +
+      (both ? `<button class="start" data-act="next">${last ? 'Результат' : 'Дальше'}</button>` : '');
+    if (same && burstKey !== S.i) { burstKey = S.i; const el = document.getElementById('res'); if (el) { const r = el.getBoundingClientRect(); Kit.burst(r.left + r.width / 2, r.top + r.height / 2); } }
   }
   Profile.on(ref, s => { S = s.val(); if (!S) { ref.transaction(x => x || fresh()); return; } render(); });
   view.onclick = e => {

@@ -26,7 +26,7 @@
 <meta name="twitter:image" content="https://twosome.games/og.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Marck+Script&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
 *{box-sizing:border-box;margin:0}
@@ -120,6 +120,7 @@ button.t{cursor:pointer}
 .btn2{width:100%;max-width:340px;padding:12px;border:1.5px solid var(--rose);border-radius:16px;color:var(--rose);font-weight:700}
 .sym{font-weight:700}.sx{color:#C2185B}.so{color:#6D5BFF}
 </style>
+<link rel="stylesheet" href="gamekit.css?v=1">
 </head>
 <body>
 <header>
@@ -136,6 +137,7 @@ button.t{cursor:pointer}
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="fx.js"></script>
+<script src="gamekit.js?v=1"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -153,12 +155,13 @@ $('#inv').onclick = async () => {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const cfg = window.FIREBASE_CONFIG || {};
 const SX = '<svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" stroke="#C2185B" stroke-width="3" stroke-linecap="round" fill="none"/></svg>';
-const SO = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" stroke="#6D5BFF" stroke-width="3" fill="none"/></svg>';
+const SO = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" stroke="#2EC4B6" stroke-width="3" fill="none"/></svg>';
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Kit.attach();
   Profile.track('tictactoe', S => S.phase === 'over' ? (S.res === 'draw' ? 'draw' : S.res === 'win' + me ? 'win' : 'loss') : null);
   const ref = firebase.database().ref('rooms/' + room + '/ttt');
   let S = { phase: 'mode' };
@@ -175,23 +178,36 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   function render() {
     const p = S.phase, sc = `Счёт: ${pn(1)} — ${S.w1 || 0}, ${pn(2)} — ${S.w2 || 0}`;
     if (p === 'mode') {
-      ui.innerHTML = `<div class="mid"><h1>Крестики-нолики</h1><p class="hint">Выберите режим</p><div class="pick">
-        <button data-act="mode" data-m="3">3 в ряд<small>поле 3×3, быстрая партия</small></button>
-        <button data-act="mode" data-m="5">5 в ряд<small>поле 13×13, игра подольше</small></button></div>${S.games ? `<p class="hint">${sc}</p>` : ''}</div>`;
+      ui.innerHTML = `<div class="mid"><h1 class="k-ttl">Крестики-нолики</h1><p class="hint">Выберите режим</p><div class="pick">
+        <button class="k-card" data-act="mode" data-m="3"><span class="ic">✕○</span><span>3 в ряд<small>поле 3×3, быстрая партия</small></span></button>
+        <button class="k-card" data-act="mode" data-m="5"><span class="ic">5</span><span>5 в ряд<small>поле 13×13, игра подольше</small></span></button></div>${S.games ? `<p class="hint">${sc}</p>` : ''}</div>`;
       return;
     }
     const { n } = dims(S.mode), b = S.b || '', line = S.line || [], myTurn = p === 'play' && S.turn === me, mark = me === 1 ? '<span class="sym sx">✕</span>' : '<span class="sym so">○</span>';
     const cells = [...Array(n * n).keys()].map(i => {
       const ch = b[i], cls = `t ${line.includes(i) ? 'win' : ''} ${S.last === i && !line.length ? 'lm' : ''}`;
-      if (ch === 'X') return `<div class="${cls}">${SX}</div>`;
-      if (ch === 'O') return `<div class="${cls}">${SO}</div>`;
-      return myTurn ? `<button class="${cls}" data-act="mv" data-i="${i}" aria-label="Клетка ${i + 1}"></button>` : `<div class="${cls}"></div>`;
+      if (ch === 'X') return `<div class="${cls}" data-i="${i}">${SX}</div>`;
+      if (ch === 'O') return `<div class="${cls}" data-i="${i}">${SO}</div>`;
+      return myTurn ? `<button class="${cls}" data-act="mv" data-i="${i}" aria-label="Клетка ${i + 1}"></button>` : `<div class="${cls}" data-i="${i}"></div>`;
     }).join('');
-    const status = p === 'over' ? (S.res === 'draw' ? 'Ничья!' : S.res === 'win' + me ? 'Вы победили!' : `Победа: ${pn(other)}`) : myTurn ? 'Ваш ход' : `Ходит ${pn(other)}…`;
-    const style = `grid-template-columns:repeat(${n},1fr);` + (n === 3 ? 'width:min(100%,340px);gap:8px;--p:18%' : 'width:min(100%,min(520px,62dvh));gap:3px;--p:14%');
-    ui.innerHTML = `<p class="turn">${status}</p><div class="ttt" style="${style}">${cells}</div>
-      <p class="hint">Вы играете ${mark} · ${S.mode === 3 ? '3' : '5'} в ряд · ${sc}</p>` +
+    const won = p === 'over' && S.res === 'win' + me;
+    const status = p === 'over' ? (S.res === 'draw' ? 'Ничья! 🤝' : won ? 'Вы победили! 🎉' : `Победа: ${esc(Kit.nm(other))}`) : myTurn ? 'Ваш ход ✨' : `Ход: ${esc(Kit.nm(other))}…`;
+    const style = `grid-template-columns:repeat(${n},1fr);` + (n === 3 ? 'width:min(100%,340px);gap:12px;--p:18%' : 'width:min(100%,min(520px,58dvh));gap:3px;--p:14%');
+    const pl = q => `<span class="k-p ${p === 'play' && S.turn === q ? 'act' : ''}"><i>${esc(Kit.av(q))}</i><span>${esc(Kit.nm(q))}</span> <b class="sym ${q === 1 ? 'sx' : 'so'}">${q === 1 ? '✕' : '○'}</b></span>`;
+    ui.innerHTML = `<div class="k-pl">${pl(1)}${pl(2)}</div><div class="ttt ${n === 3 ? '' : 'n13'}" style="${style}">${cells}<svg class="wl"></svg></div>
+      <div class="k-pill ${p === 'over' && S.res !== 'draw' ? (won ? 'ok k-pop' : 'no k-pop') : ''}" id="st">${status}</div>
+      <p class="hint">${S.mode === 3 ? '3' : '5'} в ряд · ${sc}</p>` +
       (p === 'over' ? '<button class="start" data-act="again">Играть ещё</button><button class="btn2" data-act="modes">Сменить режим</button>' : '');
+    drawWin(line);
+    if (won && wonKey !== S.games) { wonKey = S.games; const el = document.getElementById('st'); if (el) { const r = el.getBoundingClientRect(); setTimeout(() => Kit.burst(r.left + r.width / 2, r.top + r.height / 2, 40), 350); } }
+  }
+  let wonKey = -1;
+  function drawWin(line) {
+    const bd = ui.querySelector('.ttt'), svg = bd && bd.querySelector('.wl'); if (!svg || !line || line.length < 2) return;
+    const a = bd.querySelector('[data-i="' + Math.min(...line) + '"]'), z = bd.querySelector('[data-i="' + Math.max(...line) + '"]'); if (!a || !z) return;
+    const x1 = a.offsetLeft + a.offsetWidth / 2, y1 = a.offsetTop + a.offsetHeight / 2, x2 = z.offsetLeft + z.offsetWidth / 2, y2 = z.offsetTop + z.offsetHeight / 2, L = Math.hypot(x2 - x1, y2 - y1);
+    svg.setAttribute('viewBox', '0 0 ' + bd.clientWidth + ' ' + bd.clientHeight);
+    svg.innerHTML = `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${Math.max(5, a.offsetWidth * .14)}" style="--L:${L}"/>`;
   }
   Profile.on(ref, s => { S = s.val() || { phase: 'mode' }; render(); });
   function pickMode(m) {

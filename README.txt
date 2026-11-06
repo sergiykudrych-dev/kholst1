@@ -57,3 +57,5 @@ fx.js — звуки и вибрация (вкл/выкл в меню 💗), р�
 questions.html — игра «Вопросы друг другу» (12 вопросов «что вам ближе», считает совпадения).
 
 SEO-страницы: igry-dlya-par-na-rasstoyanii.html, voprosy-dlya-pary.html, risovat-vmeste-onlayn.html, krestiki-noliki-onlayn.html, ugadaj-chislo-onlayn.html — статические посадочные под поисковые запросы (стили landing.css, кнопки «Играть» — landing.js). Все они перечислены в sitemap.xml.
+
+gamekit.css / gamekit.js — общее оформление игр как в промо-видео (чипы игроков, плашки статуса, карточки, конфетти). Подключены в questions.html и tictactoe.html; остальные игры можно переводить на него по одной.
