@@ -8,8 +8,10 @@ h1{font-size:clamp(28px,8vw,36px)}
 .who,.hint{font-weight:700;color:var(--mute)}
 
 /* выбор режима / роли — крупные карточки */
-.pick{gap:14px}
-.pick button{padding:20px 22px;border-radius:30px;background:rgba(255,255,255,.93);box-shadow:0 14px 28px -16px rgba(142,15,69,.6);font-weight:800;font-size:21px;color:var(--deep);text-align:left;transition:transform .15s}
+.pick{grid-template-columns:1fr 1fr;gap:14px;max-width:380px;margin:0 auto}
+.pick button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px 12px 18px;border-radius:30px;background:rgba(255,255,255,.93);box-shadow:0 14px 28px -16px rgba(142,15,69,.6);font-weight:800;font-size:19px;color:var(--deep);text-align:center;transition:transform .15s;min-width:0}
+.pick button i{font-style:normal;display:grid;place-items:center;width:68px;height:68px;border-radius:50%;background:linear-gradient(145deg,#FFE3EE,#FFC2D8);font-size:38px;margin-bottom:4px}
+.pick button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pick button:active{transform:scale(.98)}
 .pick small{font-weight:600;color:var(--mute);margin-top:3px}
 
@@ -36,3 +38,10 @@ h1{font-size:clamp(28px,8vw,36px)}
 .sc{border-radius:99px;background:rgba(255,255,255,.78);font-weight:800}
 .sc.act{background:#fff;box-shadow:0 0 0 4px #E8548C}
 .opt{border-radius:26px;box-shadow:0 12px 24px -16px rgba(142,15,69,.6);font-weight:800}
+
+/* итог «Угадай число» */
+.nbs{display:flex;gap:12px;justify-content:center;margin:16px 0 8px}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px;border-radius:22px;background:#FFF1F6}
+.nb span{font-size:26px;line-height:1.1}
+.nb em{font-style:normal;font-weight:700;font-size:13px;color:var(--mute);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb b{font-weight:800;font-size:40px;line-height:1.1;color:var(--rose)}

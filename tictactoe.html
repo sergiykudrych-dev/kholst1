@@ -126,7 +126,7 @@ button.t{cursor:pointer}
 </style>
 <link rel="stylesheet" href="gamehead.css?v=2">
 <style>header #inv.has{display:none}</style>
-<link rel="stylesheet" href="gamekit.css?v=2">
+<link rel="stylesheet" href="gamekit.css?v=3">
 </head>
 <body>
 <header>
@@ -184,9 +184,13 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   function render() {
     const p = S.phase, sc = `Счёт: ${pn(1)} — ${S.w1 || 0}, ${pn(2)} — ${S.w2 || 0}`;
     if (p === 'mode') {
-      ui.innerHTML = `<div class="mid"><h1 class="k-ttl">Крестики-нолики</h1><p class="hint">Выберите режим</p><div class="pick">
-        <button class="k-card" data-act="mode" data-m="3"><span class="ic">✕○</span><span>3 в ряд<small>поле 3×3, быстрая партия</small></span></button>
-        <button class="k-card" data-act="mode" data-m="5"><span class="ic">5</span><span>5 в ряд<small>поле 13×13, игра подольше</small></span></button></div>${S.games ? `<p class="hint">${sc}</p>` : ''}</div>`;
+      const X = (x, y, c) => `<path d="M${x - 7} ${y - 7}l14 14M${x + 7} ${y - 7}l-14 14" stroke="${c || '#C2185B'}" stroke-width="5" stroke-linecap="round"/>`, O = (x, y) => `<circle cx="${x}" cy="${y}" r="8" fill="none" stroke="#1DA597" stroke-width="5"/>`;
+      const m3 = `<svg viewBox="0 0 120 120"><path d="M40 8v104M80 8v104M8 40h104M8 80h104" stroke="#fff" stroke-width="5" stroke-linecap="round"/>${X(20, 20)}${O(60, 20)}${O(20, 60)}${X(60, 60)}${X(100, 100)}${O(100, 20)}<path d="M12 12L108 108" stroke="#8E0F45" stroke-width="4" stroke-linecap="round" opacity=".55"/></svg>`;
+      let d5 = ''; for (let i = 0; i < 7; i++) for (let j = 0; j < 7; j++) d5 += `<circle cx="${12 + j * 16}" cy="${12 + i * 16}" r="2.4" fill="#fff"/>`;
+      const m5 = `<svg viewBox="0 0 120 120">${d5}${[0, 1, 2, 3, 4].map(i => X(28 + i * 16, 28 + i * 16)).join('')}${O(60, 28)}${O(92, 44)}${O(44, 76)}${O(76, 92)}<path d="M22 22L86 86" stroke="#8E0F45" stroke-width="3" stroke-linecap="round" opacity=".5"/></svg>`;
+      ui.innerHTML = `<div class="mid"><h1 class="k-ttl">Крестики-нолики</h1><p class="hint">Выберите поле</p><div class="k-modes">
+        <button class="k-mode" data-act="mode" data-m="3"><span class="mini">${m3}</span><b>3 в ряд</b><small>Быстрая партия</small><u>~1 мин</u></button>
+        <button class="k-mode" data-act="mode" data-m="5"><span class="mini">${m5}</span><b>5 в ряд</b><small>Большое поле 13×13</small><u>~5 мин</u></button></div>${S.games ? `<p class="hint">${sc}</p>` : ''}</div>`;
       return;
     }
     const { n } = dims(S.mode), b = S.b || '', line = S.line || [], myTurn = p === 'play' && S.turn === me, mark = me === 1 ? '<span class="sym sx">✕</span>' : '<span class="sym so">○</span>';
