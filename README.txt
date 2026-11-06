@@ -55,3 +55,5 @@ ads.js/panel.html: у баннера-картинки есть необязат�
 
 fx.js — звуки и вибрация (вкл/выкл в меню 💗), реакции-эмодзи, кнопка «Отправьте другу» в конце партии. Подключён во всех играх, кроме paint.
 questions.html — игра «Вопросы друг другу» (12 вопросов «что вам ближе», считает совпадения).
+
+SEO-страницы: igry-dlya-par-na-rasstoyanii.html, voprosy-dlya-pary.html, risovat-vmeste-onlayn.html, krestiki-noliki-onlayn.html, ugadaj-chislo-onlayn.html — статические посадочные под поисковые запросы (стили landing.css, кнопки «Играть» — landing.js). Все они перечислены в sitemap.xml.
