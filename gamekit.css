@@ -68,3 +68,5 @@ header .chip.has{pointer-events:none}
 .wl line{stroke:#8E0F45;stroke-linecap:round;opacity:.85;stroke-dasharray:var(--L);stroke-dashoffset:var(--L);animation:kline .55s .1s ease-out forwards}
 @keyframes kline{to{stroke-dashoffset:0}}
 @media(prefers-reduced-motion:reduce){.k-pop,.k-opt .av u,.t.lm svg{animation:none}.wl line{animation:none;stroke-dashoffset:0}}
+
+@media(max-width:480px){header .chip .bk{display:none}header .chip:first-child{padding:0 16px}}
