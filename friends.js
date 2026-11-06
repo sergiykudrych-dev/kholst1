@@ -70,7 +70,7 @@
 
   function badge() {
     const n = Object.keys(list).filter(u => list[u].status === 'in').length;
-    const b = $('#fr'); if (b) { b.textContent = '👥'; if (n) { const i = document.createElement('i'); i.className = 'bdg'; i.textContent = n; b.appendChild(i); } }
+    const b = $('#fr'); if (b) { b.textContent = '👥 Друзья'; if (n) { const i = document.createElement('i'); i.className = 'bdg'; i.textContent = n; b.appendChild(i); } }
   }
 
   function banner(key, v, ref) {

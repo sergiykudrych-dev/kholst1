@@ -28,11 +28,11 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://twosome.games/#site", "url": "https://twosome.games/", "name": "Во что сыграем?", "alternateName": ["Twosome", "twosome.games"], "inLanguage": "ru"}, {"@type": "WebApplication", "name": "Во что сыграем? — игры для двоих", "url": "https://twosome.games/", "applicationCategory": "GameApplication", "operatingSystem": "Any (браузер)", "browserRequirements": "Требуется браузер с JavaScript", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "description": "Бесплатные онлайн-игры для двоих: крестики-нолики, угадай число, найди пару, слова, рисование, создай монстра и вопросы друг другу. Без регистрации: отправьте ссылку и играйте вместе.", "inLanguage": "ru"}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Marck+Script&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
 *{box-sizing:border-box;margin:0}
-body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overflow-x:hidden}
+html{background:#E8548C}body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overflow-x:hidden}
 #hearts{position:fixed;inset:0;overflow:hidden;pointer-events:none}
 #hearts span{position:absolute;bottom:-70px;animation:rise linear infinite}
 #hearts span:nth-child(3n){color:#E91E63}#hearts span:nth-child(3n+1){color:#FF7FA8}#hearts span:nth-child(3n+2){color:#fff}
@@ -66,58 +66,90 @@ dialog .x:focus,dialog .x:focus-visible{outline:none}
 button:focus-visible,input:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){#hearts span{animation:none;bottom:auto;top:calc(var(--y)*1%)}.game{transition:none}}
 html,body,button,input,a{touch-action:manipulation}
+/* ——— v2: оформление как в промо-видео ——— */
+html{background:#E8548C}body{background:linear-gradient(172deg,#2A0A46 0%,#5E1A66 34%,#C93D7C 78%,#E8548C 100%) fixed;color:#fff}
+body::before{content:'';position:fixed;left:-25%;top:-12%;width:95vw;height:95vw;border-radius:50%;background:radial-gradient(circle,rgba(255,95,162,.5),rgba(0,0,0,0) 68%);pointer-events:none}
+h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spacing:-2px;color:#fff;text-shadow:0 8px 40px rgba(60,0,60,.45)}
+.h1s{margin-top:10px;font:700 13px/1.2 Manrope,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#FFC1DA}
+.lead{color:rgba(255,255,255,.82);margin-bottom:6px}
+.lead b{color:#FF9CC4}
+.toprow .who{background:#fff;box-shadow:0 8px 18px -10px rgba(20,0,30,.6)}
+.game{color:var(--ink);background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 18px 34px -18px rgba(20,0,30,.7)}
+.game:active{transform:scale(.98)}
+.hero{padding:16px 18px 16px 16px;gap:16px;border-radius:32px}
+.hero .tile{width:76px;height:76px;border-radius:24px}
+.hero .tile svg{transform:scale(1.1)}
+.hero b{font-size:21px;letter-spacing:-.5px;color:var(--deep);line-height:1.15}
+.hero small{margin-top:4px;font-size:14px}
+.hero .go{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:linear-gradient(145deg,#E8548C,#C2185B);color:#fff;font-size:20px;font-weight:800;margin-left:auto}
+.new{display:inline-block;margin-left:8px;padding:3px 9px;border-radius:99px;background:#6E52C9;color:#fff;font-size:11px;font-style:normal;font-weight:800;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
+#paint .tile,#qs .tile,#ttt .tile{background:linear-gradient(145deg,#FF7FA8,#C2185B)}
+#word .tile{background:linear-gradient(145deg,#A98BFF,#6E52C9)}
+#num .tile{background:linear-gradient(145deg,#35D0C0,#168F85)}
+#egg .tile{background:linear-gradient(145deg,#FF9A7A,#E64A19)}
+#chips .tile{background:linear-gradient(145deg,#6FB4FF,#2F6FD6)}
+#memo .tile{background:linear-gradient(145deg,#FF7A9C,#B3124F)}
+#mons .tile{background:linear-gradient(145deg,#8C7DFF,#4B3BB5)}
+.about{color:rgba(255,255,255,.82)}.about h2{color:#fff}.about a{color:#FFD3E6}
+.sharesite{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.7);color:#fff}
+.foot a,.foot span{color:rgba(255,255,255,.8)}
+.soon{margin-top:2px;border:2px dashed rgba(255,255,255,.45);color:rgba(255,255,255,.9);background:rgba(255,255,255,.08);border-radius:28px;font-weight:700}
+.toprow .who.fr{width:auto;padding:0 18px;font-size:15px}
+.statbtn{position:absolute;top:max(12px,env(safe-area-inset-top));right:16px;display:grid;place-items:center;width:46px;height:46px;border:0;border-radius:50%;background:#fff;font-size:21px;box-shadow:0 10px 20px -10px rgba(20,0,30,.7);cursor:pointer}
+.statbtn:active{transform:scale(.94)}
 </style>
 </head>
 <body>
 <div id="hearts" aria-hidden="true"></div>
 <main>
+  <button class="statbtn" id="st" type="button" aria-label="Статистика" title="Статистика">📊</button>
   <h1>Во что сыграем?<span class="h1s">Игры для двоих онлайн</span></h1>
   <p class="lead">Выберите игру <b>→</b> отправьте ссылку <b>→</b> играйте</p>
-  <div class="toprow"><button class="who" id="who" type="button"></button><button class="who ic" id="fr" type="button" aria-label="Друзья" title="Друзья">👥</button><button class="who ic" id="st" type="button" aria-label="Статистика" title="Статистика">📊</button></div>
-  <button class="game" id="paint">
-    <span class="tile"><svg width="44" height="30" viewBox="0 0 30 20"><circle cx="8" cy="11" r="7" fill="#fff"/><rect x="10" y="4" width="12" height="12" rx="2" fill="#fff" fill-opacity=".6"/><path d="M21 18l4.5-9 4.5 9z" fill="#FFE08A"/></svg></span>
-    <span><b>Холст</b><small>Рисуйте вместе: рисунок сразу появляется у второго</small></span>
-    <span class="go">♥&#xFE0E;</span>
+  <div class="toprow"><button class="who" id="who" type="button"></button><button class="who ic fr" id="fr" type="button" aria-label="Друзья" title="Друзья">👥 Друзья</button></div>
+  <button class="game hero" id="qs">
+    <span class="tile"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M6 4h22a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H16l-7 6v-6H6a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="#fff"/><path d="M14 11a4 4 0 1 1 5 4v2" stroke="#C2185B" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="19" cy="21" r="1.8" fill="#C2185B"/></svg></span>
+    <span><b>Вопросы друг другу<em class="new">Новая</em></b><small>Выбирайте и узнайте, насколько вы похожи</small></span>
+    <span class="go">→</span>
   </button>
-  <button class="game" id="word">
-    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><path d="M3 26h10M17 26h10M31 26h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/><g font-family="Manrope,sans-serif" font-weight="700" font-size="18" fill="#fff" text-anchor="middle"><text x="8" y="21">А</text><text x="36" y="21">Я</text></g></svg></span>
-    <span><b>Угадай слово</b><small>Один загадывает, другой угадывает по буквам</small></span>
-    <span class="go">♥&#xFE0E;</span>
-  </button>
-  <button class="game" id="num">
-    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><text x="22" y="25" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="700" font-size="28" fill="#fff">?</text></svg></span>
-    <span><b>Угадай число</b><small>Оба загадывают число и по очереди угадывают чужое</small></span>
-    <span class="go">♥&#xFE0E;</span>
-  </button>
-  <button class="game" id="egg">
-    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><ellipse cx="22" cy="15" rx="10" ry="12" fill="#FFE08A"/></svg></span>
-    <span><b>Не урони яйцо</b><small>Бросайте кубик по очереди: кто уронит яйцо, выполняет задание</small></span>
-    <span class="go">♥&#xFE0E;</span>
-  </button>
-  <button class="game" id="chips">
-    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><path d="M7 20C9 10 18 5 28 7c7 1 10 6 8 12-3 6-13 7-20 4-5-1-9-2-9-3z" fill="#FFE08A"/></svg></span>
-    <span><b>Чипсы-сюрприз</b><small>Каждый прячет один сюрприз среди 16 чипсов</small></span>
-    <span class="go">♥&#xFE0E;</span>
-  </button>
-  <button class="game" id="ttt">
+  <button class="game hero" id="ttt">
     <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><path d="M6 6l12 18M18 6L6 24" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="33" cy="15" r="8" stroke="#FFE08A" stroke-width="4" fill="none"/></svg></span>
     <span><b>Крестики-нолики</b><small>3 в ряд или 5 в ряд на выбор</small></span>
-    <span class="go">♥&#xFE0E;</span>
+    <span class="go">→</span>
   </button>
-  <button class="game" id="memo">
+  <button class="game hero" id="paint">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 30 20"><circle cx="8" cy="11" r="7" fill="#fff"/><rect x="10" y="4" width="12" height="12" rx="2" fill="#fff" fill-opacity=".6"/><path d="M21 18l4.5-9 4.5 9z" fill="#FFE08A"/></svg></span>
+    <span><b>Холст</b><small>Рисуйте вместе, рисунок сразу виден второму</small></span>
+    <span class="go">→</span>
+  </button>
+  <button class="game hero" id="word">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><path d="M3 26h10M17 26h10M31 26h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/><g font-family="Manrope,sans-serif" font-weight="700" font-size="18" fill="#fff" text-anchor="middle"><text x="8" y="21">А</text><text x="36" y="21">Я</text></g></svg></span>
+    <span><b>Угадай слово</b><small>Один загадывает, другой угадывает по буквам</small></span>
+    <span class="go">→</span>
+  </button>
+  <button class="game hero" id="num">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><text x="22" y="25" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="700" font-size="28" fill="#fff">?</text></svg></span>
+    <span><b>Угадай число</b><small>Оба загадывают число и угадывают чужое</small></span>
+    <span class="go">→</span>
+  </button>
+  <button class="game hero" id="egg">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><ellipse cx="22" cy="15" rx="10" ry="12" fill="#FFE08A"/></svg></span>
+    <span><b>Не урони яйцо</b><small>Кубик по очереди и задания тому, кто уронит</small></span>
+    <span class="go">→</span>
+  </button>
+  <button class="game hero" id="chips">
+    <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><path d="M7 20C9 10 18 5 28 7c7 1 10 6 8 12-3 6-13 7-20 4-5-1-9-2-9-3z" fill="#FFE08A"/></svg></span>
+    <span><b>Чипсы-сюрприз</b><small>Каждый прячет один сюрприз среди чипсов</small></span>
+    <span class="go">→</span>
+  </button>
+  <button class="game hero" id="memo">
     <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><rect x="4" y="4" width="16" height="22" rx="4" fill="#fff"/><rect x="24" y="4" width="16" height="22" rx="4" fill="#FFE08A"/><path d="M12 11c-3-3-6 1-3 4l3 3 3-3c3-3 0-7-3-4z" fill="#C2185B"/></svg></span>
-    <span><b>Найди пару</b><small>Открывайте по две карточки и ищите одинаковые</small></span>
-    <span class="go">♥&#xFE0E;</span>
+    <span><b>Найди пару</b><small>Открывайте по две карточки, ищите пары</small></span>
+    <span class="go">→</span>
   </button>
-  <button class="game" id="mons">
+  <button class="game hero" id="mons">
     <span class="tile"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M10 12L7 3l7 5M30 12l3-9-7 5" fill="#FFD166"/><ellipse cx="20" cy="19" rx="13" ry="13" fill="#6CC24A"/><circle cx="15" cy="16" r="4" fill="#fff"/><circle cx="25" cy="16" r="4" fill="#fff"/><circle cx="15" cy="16" r="1.8" fill="#2B1B3A"/><circle cx="25" cy="16" r="1.8" fill="#2B1B3A"/><path d="M13 23q7 7 14 0z" fill="#5A1030"/></svg></span>
-    <span><b>Создай монстра</b><small>По очереди выбирайте глаза, рот, тело, ноги и аксессуары</small></span>
-    <span class="go">♥&#xFE0E;</span>
-  </button>
-  <button class="game" id="qs">
-    <span class="tile"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M6 4h22a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H16l-7 6v-6H6a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="#fff"/><path d="M14 11a4 4 0 1 1 5 4v2" stroke="#C2185B" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="19" cy="21" r="1.8" fill="#C2185B"/></svg></span>
-    <span><b>Вопросы друг другу</b><small>Выбирайте и узнайте, насколько вы похожи</small></span>
-    <span class="go">♥&#xFE0E;</span>
+    <span><b>Создай монстра</b><small>По очереди собирайте смешного монстра</small></span>
+    <span class="go">→</span>
   </button>
   <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
   <section class="about">
