@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const P = window.Profile; if (!P) return;
-  const PAGES = { paint: 'Холст', word: 'Угадай слово', number: 'Угадай число', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', tictactoe: 'Крестики-нолики', memory: 'Найди пару', monster: 'Создай монстра' };
+  const PAGES = { paint: 'Холст', word: 'Угадай слово', number: 'Угадай число', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', tictactoe: 'Крестики-нолики', memory: 'Найди пару', questions: 'Вопросы друг другу', monster: 'Создай монстра' };
   const ALPHA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const $ = s => document.querySelector(s);

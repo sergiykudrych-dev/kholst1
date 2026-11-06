@@ -57,6 +57,7 @@ dialog p{text-align:center;color:var(--mute);font-size:14px;margin:8px 0 16px}
 .btn{padding:12px;border:1.5px solid var(--rose);border-radius:14px;background:none;color:var(--rose);font:700 15px Manrope,sans-serif;cursor:pointer}
 .play{width:100%;padding:15px;border:0;border-radius:16px;background:var(--rose);color:#fff;font:700 17px Manrope,sans-serif;cursor:pointer}
 .x{position:absolute;top:8px;right:10px;width:40px;height:40px;border:0;background:none;font-size:22px;color:var(--mute);cursor:pointer}
+.sharesite{display:block;width:100%;margin:14px 0 4px;padding:13px;border:1.5px solid var(--rose);border-radius:16px;background:rgba(255,255,255,.6);color:var(--rose);font:700 15px Manrope,sans-serif;cursor:pointer}
 .hint{font-size:12px;color:var(--mute);text-align:center;margin-top:10px}
 dialog .x:focus,dialog .x:focus-visible{outline:none}
 button:focus-visible,input:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
@@ -110,7 +111,13 @@ html,body,button,input,a{touch-action:manipulation}
     <span><b>Создай монстра</b><small>По очереди выбирайте глаза, рот, тело, ноги и аксессуары</small></span>
     <span class="go">♥&#xFE0E;</span>
   </button>
+  <button class="game" id="qs">
+    <span class="tile"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M6 4h22a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H16l-7 6v-6H6a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="#fff"/><path d="M14 11a4 4 0 1 1 5 4v2" stroke="#C2185B" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="19" cy="21" r="1.8" fill="#C2185B"/></svg></span>
+    <span><b>Вопросы друг другу</b><small>Выбирайте и узнайте, насколько вы похожи</small></span>
+    <span class="go">♥&#xFE0E;</span>
+  </button>
   <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
+  <button class="sharesite" id="sharesite">💌 Рассказать друзьям</button>
   <p class="foot"><a href="privacy.html">Конфиденциальность</a><br><span id="ver"></span></p>
 </main>
 
@@ -134,6 +141,7 @@ html,body,button,input,a{touch-action:manipulation}
 <script src="ads.js" data-mode="home"></script>
 <script src="stats.js"></script>
 <script src="friends.js"></script>
+<script src="fx.js"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), dlg = $('#dlg'), link = $('#link');
@@ -166,6 +174,7 @@ $('#egg').onclick = () => open('egg.html');
 $('#chips').onclick = () => open('chips.html');
 $('#ttt').onclick = () => open('tictactoe.html');
 $('#memo').onclick = () => open('memory.html');
+$('#qs').onclick = () => open('questions.html');
 $('#mons').onclick = () => open('monster.html');
 const paintWho = () => { $('#who').textContent = Profile.has() ? (Profile.avatar() + ' ' + Profile.name()).trim() : 'Как вас зовут? ✎'; };
 $('#who').onclick = () => Profile.ask().then(paintWho); paintWho();
@@ -173,6 +182,7 @@ if (!Profile.has() && !Profile.skipped()) Profile.ask().then(paintWho);
 $('#fr').onclick = () => Friends.open();
 $('#st').onclick = () => Stats.open();
 Friends.init();
+$('#sharesite').onclick = e => Fx.shareSite(e.currentTarget);
 try { if (localStorage.getItem('kh_owner') === '1') Ver.mount($('#ver')); } catch (e) {}
 $('#x').onclick = () => dlg.close();
 dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };

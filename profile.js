@@ -149,6 +149,7 @@
       db.ref('rooms/' + room + '/players').on('value', s => {
         const v = s.val() || {}; P.names = { 1: v.p1 || null, 2: v.p2 || null }; P.notify(); flush();
         leftNote(v['p' + (3 - me)]);
+        try { window.Fx && Fx.players(v['p' + (3 - me)]); } catch (e) {}
         if (me === 1 && v.p1 && v.p2 && !P._pj) { P._pj = 1; ev('partner_joined'); }
       }, P.denied);
       return P.publish();
@@ -200,7 +201,9 @@
   /* Подписка на состояние игры — только после входа и записи имени в комнату. */
   P.on = (ref, cb) => P.ready.then(() => ref.on('value', s => {
     P.gotData = true; cb(s);
-    const v = s.val();
-    if (v && P.tracker) { let r = null; try { r = P.tracker.calc(v); } catch (e) {} if (r) { ev('game_complete', { game: P.tracker.game, result: r, host: P.me === 1 }); P.record(P.tracker.game, v, r); } }
+    const v = s.val(); let r = null;
+    if (v && P.tracker) { try { r = P.tracker.calc(v); } catch (e) {} }
+    try { window.Fx && Fx.state(v, r); } catch (e) {}
+    if (v && P.tracker) { if (r) { ev('game_complete', { game: P.tracker.game, result: r, host: P.me === 1 }); P.record(P.tracker.game, v, r); } }
   }, P.denied));
 })();

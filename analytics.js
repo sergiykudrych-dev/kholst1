@@ -7,7 +7,7 @@
     get() { try { return localStorage.getItem(K); } catch (e) { return null; } },
     set(v) { try { localStorage.setItem(K, v); } catch (e) {} }
   };
-  const GAMES = ['paint', 'word', 'number', 'egg', 'chips', 'tictactoe', 'memory', 'monster'];
+  const GAMES = ['paint', 'word', 'number', 'egg', 'chips', 'tictactoe', 'memory', 'monster', 'questions'];
   const pageName = () => (location.pathname.split('/').pop() || 'index').replace(/\.html$/, '') || 'index';
   const cleanUrl = () => location.origin + location.pathname + location.search;   /* без #room=… */
   const optedOut = () => navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1';

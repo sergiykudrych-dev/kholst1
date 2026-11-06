@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FFC9DC">
+<meta name="apple-mobile-web-app-title" content="Во что сыграем?">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Вопросы друг другу</title>
+<meta name="description" content="Тебя зовут сыграть вдвоём. Открой ссылку, и игра начнётся.">
+<link rel="canonical" href="https://twosome.games/questions.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Во что сыграем?">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Вопросы друг другу — сыграем?">
+<meta property="og:description" content="Тебя зовут сыграть вдвоём. Открой ссылку, и игра начнётся.">
+<meta property="og:url" content="https://twosome.games/questions.html">
+<meta property="og:image" content="https://twosome.games/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Вопросы друг другу — сыграем?">
+<meta name="twitter:description" content="Тебя зовут сыграть вдвоём. Открой ссылку, и игра начнётся.">
+<meta name="twitter:image" content="https://twosome.games/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
+*{box-sizing:border-box;margin:0}
+body{display:flex;flex-direction:column;min-height:100dvh;font:500 16px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) 12px 6px;max-width:520px;width:100%;margin:0 auto}
+.chip{padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.78);font-weight:700;font-size:14px;color:var(--deep);text-decoration:none}
+#view{flex:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:520px;margin:0 auto;padding:0 10px max(12px,env(safe-area-inset-bottom))}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;width:100%;text-align:center}
+h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
+.pick{display:grid;gap:12px;width:100%}
+.pick button{padding:20px;border-radius:24px;background:rgba(255,255,255,.82);box-shadow:0 14px 34px -18px rgba(142,15,69,.6);font-size:22px;font-weight:700}
+.pick small{display:block;font-size:13px;font-weight:500;color:var(--mute)}
+.beat{font-size:64px;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.18)}}
+.who,.hint{color:var(--mute);font-size:14px}
+.disp{display:grid;place-items:center;min-height:78px;font:700 clamp(52px,16vw,72px)/1 Manrope,sans-serif;color:var(--deep);letter-spacing:2px}
+.disp.empty{color:rgba(142,15,69,.25)}
+.range{width:100%;text-align:center;padding-top:6px}
+.bar{position:relative;height:10px;margin-top:8px;border-radius:99px;background:rgba(255,255,255,.7);overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--rose)}
+.hist{flex:1;min-height:0;width:100%;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0}
+.try{display:flex;gap:12px;align-items:center;padding:8px 18px;border-radius:999px;background:rgba(255,255,255,.82);font-weight:700;color:var(--deep)}
+.try span{font-weight:500;color:var(--mute)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:340px}
+.pad button{height:54px;border-radius:14px;background:rgba(255,255,255,.9);color:var(--deep);font-weight:700;font-size:24px;box-shadow:0 2px 0 rgba(142,15,69,.2)}
+.start,.again{width:100%;max-width:340px;padding:15px;border-radius:16px;background:var(--rose);color:#fff;font-weight:700;font-size:17px;margin-top:10px}
+.start:disabled{opacity:.4;cursor:default}
+.over{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
+.card{width:100%;max-width:400px;padding:28px 22px 22px;border-radius:28px;background:#FFF8FA;text-align:center;box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
+.card h2{font:400 42px/1.1 'Marck Script',cursive;color:var(--deep)}
+.big{margin:10px 0 14px;font-weight:700;font-size:26px;letter-spacing:2px;text-transform:uppercase;color:var(--rose);word-break:break-word}
+.card a{display:inline-block;margin-top:12px;color:var(--mute);font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){.beat{animation:none}}
+.cols{flex:1;min-height:0;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:8px}
+.col{display:flex;flex-direction:column;align-items:center;gap:6px;overflow-y:auto;min-height:0}
+.col h3{font-size:13px;color:var(--mute);font-weight:700}
+.col .try{width:100%;justify-content:space-between;padding:6px 14px;font-size:15px}
+.turn{font-weight:700;color:var(--deep);text-align:center}
+.mine{margin:6px auto 0;padding:5px 14px;border-radius:999px;background:rgba(255,255,255,.7);font-size:13px;color:var(--mute)}
+.pad button:disabled{opacity:.4;cursor:default}
+html,body,button,input,a{touch-action:manipulation}
+body{-webkit-user-select:none;user-select:none}
+body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+#view,.mid{min-height:0}
+.range,.mine,.disp,.pad,.start{flex-shrink:0}
+.cols{grid-template-rows:minmax(0,1fr);min-height:72px}
+.disp{min-height:clamp(48px,9dvh,78px);font-size:clamp(40px,8dvh,72px)}
+.pad button{height:clamp(42px,6.5dvh,54px)}
+.start{margin-top:8px}
+
+.qn{margin-top:6px;font-size:13px;font-weight:700;color:var(--mute);text-align:center}
+.qt{font:400 clamp(30px,8.5vw,40px)/1.15 'Marck Script',cursive;color:var(--deep);text-align:center}
+.opts{display:grid;gap:12px;width:100%}
+.opt{padding:20px 18px;border-radius:22px;background:rgba(255,255,255,.88);box-shadow:0 14px 34px -18px rgba(142,15,69,.6);font-size:20px;font-weight:700;line-height:1.25;color:var(--deep);text-align:center}
+.opt.sel{background:var(--rose);color:#fff}
+.opt.dim{opacity:.55}
+.rv{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.rv div{padding:16px 12px;border-radius:20px;background:rgba(255,255,255,.88);text-align:center;font-weight:700;color:var(--deep);font-size:17px;line-height:1.25}
+.rv small{display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--mute)}
+.res{font-weight:800;font-size:20px;color:var(--rose);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <a class="chip" href="index.html">← Игры</a>
+  <span class="chip" id="me"></span>
+  <button class="chip" id="inv">Пригласить</button>
+</header>
+<div id="view"></div>
+<div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="analytics.js"></script>
+<script src="profile.js"></script>
+<script src="fx.js"></script>
+<script src="ads.js" data-mode="game"></script>
+<script>
+document.addEventListener('gesturestart', e => e.preventDefault());
+const $ = s => document.querySelector(s), view = $('#view');
+const room = (location.hash.match(/room=([\w-]+)/) || [])[1];
+if (!room) location.replace('index.html');
+const me = /host=1/.test(location.hash) ? 1 : 2;
+$('#me').textContent = 'Вы — Игрок ' + me;
+let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2000); };
+$('#inv').onclick = async () => {
+  const u = location.href.split('#')[0] + '#room=' + room;
+  try { if (navigator.share) await navigator.share({ title: 'Вопросы друг другу', url: u }); else { await navigator.clipboard.writeText(u); toast('Ссылка скопирована'); } }
+  catch (e) { if (e.name !== 'AbortError') prompt('Скопируйте ссылку:', u); }
+};
+const QS = [
+['Ужин при свечах дома','Ужин в шумном ресторане'],['Путешествие на море','Путешествие в горы'],['Кино дома под одеялом','Кино в кинотеатре'],
+['Узнать будущее','Изменить прошлое'],['Всегда говорить правду','Всегда делать комплименты'],['Жить в большом городе','Жить в маленьком уютном доме'],
+['Утренний кофе в постель','Романтический ужин вечером'],['Сюрприз-подарок','Подарок по списку желаний'],['Лето круглый год','Зима круглый год'],
+['Уметь читать мысли','Уметь летать'],['Танцевать под дождём','Смотреть дождь из окна с чаем'],['Собака','Кот'],
+['Идеальное свидание на природе','Идеальное свидание в городе'],['Пицца','Суши'],['Никогда не лгать','Никогда не ссориться'],
+['Весь день ничего не делать вместе','Весь день путешествовать вместе'],['Поехать куда-то завтра без плана','Планировать поездку полгода'],['Жить у моря','Жить в лесу'],
+['Писать друг другу письма','Звонить каждый день'],['Дарить цветы','Готовить завтрак'],['Научиться играть на гитаре','Научиться танцевать'],
+['Остаться на необитаемом острове с книгами','Остаться с музыкой и гитарой'],['Спонтанное свидание','Свидание, спланированное заранее'],['Фотографироваться вместе','Просто быть в моменте'],
+['Всегда опаздывать','Всегда приходить заранее'],['Тёплое лето и дождь','Снежная зима и камин'],['Целый день вместе','Вечер вместе и свобода днём'],
+['Сладкое на десерт','Солёное на закуску'],['Шумная вечеринка','Тихий вечер вдвоём'],['Знать, что о тебе думают','Не знать и быть спокойным'],
+['Путешествовать по миру','Купить уютный дом'],['Смех до слёз','Трогательное кино до слёз'],['Позавтракать на рассвете','Посидеть вместе допоздна'],
+['Идеальный подарок, но не к дате','Скромный подарок точно в праздник'],['Каждый день по сюрпризу','Каждую неделю по традиции'],['Готовить вместе','Заказать еду и смотреть фильм'],
+['Увидеть северное сияние','Увидеть тропический остров'],['Целоваться под дождём','Обниматься у камина'],['Остаться друзьями на всю жизнь','Влюбляться снова и снова'],
+['Первым написать','Дождаться, когда напишут'],['Подарить воспоминание','Подарить вещь'],['Поехать на фестиваль','Остаться на даче'],
+['Придумать совместный проект','Просто отдыхать вместе'],['Говорить о мечтах','Говорить о планах'],['Спать до обеда','Вставать на рассвете'],
+['Все дела вместе','Каждому своё время'],['Устроить пикник','Устроить киномарафон'],['Встретить закат','Встретить рассвет'],
+['Научиться говорить на новом языке','Научиться готовить новое блюдо'],['Прогулка по ночному городу','Прогулка по лесу днём'],['Танцевать на кухне','Петь в машине'],
+['Всегда быть вместе','Скучать и радоваться встречам'],['Обменяться тайными записками','Устроить квест'],['Горячий шоколад','Прохладный лимонад'],
+['Свадьба в большой компании','Свадьба только вдвоём'],['Остров с пальмами','Домик в снегах'],['Подарить песню','Подарить фото'],
+['Рассказать самый стыдный секрет','Услышать самый стыдный секрет'],['Вечер настольных игр','Вечер с видеоиграми']
+];
+const N = 12;
+const cfg = window.FIREBASE_CONFIG || {};
+if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
+  view.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
+} else {
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
+  Profile.track('questions', S => S.phase === 'over' ? 'coop' : null);
+  const ref = firebase.database().ref('rooms/' + room + '/qs'), other = 3 - me;
+  let S = null;
+  const fresh = () => {
+    const a = QS.map((_, i) => i);
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return { phase: 'play', order: a.slice(0, N), i: 0, m: 0 };
+  };
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function render() {
+    if (!S) return;
+    if (S.phase === 'over') {
+      const m = S.m || 0, r = m / N;
+      const txt = r >= .75 ? 'Вы почти читаете мысли друг друга ♥' : r >= .5 ? 'Вы очень похожи — и это здорово' : r >= .3 ? 'Вы разные, и в этом интерес' : 'Противоположности притягиваются!';
+      view.innerHTML = `<div class="mid"><div class="beat">♥&#xFE0E;</div><h1>Готово</h1></div>
+        <div class="over"><div class="card"><h2>Вы совпали в ${m} из ${N}</h2><p class="hint">${txt}</p><button class="again" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
+      return;
+    }
+    const q = QS[S.order[S.i]], mine = S['a' + me], theirs = S['a' + other], both = mine && theirs;
+    let body;
+    if (!mine) {
+      body = `<div class="mid"><p class="qt">Что вам ближе?</p><div class="opts"><button class="opt" data-c="1">${esc(q[0])}</button><button class="opt" data-c="2">${esc(q[1])}</button></div>
+        <p class="hint">${theirs ? esc(pnRaw(other)) + ' уже выбрал(а)' : 'Ответы откроются, когда выберете оба'}</p></div>`;
+    } else if (!both) {
+      body = `<div class="mid"><p class="qt">Что вам ближе?</p><div class="opts"><button class="opt ${mine === 1 ? 'sel' : 'dim'}" disabled>${esc(q[0])}</button><button class="opt ${mine === 2 ? 'sel' : 'dim'}" disabled>${esc(q[1])}</button></div>
+        <p class="hint">Ждём: ${esc(pnRaw(other))}…</p></div>`;
+    } else {
+      const same = mine === theirs, last = S.i + 1 >= N;
+      body = `<div class="mid"><p class="res">${same ? 'Совпали! ♥&#xFE0E;' : 'Мнения разошлись'}</p>
+        <div class="rv"><div><small>Вы</small>${esc(q[mine - 1])}</div><div><small>${esc(pnRaw(other))}</small>${esc(q[theirs - 1])}</div></div>
+        <p class="hint">${same ? 'Расскажите друг другу, почему' : 'Расскажите друг другу, почему вы так выбрали'}</p></div>
+        <button class="start" data-act="next">${last ? 'Результат' : 'Дальше'}</button>`;
+    }
+    view.innerHTML = `<p class="qn">Вопрос ${S.i + 1} из ${N} · совпадений: ${S.m || 0}</p>` + body;
+  }
+  Profile.on(ref, s => { S = s.val(); if (!S) { ref.transaction(x => x || fresh()); return; } render(); });
+  view.onclick = e => {
+    const b = e.target.closest('button'); if (!b || b.disabled || !S) return;
+    if (b.dataset.c) {
+      const c = +b.dataset.c;
+      ref.transaction(s => { if (!s || s.phase !== 'play' || s['a' + me]) return; const t = { ...s }; t['a' + me] = c; return t; });
+    } else if (b.dataset.act === 'next') {
+      const at = S.i;
+      ref.transaction(s => {
+        if (!s || s.phase !== 'play' || s.i !== at || !s.a1 || !s.a2) return;
+        const t = { ...s }; if (s.a1 === s.a2) t.m = (s.m || 0) + 1; t.i = s.i + 1; delete t.a1; delete t.a2; if (t.i >= N) t.phase = 'over'; return t;
+      });
+    } else if (b.dataset.act === 'again') ref.set(fresh());
+  };
+}
+</script>
+</body>
+</html>
