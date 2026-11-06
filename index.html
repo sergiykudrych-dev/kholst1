@@ -38,7 +38,7 @@ body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var
 #hearts span:nth-child(3n){color:#E91E63}#hearts span:nth-child(3n+1){color:#FF7FA8}#hearts span:nth-child(3n+2){color:#fff}
 @keyframes rise{to{transform:translateY(-125vh) rotate(14deg)}}
 main{position:relative;max-width:520px;margin:0 auto;padding:max(48px,env(safe-area-inset-top)) 20px max(32px,env(safe-area-inset-bottom));display:grid;gap:14px}
-h1{font:400 clamp(52px,16vw,84px)/1 'Marck Script',cursive;color:var(--deep);text-align:center}
+h1{font:400 clamp(52px,16vw,84px)/1 'Marck Script',cursive;color:var(--deep);text-align:center}.h1s{display:block;margin-top:6px;font:700 13px/1.2 Manrope,system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
 .lead{text-align:center;color:var(--mute);margin-bottom:12px;font-size:15px}
 .game{display:flex;align-items:center;gap:16px;width:100%;text-align:left;padding:16px;border:0;border-radius:28px;background:rgba(255,255,255,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 14px 34px -16px rgba(142,15,69,.55);cursor:pointer;color:inherit;font:inherit;transition:transform .2s}
 .game:hover{transform:translateY(-2px)}
@@ -71,7 +71,7 @@ html,body,button,input,a{touch-action:manipulation}
 <body>
 <div id="hearts" aria-hidden="true"></div>
 <main>
-  <h1>Во что сыграем?</h1>
+  <h1>Во что сыграем?<span class="h1s">Игры для двоих онлайн</span></h1>
   <p class="lead">Выберите игру <b>→</b> отправьте ссылку <b>→</b> играйте</p>
   <div class="toprow"><button class="who" id="who" type="button"></button><button class="who ic" id="fr" type="button" aria-label="Друзья" title="Друзья">👥</button><button class="who ic" id="st" type="button" aria-label="Статистика" title="Статистика">📊</button></div>
   <button class="game" id="paint">
