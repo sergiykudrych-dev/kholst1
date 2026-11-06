@@ -5,7 +5,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#2A0A46">
+<meta name="theme-color" content="#3C0F40">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -35,7 +35,7 @@
 <style>
 :root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
 *{box-sizing:border-box;margin:0}
-html{background:#2A0A46}body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overflow-x:hidden}
+html{background:#3C0F40}body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overflow-x:hidden}
 #hearts{position:fixed;inset:0;overflow:hidden;pointer-events:none}
 #hearts span{position:absolute;bottom:-70px;animation:rise linear infinite}
 #hearts span:nth-child(3n){color:#E91E63}#hearts span:nth-child(3n+1){color:#FF7FA8}#hearts span:nth-child(3n+2){color:#fff}
@@ -70,8 +70,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rose);outline-o
 @media(prefers-reduced-motion:reduce){#hearts span{animation:none;bottom:auto;top:calc(var(--y)*1%)}.game{transition:none}}
 html,body,button,input,a{touch-action:manipulation}
 /* ——— v2: оформление как в промо-видео ——— */
-html{background:#2A0A46}body{background:linear-gradient(172deg,#2A0A46 0%,#5E1A66 34%,#C93D7C 78%,#E8548C 100%) fixed;color:#fff}
-body::before{content:'';position:fixed;left:-25%;top:-12%;width:95vw;height:95vw;border-radius:50%;background:radial-gradient(circle,rgba(255,95,162,.5),rgba(0,0,0,0) 68%);pointer-events:none}
+html{background:#3C0F40}body{background:linear-gradient(172deg,#2A0A46 0%,#5E1A66 34%,#C93D7C 78%,#E8548C 100%) fixed;color:#fff}
+body::before{content:'';position:fixed;left:-25%;top:6%;width:95vw;height:95vw;border-radius:50%;background:radial-gradient(circle,rgba(255,95,162,.5),rgba(0,0,0,0) 68%);pointer-events:none}
 h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spacing:-2px;color:#fff;text-shadow:0 8px 40px rgba(60,0,60,.45)}
 .h1s{margin-top:10px;font:700 13px/1.2 Manrope,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#FFC1DA}
 .lead{color:rgba(255,255,255,.82);margin-bottom:6px}
