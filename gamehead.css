@@ -4,8 +4,8 @@ header .chip{display:inline-flex;align-items:center;justify-content:center;gap:6
 header .chip i{font-style:normal;display:grid;place-items:center;width:28px;height:28px;margin-left:-8px;border-radius:50%;background:#FFE3EE;font-size:17px;flex:none}
 header #me{display:none}
 header .chip:first-child{flex:none}
-header #inv{flex:1 1 auto;min-width:0}
-header .chip.pc{position:relative;justify-content:flex-start;padding-right:30px;overflow:hidden;text-overflow:ellipsis}
+header{justify-content:space-between}header #inv{flex:0 1 auto;min-width:0;max-width:calc(100% - 112px)}
+header .chip.pc{position:relative;justify-content:flex-start;padding-right:32px;overflow:hidden;text-overflow:ellipsis}
 header .chip.pc b{position:absolute;right:11px;top:50%;margin-top:-5px;width:10px;height:10px;border-radius:50%;background:#2ECC71;box-shadow:0 0 0 3px #fff}
 header .chip.has{pointer-events:none}
 header .fx-b,header #fx-btn{flex:none;width:44px;padding:0;font-size:20px}
