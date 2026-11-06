@@ -97,10 +97,11 @@ textarea{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:1
 .task{margin:10px 0 16px;font-weight:700;font-size:22px;color:var(--deep);word-break:break-word}
 @media(prefers-reduced-motion:reduce){.die.roll{animation:none}}
 </style>
+<link rel="stylesheet" href="gamehead.css?v=1">
 </head>
 <body>
 <header>
-  <a class="chip" href="index.html">← Игры</a>
+  <a class="chip" href="index.html" aria-label="Игры">←<span class="bk"> Игры</span></a>
   <span class="chip" id="me"></span>
   <button class="chip" id="inv">Пригласить</button>
 </header>
@@ -123,6 +124,7 @@ textarea{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:1
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="fx.js"></script>
+<script src="gamekit.js?v=1"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -167,6 +169,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Kit.attach();
   Profile.track('egg', S => S.phase === 'over' && S.loser ? (S.loser === me ? 'loss' : 'win') : null);
   const ref = firebase.database().ref('rooms/' + room + '/egg');
   let S = { phase: 'setup' }, draft = '', prevP = '', prevN = -1, lastTgt = '', showOver = false, overT;

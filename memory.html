@@ -136,10 +136,11 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 .big2{font-size:64px;line-height:1.1}
 @media(prefers-reduced-motion:reduce){.anim .in,.anim2 .in,.pop .fr,.over{animation:none}}
 </style>
+<link rel="stylesheet" href="gamehead.css?v=1">
 </head>
 <body>
 <header>
-  <a class="chip" href="index.html">← Игры</a>
+  <a class="chip" href="index.html" aria-label="Игры">←<span class="bk"> Игры</span></a>
   <span class="chip" id="me"></span>
   <button class="chip" id="inv">Пригласить</button>
 </header>
@@ -152,6 +153,7 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="fx.js"></script>
+<script src="gamekit.js?v=1"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -174,6 +176,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Kit.attach();
   Profile.track('memory', S => S.phase === 'over' ? ((S.s1 || 0) === (S.s2 || 0) ? 'draw' : ((S.s1 || 0) > (S.s2 || 0) ? 1 : 2) === me ? 'win' : 'loss') : null);
   const ref = firebase.database().ref('rooms/' + room + '/memory');
   let S = null, prevFace = null, prevId = 0, tn = -1;

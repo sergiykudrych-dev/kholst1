@@ -73,10 +73,11 @@ h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
 html,body,button,input,a{touch-action:manipulation}
 body{-webkit-user-select:none;user-select:none}
 </style>
+<link rel="stylesheet" href="gamehead.css?v=1">
 </head>
 <body>
 <header>
-  <a class="chip" href="index.html">← Игры</a>
+  <a class="chip" href="index.html" aria-label="Игры">←<span class="bk"> Игры</span></a>
   <span class="chip" id="me"></span>
   <button class="chip" id="inv">Пригласить</button>
 </header>
@@ -89,6 +90,7 @@ body{-webkit-user-select:none;user-select:none}
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="fx.js"></script>
+<script src="gamekit.js?v=1"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -113,6 +115,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Kit.attach();
   Profile.track('word', S => S.phase === 'won' || S.phase === 'lost' ? ((S.phase === 'won') === (me !== S.setter) ? 'win' : 'loss') : null);
   const ref = firebase.database().ref('rooms/' + room + '/word');
   let S = { phase: 'pick' }, draft = '', lives = 7, prev = '';

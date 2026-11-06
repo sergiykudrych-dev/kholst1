@@ -115,10 +115,11 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 .board4 .cell .em{font-size:clamp(30px,11vw,46px)}
 .board4 .cell .b{top:2px;right:6px;font-size:20px}
 </style>
+<link rel="stylesheet" href="gamehead.css?v=1">
 </head>
 <body>
 <header>
-  <a class="chip" href="index.html">← Игры</a>
+  <a class="chip" href="index.html" aria-label="Игры">←<span class="bk"> Игры</span></a>
   <span class="chip" id="me"></span>
   <button class="chip" id="inv">Пригласить</button>
 </header>
@@ -131,6 +132,7 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="fx.js"></script>
+<script src="gamekit.js?v=1"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -153,6 +155,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Kit.attach();
   Profile.track('chips', S => S.phase === 'over' ? 'coop' : null);
   const ref = firebase.database().ref('rooms/' + room + '/chips16'), CELLS = [...Array(16).keys()];
   let S = { phase: 'setup' }, pickI = -1, prevP = '';

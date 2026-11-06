@@ -81,10 +81,11 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .pad button{height:clamp(42px,6.5dvh,54px)}
 .start{margin-top:8px}
 </style>
+<link rel="stylesheet" href="gamehead.css?v=1">
 </head>
 <body>
 <header>
-  <a class="chip" href="index.html">← Игры</a>
+  <a class="chip" href="index.html" aria-label="Игры">←<span class="bk"> Игры</span></a>
   <span class="chip" id="me"></span>
   <button class="chip" id="inv">Пригласить</button>
 </header>
@@ -97,6 +98,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="fx.js"></script>
+<script src="gamekit.js?v=1"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -119,6 +121,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
 } else {
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   Profile.start(room, me, () => { if (S) render(); });
+  Kit.attach();
   Profile.track('number', S => S.phase === 'over' ? (S.winner === 0 ? 'draw' : S.winner === me ? 'win' : 'loss') : null);
   const ref = firebase.database().ref('rooms/' + room + '/duel'), other = 3 - me;
   let S = { phase: 'write' }, draft = '', prev = '';
