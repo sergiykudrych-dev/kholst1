@@ -11,18 +11,32 @@
   let db, me = null, myCode = '', list = {}, U = {}, target = null, dlg = null, ready = null, bar = null, tt;
 
   const css = document.createElement('style');
-  css.textContent = `#fdlg{max-height:88dvh;overflow:auto}
-.fcode{margin:2px 0 8px;text-align:center;font:700 36px/1.1 Manrope,system-ui,sans-serif;letter-spacing:6px;color:#8E0F45;-webkit-user-select:all;user-select:all}
-.facc{margin:4px 0 12px;padding:12px;border-radius:16px;background:#fff;text-align:center;font-size:14px}
-.facc p{margin:0 0 8px;font-size:13px}.facc .btn{width:100%}
-.facc.ok{background:#EAF8EE;color:#1F6B3A;font-weight:700}.facc.ok .fb{margin-top:8px}
-.fadd{display:grid;grid-template-columns:1fr auto;gap:8px;margin:14px 0 4px}
-.fadd .link{text-transform:uppercase;letter-spacing:2px;text-align:center}
-#flist h3{margin:14px 0 2px;font-size:13px;color:#8A5570;font-weight:700}
-.frow{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid #F3B6CC}
-.fn{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fb{padding:8px 12px;border:1.5px solid #E7B1C6;border-radius:12px;background:#fff;color:#8E0F45;font:700 13px Manrope,system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
+  css.textContent = `#fdlg{max-height:88dvh;overflow:auto;padding:22px 18px 18px}
+#fdlg h2{font-size:34px;margin:0 0 12px}
+#fdlg .x{top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:#F7E1EA;font-size:15px;line-height:36px;padding:0;color:#8E0F45}
+#fdlg button:focus{outline:none}#fdlg button:focus-visible{outline:2px solid #C2185B;outline-offset:2px}
+#fdlg .sec{display:grid;gap:10px;margin:0 0 14px}
+.fcard{padding:14px;border-radius:20px;background:#fff;text-align:center}
+.flab{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8A5570}
+.fcode{margin:4px 0 10px;font:800 32px/1.1 Manrope,system-ui,sans-serif;letter-spacing:5px;color:#8E0F45;-webkit-user-select:all;user-select:all}
+.fcard.sec{gap:4px}.fcard .two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
+.fadd{display:grid;grid-template-columns:1fr auto;gap:8px;margin:0}
+.fadd .link{margin:0;text-transform:uppercase;letter-spacing:2px;text-align:center}
+#fmsg{margin:0;min-height:0;font-size:13px;color:#8A5570;text-align:center}#fmsg:empty{display:none}
+#flist h3{margin:14px 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#8A5570;font-weight:700}
+#flist .none{margin:6px 0 0;color:#8A5570;font-size:14px;text-align:center}
+.frow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #F5D3E0}
+.frow:first-of-type{border-top:0}
+.fav{flex:none;width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:22px}
+.fn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fn b{display:block;font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis}.fn small{display:block;font-size:12px;color:#8A5570}
+.fb{padding:8px 14px;border:1.5px solid #E7B1C6;border-radius:12px;background:#fff;color:#8E0F45;font:700 13px Manrope,system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
 .fb.ok{border-color:#C2185B;background:#C2185B;color:#fff}
+.fb.rm{width:32px;height:32px;padding:0;border-radius:50%;border-color:transparent;background:#F7E1EA;color:#8A5570;font-size:13px}
+.facc{margin:16px 0 0;text-align:center;font-size:13px;color:#8A5570}
+.facc.ok b{color:#1F6B3A}.facc.ok .em{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+.facc.ok .fb{margin-top:8px;padding:6px 12px;font-size:12px}
+.facc.warn{padding:14px;border-radius:20px;background:#FFF1F6;border:1.5px dashed #E7B1C6;color:#4A1236}
+.facc.warn b{display:block;margin-bottom:2px;font-size:15px}.facc.warn .btn{width:100%;margin-top:10px}
 #finv{position:fixed;left:0;right:0;top:0;z-index:60;display:grid;gap:6px;padding:max(8px,env(safe-area-inset-top)) 10px 0;pointer-events:none}
 .fban,.ftarget{pointer-events:auto;display:flex;align-items:center;gap:8px;max-width:480px;width:100%;margin:0 auto;padding:10px 12px;border-radius:18px;background:#fff;color:#4A1236;box-shadow:0 12px 30px -10px rgba(74,18,54,.55);font:600 14px/1.3 Manrope,system-ui,sans-serif}
 .fban span,.ftarget span{flex:1}
@@ -31,6 +45,7 @@
 
   const label = o => ((o && o.avatar) ? o.avatar + ' ' : '') + ((o && o.name) || 'Без имени');
   const who = uid => label(U[uid] && U[uid].name ? U[uid] : list[uid]);
+  const parts = uid => { const o = (U[uid] && U[uid].name ? U[uid] : list[uid]) || {}; return { av: o.avatar || '🙂', nm: o.name || 'Без имени' }; };
   F.toast = msg => {
     let t = document.querySelector('.ftoast'); if (!t) { t = document.createElement('div'); t.className = 'ftoast'; document.body.appendChild(t); }
     t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 2600);
@@ -55,7 +70,7 @@
 
   function badge() {
     const n = Object.keys(list).filter(u => list[u].status === 'in').length;
-    const b = $('#fr'); if (b) b.textContent = '👥' + (n ? ' ' + n : '');
+    const b = $('#fr'); if (b) { b.textContent = '👥'; if (n) { const i = document.createElement('i'); i.className = 'bdg'; i.textContent = n; b.appendChild(i); } }
   }
 
   function banner(key, v, ref) {
@@ -121,10 +136,10 @@
     const e = $('#facc'); if (!e) return;
     if (P.isLinked()) {
       e.className = 'facc ok';
-      e.innerHTML = `✓ Профиль сохранён${P.email() ? ': ' + esc(P.email()) : ''}<br><button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут, пока не войдёте снова' : 'Выйти из аккаунта'}</button>`;
+      e.innerHTML = `<b>✓ Профиль сохранён</b>${P.email() ? `<span class="em">${esc(P.email())}</span>` : ''}<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`;
     } else {
-      e.className = 'facc';
-      e.innerHTML = `<p>Профиль не сохранён: если очистить данные сайта, друзья пропадут.</p><button class="btn" type="button" data-a="google">Сохранить через Google</button><p class="hint">Уже сохраняли раньше? Нажмите ту же кнопку, и профиль вернётся.</p>`;
+      e.className = 'facc warn';
+      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта.<button class="btn" type="button" data-a="google">Сохранить через Google</button>`;
     }
   }
   function render() {
@@ -133,14 +148,16 @@
     $('#fcode').textContent = myCode;
     const g = { in: [], ok: [], out: [] };
     Object.keys(list).forEach(u => (g[list[u].status] || g.out).push(u));
-    const score = u => { const c = window.Stats && Stats.score(u); return c && (c.w + c.l + c.d) ? ` · ${c.w}:${c.l}` : ''; };
-    const row = (u, b) => `<div class="frow"><span class="fn">${esc(who(u))}${g.ok.includes(u) ? esc(score(u)) : ''}</span>${b}</div>`;
-    const btn = (a, u, t, c) => `<button class="fb ${c || ''}" type="button" data-a="${a}" data-u="${esc(u)}">${t}</button>`;
+    const score = u => { const c = window.Stats && Stats.score(u); return c && (c.w + c.l + c.d) ? `Счёт ${c.w}:${c.l}` : ''; };
+    const row = (u, b, sub) => { const p = parts(u); return `<div class="frow"><span class="fav">${esc(p.av)}</span><span class="fn"><b>${esc(p.nm)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</span>${b}</div>`; };
+    const btn = (a, u, t, c) => `<button class="fb ${c || ''}" type="button" data-a="${a}" data-u="${esc(u)}"${c === 'rm' ? ' aria-label="Убрать"' : ''}>${t}</button>`;
+    const multi = [g.in, g.ok, g.out].filter(x => x.length).length > 1;
+    const head = t => multi ? `<h3>${t}</h3>` : '';
     let h = '';
-    if (g.in.length) h += '<h3>Хотят дружить</h3>' + g.in.map(u => row(u, btn('accept', u, 'Принять', 'ok') + btn('remove', u, '✕'))).join('');
-    if (g.ok.length) h += '<h3>Друзья</h3>' + g.ok.map(u => row(u, btn('invite', u, 'Позвать играть', 'ok') + btn('remove', u, '✕'))).join('');
-    if (g.out.length) h += '<h3>Ждём ответа</h3>' + g.out.map(u => row(u, btn('remove', u, 'Отменить'))).join('');
-    $('#flist').innerHTML = h || '<p class="hint">Пока никого. Отправьте свой код или введите чужой.</p>';
+    if (g.in.length) h += head('Хотят дружить') + g.in.map(u => row(u, btn('accept', u, 'Принять', 'ok') + btn('remove', u, '✕', 'rm'), 'Хочет дружить')).join('');
+    if (g.ok.length) h += head('Друзья') + g.ok.map(u => row(u, btn('invite', u, 'Играть', 'ok') + btn('remove', u, '✕', 'rm'), score(u))).join('');
+    if (g.out.length) h += head('Ждём ответа') + g.out.map(u => row(u, btn('remove', u, 'Отменить'), 'Ждём ответа')).join('');
+    $('#flist').innerHTML = h || '<p class="none">Пока никого. Отправьте код другу.</p>';
   }
 
   const shareUrl = () => new URL('index.html#add=' + myCode, location.href).href;
@@ -150,11 +167,11 @@
     if (dlg) return dlg;
     dlg = document.createElement('dialog'); dlg.id = 'fdlg';
     dlg.innerHTML = `<button class="x" type="button" data-a="close" aria-label="Закрыть">✕</button><h2>Друзья</h2>
-<div class="facc" id="facc"></div>
-<p>Ваш код. Отправьте его другу, и он сможет вас добавить.</p><div class="fcode" id="fcode"></div>
-<div class="two"><button class="btn" type="button" data-a="copy">Копировать</button><button class="btn" type="button" data-a="share">Поделиться</button></div>
-<div class="fadd"><input class="link" id="fin" placeholder="Код друга" maxlength="10" autocapitalize="characters" autocomplete="off" aria-label="Код друга"><button class="btn" type="button" data-a="add">Добавить</button></div>
-<p class="hint" id="fmsg"></p><div id="flist"></div>`;
+<div class="fcard sec"><div><div class="flab">Ваш код</div><div class="fcode" id="fcode"></div></div>
+<div class="two"><button class="fb" type="button" data-a="copy">Копировать</button><button class="fb" type="button" data-a="share">Поделиться</button></div></div>
+<div class="sec"><div class="fadd"><input class="link" id="fin" placeholder="Код друга" maxlength="10" autocapitalize="characters" autocomplete="off" aria-label="Код друга"><button class="fb ok" type="button" data-a="add" style="padding:0 18px">Добавить</button></div><p id="fmsg"></p></div>
+<div id="flist"></div>
+<div class="facc" id="facc"></div>`;
     document.body.appendChild(dlg);
     dlg.onclick = async e => {
       if (e.target === dlg) { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); return; }
@@ -205,7 +222,7 @@
     if (!ready) F.init();
     await ready;
     if (F.off) return F.toast('Друзья пока недоступны: включите анонимный вход и обновите правила базы');
-    dialog(); render(); say(''); dlg.showModal();
+    dialog(); render(); say(''); dlg.showModal(); try { document.activeElement.blur(); } catch (e) {}
   };
 
   F.init = function () {

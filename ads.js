@@ -42,11 +42,11 @@
 .adx-tx{min-width:0}.adx-tx b{display:block;font-weight:800;font-size:16px;line-height:1.15}
 .adx-tx span{display:block;margin-top:2px;font-size:13px;line-height:1.3;opacity:.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .adx-l{position:absolute;left:8px;top:6px;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.8);color:#6b4a5c;font:700 9px Manrope,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;pointer-events:none}
-.adx-x{position:absolute;right:6px;top:6px;width:26px;height:26px;padding:0;border:0;border-radius:99px;background:rgba(74,18,54,.55);color:#fff;font:700 15px/26px Manrope,system-ui,sans-serif;text-align:center;cursor:pointer}
+.adx-x{position:absolute;right:6px;top:6px;width:28px;height:28px;padding:0;border:0;border-radius:99px;background:rgba(255,255,255,.92);color:#4A1236;box-shadow:0 1px 4px rgba(0,0,0,.35);font:700 16px/28px Manrope,system-ui,sans-serif;text-align:center;cursor:pointer}
 .adx-home{margin:0}
 .adx-end{margin:14px 0 0}
 .adx-game{flex:none;width:calc(100% - 24px);max-width:420px;margin:8px auto 0;border-radius:14px;box-shadow:0 4px 12px rgba(74,18,54,.14)}
-.adx-game.adx-image{max-width:250px}
+.adx-game.adx-image{max-width:none}.adx-game.adx-image img{aspect-ratio:11/2}
 .adx-game.adx-card a{gap:10px;padding:16px 38px 7px 10px}
 .adx-game .adx-th{width:40px;height:40px;border-radius:10px}
 .adx-game .adx-tx b{font-size:14px}
