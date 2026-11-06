@@ -1,0 +1,38 @@
+/* Единый стиль остальных игр (как в «Вопросах» и крестиках-ноликах).
+   Подключается после встроенных стилей игры, только переопределяет внешний вид. */
+:root{--teal:#2EC4B6;--plum:#6E52C9}
+body{font-family:Manrope,system-ui,sans-serif}
+h1,.card h2{font-family:Manrope,system-ui,sans-serif;font-weight:800;letter-spacing:-.6px;line-height:1.1;color:var(--deep)}
+h1{font-size:clamp(28px,8vw,36px)}
+.card h2{font-size:30px}
+.who,.hint{font-weight:700;color:var(--mute)}
+
+/* выбор режима / роли — крупные карточки */
+.pick{gap:14px}
+.pick button{padding:20px 22px;border-radius:30px;background:rgba(255,255,255,.93);box-shadow:0 14px 28px -16px rgba(142,15,69,.6);font-weight:800;font-size:21px;color:var(--deep);text-align:left;transition:transform .15s}
+.pick button:active{transform:scale(.98)}
+.pick small{font-weight:600;color:var(--mute);margin-top:3px}
+
+/* главные кнопки */
+.start,.again{border-radius:99px;padding:17px;background:linear-gradient(90deg,#E8548C,#C2185B);color:#fff;font-weight:800;font-size:18px;box-shadow:0 12px 24px -12px rgba(194,24,91,.8)}
+.start:disabled{box-shadow:none}
+.card a{font-weight:700}
+
+/* итоговое окно */
+.over{background:rgba(74,18,54,.5)}
+.card{border-radius:34px;background:#fff}
+.big{font-weight:800}
+
+/* цифры, буквы, ходы */
+.pad button,.key{background:#fff;color:var(--deep);box-shadow:0 8px 16px -10px rgba(142,15,69,.55);font-weight:800}
+.pad button{border-radius:20px}
+.key{border-radius:12px}
+.key.ok{background:linear-gradient(145deg,#E8548C,#C2185B);color:#fff}
+.try{background:#fff;box-shadow:0 8px 16px -12px rgba(142,15,69,.55)}
+.lv button{box-shadow:0 8px 16px -10px rgba(142,15,69,.55);font-weight:800}
+.bar{background:rgba(255,255,255,.8)}
+.bar i{background:linear-gradient(90deg,#E8548C,#C2185B)}
+.col{border-radius:24px}
+.sc{border-radius:99px;background:rgba(255,255,255,.78);font-weight:800}
+.sc.act{background:#fff;box-shadow:0 0 0 4px #E8548C}
+.opt{border-radius:26px;box-shadow:0 12px 24px -16px rgba(142,15,69,.6);font-weight:800}
