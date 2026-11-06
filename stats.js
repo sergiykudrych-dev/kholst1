@@ -78,7 +78,7 @@
       dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.target.classList.contains('x') || e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };
     }
     $('#sme').textContent = ((P.avatar() || '') + ' ' + (P.name() || '')).trim();
-    $('#sbody').innerHTML = '<p class="hint">Загружаем…</p>'; dlg.showModal();
+    $('#sbody').innerHTML = '<p class="hint">Загружаем…</p>'; dlg.showModal(); try { document.activeElement.blur(); } catch (e) {}
     try { await St.load(); render(); } catch (e) { $('#sbody').innerHTML = '<p class="hint">Статистика недоступна: включите анонимный вход и обновите правила базы.</p>'; }
   };
 })();

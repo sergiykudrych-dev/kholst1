@@ -46,7 +46,7 @@ h1{font:400 clamp(52px,16vw,84px)/1 'Marck Script',cursive;color:var(--deep);tex
 .go{margin-left:auto;color:var(--rose);font-size:24px}
 .toprow{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:nowrap;margin:-4px 0 12px}.toprow #who{min-width:0;max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.toprow .who{height:42px;padding:0 16px}.toprow .who.ic{position:relative;flex:none;width:42px;padding:0;justify-content:center;font-size:19px;line-height:1}.bdg{position:absolute;right:-3px;top:-3px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#C2185B;color:#fff;font:700 11px/18px Manrope,sans-serif;font-style:normal;text-align:center}.lead b{color:var(--rose)}
 .who{margin:0;padding:9px 16px;border:0;border-radius:999px;background:rgba(255,255,255,.8);color:var(--deep);font:700 14px Manrope,sans-serif;cursor:pointer}
-.foot{text-align:center;font-size:12px}.foot a{color:var(--mute)}
+.foot{text-align:center;font-size:12px}.foot a,.foot span{color:var(--mute)}
 .soon{padding:18px;border:2px dashed rgba(194,24,91,.35);border-radius:28px;text-align:center;color:var(--mute);font-size:14px}
 dialog{border:0;border-radius:28px;padding:26px 22px 22px;width:min(400px,calc(100vw - 32px));margin:auto;background:#FFF8FA;color:var(--ink);box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
 dialog::backdrop{background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
@@ -58,6 +58,7 @@ dialog p{text-align:center;color:var(--mute);font-size:14px;margin:8px 0 16px}
 .play{width:100%;padding:15px;border:0;border-radius:16px;background:var(--rose);color:#fff;font:700 17px Manrope,sans-serif;cursor:pointer}
 .x{position:absolute;top:8px;right:10px;width:40px;height:40px;border:0;background:none;font-size:22px;color:var(--mute);cursor:pointer}
 .hint{font-size:12px;color:var(--mute);text-align:center;margin-top:10px}
+dialog .x:focus,dialog .x:focus-visible{outline:none}
 button:focus-visible,input:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){#hearts span{animation:none;bottom:auto;top:calc(var(--y)*1%)}.game{transition:none}}
 html,body,button,input,a{touch-action:manipulation}
@@ -110,7 +111,7 @@ html,body,button,input,a{touch-action:manipulation}
     <span class="go">♥&#xFE0E;</span>
   </button>
   <div class="soon">Скоро здесь появятся новые игры ♥&#xFE0E;</div>
-  <p class="foot"><a href="privacy.html">Конфиденциальность</a></p>
+  <p class="foot"><a href="privacy.html">Конфиденциальность</a><br><span id="ver"></span></p>
 </main>
 
 <dialog id="dlg">
@@ -127,6 +128,7 @@ html,body,button,input,a{touch-action:manipulation}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="version.js"></script><script src="version-check.js"></script>
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="ads.js" data-mode="home"></script>
@@ -144,7 +146,7 @@ for (let i = 0; i < 16; i++) {
 const showRoom = (page, code) => {
   link.value = new URL(page + '#room=' + code, location.href).href;
   $('#hint').hidden = location.protocol !== 'file:';
-  dlg.showModal();
+  dlg.showModal(); try { document.activeElement.blur(); } catch (e) {}
 };
 const open = page => {
   if (window.Track) Track.event('room_created', { game: page.replace(/\.html$/, '') });
@@ -171,6 +173,7 @@ if (!Profile.has() && !Profile.skipped()) Profile.ask().then(paintWho);
 $('#fr').onclick = () => Friends.open();
 $('#st').onclick = () => Stats.open();
 Friends.init();
+try { if (localStorage.getItem('kh_owner') === '1') Ver.mount($('#ver')); } catch (e) {}
 $('#x').onclick = () => dlg.close();
 dlg.onclick = e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close(); };
 link.onclick = () => link.select();
