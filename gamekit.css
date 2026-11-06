@@ -87,3 +87,6 @@ header .chip.has{pointer-events:none}
 .k-acts .btn2{flex:none;width:auto;margin-top:0;padding:0 22px;border-radius:99px;background:#fff;border:2px solid var(--rose);color:var(--rose);font-weight:800}
 
 .k-p{gap:6px;padding:0 10px 0 6px}
+
+/* кнопка «На главную» в окнах итога */
+.card a.home{display:inline-block;margin:12px 0 0;padding:0;background:none;border-radius:0;color:var(--mute);font-weight:700;font-size:14px;text-decoration:underline}

@@ -58,3 +58,6 @@ h1{font-size:clamp(28px,8vw,36px)}
 .k-mode small{font-size:13px;font-weight:600;color:var(--mute);line-height:1.25}
 .k-pill{display:grid;place-items:center;min-height:54px;padding:0 24px;border-radius:99px;background:#fff;box-shadow:0 10px 22px -12px rgba(142,15,69,.55);font-weight:800;font-size:19px;color:var(--deep);text-align:center}
 .k-pill.sm{min-height:40px;padding:0 18px;font-size:15px;background:rgba(255,255,255,.85);box-shadow:none}
+
+/* кнопка «На главную» в окнах итога */
+.card a.home{display:inline-block;margin:12px 0 0;padding:0;background:none;border-radius:0;color:var(--mute);font-weight:700;font-size:14px;text-decoration:underline}

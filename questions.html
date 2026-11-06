@@ -97,7 +97,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .res{font-weight:800;font-size:20px;color:var(--rose);text-align:center}
 </style>
 <link rel="stylesheet" href="gamehead.css?v=2">
-<link rel="stylesheet" href="gamekit.css?v=5">
+<link rel="stylesheet" href="gamekit.css?v=7">
 </head>
 <body>
 <header>
@@ -181,7 +181,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       const m = S.m || 0, r = m / N;
       const txt = r >= .75 ? 'Вы почти читаете мысли друг друга ♥' : r >= .5 ? 'Вы очень похожи — и это здорово' : r >= .3 ? 'Вы разные, и в этом интерес' : 'Противоположности притягиваются!';
       view.innerHTML = `<div class="mid"><div class="k-bigheart">♥&#xFE0E;</div><h1 class="k-ttl">Готово</h1></div>
-        <div class="over"><div class="card"><div class="k-bigheart">♥&#xFE0E;</div><h2 class="k-h2">Вы совпали в ${m} из ${N}</h2><p class="hint" style="margin-top:8px">${txt}</p><button class="again start" data-act="again">Играть ещё</button><a href="index.html">На главную</a></div></div>`;
+        <div class="over"><div class="card"><div class="k-bigheart">♥&#xFE0E;</div><h2 class="k-h2">Вы совпали в ${m} из ${N}</h2><p class="hint" style="margin-top:8px">${txt}</p><button class="again start" data-act="again">Играть ещё</button><a class="home" href="index.html">На главную</a></div></div>`;
       if (!endBurst && r >= .5) { endBurst = true; setTimeout(() => Kit.burst(innerWidth / 2, innerHeight * .35, 44), 250); }
       return;
     }
