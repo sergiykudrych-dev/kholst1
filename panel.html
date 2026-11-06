@@ -131,9 +131,12 @@ function adAdmin() {
   const fixUrl = u => /^https?:\/\//i.test(u) ? u.replace(/^http:/i, 'https:') : (u ? 'https://' + u : '');
   const cur = () => ({ id: 'pv', type: type(), img: imgData, imgGame, title: v('#at'), text: v('#ax'), url: fixUrl(v('#au')) || 'https://example.com' });
   function preview() {
-    const pv = $('#apv'); if (!imgData) { pv.hidden = true; return; }
-    pv.hidden = false; pv.innerHTML = '<small>Так будет на главной и после партии</small><div id="p1"></div><small>Так будет в играх сверху</small><div id="p2"></div>';
-    $('#p1').appendChild(Ads.render(cur(), 'home', { preview: true })); $('#p2').appendChild(Ads.render(cur(), 'game', { preview: true }));
+    const pv = $('#apv'), card = type() === 'card';
+    const showMain = !!imgData, showGame = card ? !!imgData : !!imgGame;
+    if (!showMain && !showGame) { pv.hidden = true; return; }
+    pv.hidden = false; pv.innerHTML = (showMain ? '<small>Так будет на главной и после партии</small><div id="p1"></div>' : '') + (showGame ? '<small>Так будет в играх сверху</small><div id="p2"></div>' : '');
+    if (showMain) $('#p1').appendChild(Ads.render(cur(), 'home', { preview: true }));
+    if (showGame) $('#p2').appendChild(Ads.render(card ? cur() : { ...cur(), img: imgGame }, 'game', { preview: true }));
   }
   const proc = (file, t) => new Promise((res, rej) => {
     const u = URL.createObjectURL(file), im = new Image();
