@@ -45,12 +45,13 @@
 .adx-x{position:absolute;right:6px;top:6px;width:28px;height:28px;padding:0;border:0;border-radius:99px;background:rgba(255,255,255,.92);color:#4A1236;box-shadow:0 1px 4px rgba(0,0,0,.35);font:700 16px/28px Manrope,system-ui,sans-serif;text-align:center;cursor:pointer}
 .adx-home{margin:0}
 .adx-end{margin:14px 0 0}
-.adx-game{flex:none;width:calc(100% - 24px);max-width:420px;margin:8px auto 0;border-radius:14px;box-shadow:0 4px 12px rgba(74,18,54,.14)}
+.adx-game{flex:none;width:calc(100% - 24px);max-width:420px;margin:max(8px,calc(env(safe-area-inset-top) + 2px)) auto 0;border-radius:14px;box-shadow:0 4px 12px rgba(74,18,54,.14)}
 .adx-game.adx-image{max-width:none}.adx-game.adx-image img{aspect-ratio:11/2}
 .adx-game.adx-card a{gap:10px;padding:16px 38px 7px 10px}
 .adx-game .adx-th{width:40px;height:40px;border-radius:10px}
 .adx-game .adx-tx b{font-size:14px}
-.adx-game .adx-tx span{font-size:12px;-webkit-line-clamp:1}`;
+.adx-game .adx-tx span{font-size:12px;-webkit-line-clamp:1}
+.adx-game + header,body:has(> .adx-game) header{padding-top:10px!important}`;
     document.head.appendChild(s);
   }
 
