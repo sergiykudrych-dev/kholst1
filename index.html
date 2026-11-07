@@ -56,6 +56,14 @@ h1{font:400 clamp(52px,16vw,84px)/1 'Marck Script',cursive;color:var(--deep);tex
 .soon{padding:18px;border:2px dashed rgba(194,24,91,.35);border-radius:28px;text-align:center;color:var(--mute);font-size:14px}
 dialog{border:0;border-radius:28px;padding:26px 22px 22px;width:min(400px,calc(100vw - 32px));margin:auto;background:#FFF8FA;color:var(--ink);box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
 dialog::backdrop{background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
+#dlg{max-height:92dvh;overflow:auto}.rfr{margin:2px 0 14px}.rfr[hidden]{display:none}
+.rfr h3{font:800 12px Manrope,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);text-align:center;margin:4px 0 8px}
+.rfr .r{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:16px;background:#fff;margin-top:6px}
+.rfr .r i{font-style:normal;width:36px;height:36px;border-radius:50%;background:#FFE3EE;display:grid;place-items:center;font-size:20px;flex:none}
+.rfr .r b{flex:1;min-width:0;font:700 15px Manrope,sans-serif;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rfr .r button{flex:none;padding:8px 14px;border:0;border-radius:99px;background:linear-gradient(90deg,#E8548C,#C2185B);color:#fff;font:800 13px Manrope,sans-serif;cursor:pointer}
+.rfr .r button:disabled{opacity:.6}
+.rfr .or{font:700 13px Manrope,sans-serif;color:var(--mute);text-align:center;margin:12px 0 0}
 dialog h2{font:400 38px/1.1 'Marck Script',cursive;color:var(--deep);text-align:center}
 dialog p{text-align:center;color:var(--mute);font-size:14px;margin:8px 0 16px}
 .link{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:14px;background:#fff;font:600 14px Manrope,sans-serif;color:var(--ink)}
@@ -172,6 +180,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
   <button class="x" id="x" aria-label="Закрыть">✕</button>
   <h2>Комната для двоих</h2>
   <p>Отправьте ссылку тому, с кем хотите играть, и нажмите «Играть».</p>
+  <div class="rfr" id="rfr" hidden></div>
   <input class="link" id="link" readonly aria-label="Ссылка на комнату">
   <div class="two"><button class="btn" id="share">Поделиться</button><button class="btn" id="copy">Копировать</button></div>
   <button class="play" id="play">Играть</button>
@@ -199,7 +208,17 @@ for (let i = 0; i < 16; i++) {
   s.style.cssText = `left:${Math.random() * 100}%;font-size:${14 + Math.random() * 34}px;opacity:${.25 + Math.random() * .35};animation-duration:${14 + Math.random() * 16}s;animation-delay:-${Math.random() * 30}s;--y:${y}`;
   $('#hearts').append(s);
 }
+let roomPage = '', roomCode = '';
+const paintFriends = () => {
+  const box = $('#rfr'); if (!box) return;
+  const fr = (window.Friends && Friends.friends) ? Friends.friends() : [];
+  box.hidden = !fr.length;
+  if (!fr.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<h3>Позвать друга</h3>' + fr.map(f => `<div class="r"><i>${Kit0(f.av)}</i><b>${Kit0(f.nm)}</b><button type="button" data-u="${Kit0(f.uid)}">Позвать</button></div>`).join('') + '<p class="or">или отправьте ссылку</p>';
+};
+const Kit0 = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const showRoom = (page, code) => {
+  roomPage = page; roomCode = code; paintFriends();
   link.value = new URL(page + '#room=' + code, location.href).href;
   $('#hint').hidden = location.protocol !== 'file:';
   dlg.showModal(); try { document.activeElement.blur(); } catch (e) {}
@@ -230,6 +249,14 @@ if (!Profile.has() && !Profile.skipped()) Profile.ask().then(paintWho);
 $('#fr').onclick = () => Friends.open();
 $('#st').onclick = () => Stats.open();
 Friends.init();
+Friends.onList = () => { if (dlg.open) paintFriends(); };
+$('#rfr').onclick = e => {
+  const b = e.target.closest('button[data-u]'); if (!b) return;
+  b.disabled = true; b.textContent = 'Зовём…';
+  Friends.inviteTo(b.dataset.u, roomPage, roomCode).then(
+    () => { location.href = new URL(roomPage + '#room=' + roomCode + '&host=1', location.href).href; },
+    () => { b.disabled = false; b.textContent = 'Позвать'; Friends.toast('Не удалось отправить, попробуйте ссылкой'); });
+};
 Push.installButton($('#inst'));
 Push.bellButton($('#bell'));
 setTimeout(() => { if (window.firebase && firebase.apps.length) Push.refresh(); }, 3000);

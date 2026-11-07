@@ -85,7 +85,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .pad button{height:clamp(42px,6.5dvh,54px)}
 .start{margin-top:8px}
 </style>
-<link rel="stylesheet" href="gamehead.css?v=2">
+<link rel="stylesheet" href="gamehead.css?v=3">
 <link rel="stylesheet" href="gamestyle.css?v=7">
 </head>
 <body>
@@ -158,9 +158,9 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
         over = `<div class="over"><div class="card"><h2>${title}</h2><p class="hint">${sub}</p>
           <div class="nbs">${nb(1)}${nb(2)}</div><button class="again" data-act="again">Играть ещё</button><a class="home" href="index.html">На главную</a></div></div>`;
       }
-      view.innerHTML = `<div class="range"><p class="turn">${p === 'over' ? 'Игра окончена' : myTurn ? 'Ваш ход' : `Ходит ${pn(other)}…`}</p>
-        <p class="who">Число (${pn(other)}): от <b>${lo}</b> до <b>${hi}</b></p><div class="bar"><i style="left:${lo - 1}%;width:${hi - lo + 1}%"></i></div></div>
-        <div class="cols"><div class="col"><h3>Ваши попытки</h3>${col(mine)}</div><div class="col"><h3>Попытки: ${pn(other)}</h3>${col(theirs)}</div></div>
+      view.innerHTML = `<div class="range"><p class="turn">${p === 'over' ? 'Игра окончена' : myTurn ? 'Ваш ход' : 'Ход партнёра…'}</p>
+        <p class="who">Загаданное число: от <b>${lo}</b> до <b>${hi}</b></p><div class="bar"><i style="left:${lo - 1}%;width:${hi - lo + 1}%"></i></div></div>
+        <div class="cols"><div class="col"><h3>Ваши попытки</h3>${col(mine)}</div><div class="col"><h3>Попытки партнёра</h3>${col(theirs)}</div></div>
         <p class="mine">Ваше число: ${my}</p>${disp()}${pad(!myTurn)}
         <button class="start" data-act="check" ${myTurn && valid() ? '' : 'disabled'}>Проверить</button>${over}`;
     }

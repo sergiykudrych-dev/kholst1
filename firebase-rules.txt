@@ -44,6 +44,12 @@
         }
       }
     },
+    "push": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
     "history": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",

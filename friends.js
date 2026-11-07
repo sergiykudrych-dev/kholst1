@@ -143,6 +143,7 @@
     }
   }
   function render() {
+    try { F.onList && F.onList(); } catch (e) {}
     if (!dlg) return;
     renderAcc();
     $('#fcode').textContent = myCode;
@@ -212,6 +213,9 @@
   }
   const hideTarget = () => { if (bar) { bar.remove(); bar = null; } };
 
+  // Друзья, с которыми уже дружим (для окна «Комната для двоих»)
+  F.friends = () => Object.keys(list).filter(u => list[u].status === 'ok').map(u => ({ uid: u, ...parts(u) }));
+  F.inviteTo = (uid, page, room) => { target = { uid, name: who(uid) }; return F.sendInvite(page, room).finally(() => { target = null; }); };
   F.target = () => target;
   F.clearTarget = () => { target = null; hideTarget(); };
   // Уведомление на телефон друга (через Cloudflare Worker, адрес в firebase-config.js → PUSH_URL)

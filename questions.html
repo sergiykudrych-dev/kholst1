@@ -95,8 +95,14 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .rv div{padding:16px 12px;border-radius:20px;background:rgba(255,255,255,.88);text-align:center;font-weight:700;color:var(--deep);font-size:17px;line-height:1.25}
 .rv small{display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--mute)}
 .res{font-weight:800;font-size:20px;color:var(--rose);text-align:center}
+
+/* без скачков при выборе */
+.k-st{min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;width:100%}
+.k-st .hint{margin:0}
+.start.ghost{visibility:hidden}
+.k-pill>span{white-space:nowrap}.k-pill .k-d3{display:inline-block;width:1.2em;text-align:left}
 </style>
-<link rel="stylesheet" href="gamehead.css?v=2">
+<link rel="stylesheet" href="gamehead.css?v=3">
 <link rel="stylesheet" href="gamekit.css?v=7">
 </head>
 <body>
@@ -195,11 +201,11 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     };
     let status;
     if (!mine) status = `<div class="k-pill sm">${theirs ? esc(Kit.nm(other)) + ' уже выбрал(а)' : 'Ответы откроются, когда выберете оба'}</div>`;
-    else if (!both) status = `<div class="k-pill">Ждём ${esc(Kit.nm(other))}<span class="k-d3"><span>.</span><span>.</span><span>.</span></span></div>`;
+    else if (!both) status = `<div class="k-pill"><span>Ждём ${esc(Kit.nm(other))}<span class="k-d3"><span>.</span><span>.</span><span>.</span></span></span></div>`;
     else status = `<div class="k-pill ${same ? 'ok' : 'no'} k-pop" id="res">${same ? 'Совпали! 💗' : 'Мнения разошлись 😅'}</div><p class="hint">${same ? 'Расскажите друг другу, почему' : 'Расскажите друг другу, почему вы так выбрали'}</p>`;
     view.innerHTML = `<div class="k-top"><div class="k-dots">${dots}</div><div class="k-pill sm">Вопрос ${S.i + 1} из ${N} · совпали: ${S.m || 0} 💗</div></div>
-      <div class="mid k-mid"><p class="k-q">Что вам ближе?</p><div class="k-opts">${opt(0)}${opt(1)}</div>${status}</div>` +
-      (both ? `<button class="start" data-act="next">${last ? 'Результат' : 'Дальше'}</button>` : '');
+      <div class="mid k-mid"><p class="k-q">Что вам ближе?</p><div class="k-opts">${opt(0)}${opt(1)}</div><div class="k-st">${status}</div></div>` +
+      `<button class="start${both ? '' : ' ghost'}" data-act="next"${both ? '' : ' tabindex="-1" aria-hidden="true" disabled'}>${last ? 'Результат' : 'Дальше'}</button>`;
     if (same && burstKey !== S.i) { burstKey = S.i; const el = document.getElementById('res'); if (el) { const r = el.getBoundingClientRect(); Kit.burst(r.left + r.width / 2, r.top + r.height / 2); } }
   }
   Profile.on(ref, s => { S = s.val(); if (!S) { ref.transaction(x => x || fresh()); return; } render(); });

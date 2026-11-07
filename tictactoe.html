@@ -127,7 +127,7 @@ button.t{cursor:pointer}
 /* игра по центру (чуть ниже) */
 #ui{justify-content:center}#ui::before{content:"";flex:none;height:3vh}@media(max-height:760px){#ui::before{display:none}}
 </style>
-<link rel="stylesheet" href="gamehead.css?v=2">
+<link rel="stylesheet" href="gamehead.css?v=3">
 <style>header #inv.has{display:none}</style>
 <link rel="stylesheet" href="gamekit.css?v=7">
 </head>
@@ -204,7 +204,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       return myTurn ? `<button class="${cls}" data-act="mv" data-i="${i}" aria-label="Клетка ${i + 1}"></button>` : `<div class="${cls}" data-i="${i}"></div>`;
     }).join('');
     const won = p === 'over' && S.res === 'win' + me;
-    const status = p === 'over' ? (S.res === 'draw' ? 'Ничья! 🤝' : won ? 'Вы победили! 🎉' : `Победа: ${esc(Kit.nm(other))}`) : myTurn ? 'Ваш ход ✨' : `Ход: ${esc(Kit.nm(other))}…`;
+    const status = p === 'over' ? (S.res === 'draw' ? 'Ничья! 🤝' : won ? 'Вы победили! 🎉' : `Победа: ${esc(Kit.nm(other))}`) : myTurn ? 'Ваш ход ✨' : 'Ход партнёра…';
     const style = `grid-template-columns:repeat(${n},1fr);` + (n === 3 ? 'width:min(100%,340px);gap:12px;--p:18%' : 'width:min(100%,min(520px,58dvh));gap:3px;--p:14%');
     const pl = q => `<span class="k-p ${p === 'play' && S.turn === q ? 'act' : ''}"><i>${esc(Kit.av(q))}</i><span>${esc(Kit.nm(q))}</span> <b class="sym ${q === 1 ? 'sx' : 'so'}">${q === 1 ? '✕' : '○'}</b>${S.games ? `<em class="k-w">${S['w' + q] || 0}</em>` : ''}</span>`;
     clearTimeout(overT); if (p !== 'over') showOver = false;
