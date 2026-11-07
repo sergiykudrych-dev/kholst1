@@ -10,3 +10,6 @@ header .chip.pc b{position:absolute;right:11px;top:50%;margin-top:-5px;width:10p
 header .chip.has{pointer-events:none}
 header .fx-b,header #fx-btn{flex:none;width:44px;padding:0;font-size:20px}
 @media(max-width:480px){header .chip .bk{display:none}header .chip:first-child{width:44px;padding:0}}
+
+/* Приложение на экране «Домой»: полоска под жестом «домой» — в цвет низа фона */
+@media (display-mode: standalone){html{background:#F9ADCC!important}}
