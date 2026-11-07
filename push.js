@@ -24,6 +24,7 @@
 .instbtn:not([hidden]) + .sharesite{margin-top:0}
 #pdlg{max-width:420px;padding:22px 18px 18px}
 #pdlg h2{font-size:30px;margin:0 0 6px}
+
 #pdlg .x{top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:#F7E1EA;font-size:15px;line-height:36px;padding:0;color:#8E0F45}
 #pdlg .pl{margin:0 0 14px;color:#8A5570;font-size:14px}
 #pdlg ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
@@ -46,7 +47,15 @@ body.hasbell main{padding-top:max(76px,calc(env(safe-area-inset-top) + 60px))}.n
 .fpush small{display:block;color:#8A5570;font-size:13px}
 .fpush .fb{margin-top:10px}
 .fpush .on{color:#1F6B3A}
-.fpush .lnk{display:inline-block;margin:8px 8px 0;background:none;border:0;padding:0;color:#8A5570;text-decoration:underline;font:600 13px Manrope,system-ui,sans-serif;cursor:pointer}`;
+.fpush .lnk{display:inline-block;margin:8px 8px 0;background:none;border:0;padding:0;color:#8A5570;text-decoration:underline;font:600 13px Manrope,system-ui,sans-serif;cursor:pointer}
+#pdlg{background:#FBE4EE}
+#pdlg::backdrop{background:rgba(40,4,32,.62)}
+#pdlg h2{color:#8E0F45}
+#pdlg .pl{color:#5E2346;font-weight:600}
+#pdlg li{box-shadow:0 4px 12px -6px rgba(142,15,69,.45);color:#2E0A22}
+#pdlg li small{color:#7A3D5E!important}
+#pdlg .pnote{background:#fff;border-color:#D98AAA;color:#2E0A22}
+#pdlg .x{background:#fff}`;
   document.head.appendChild(css);
 
   const ICON_SHARE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4M6 11H5v10h14V11h-1"/></svg>';
@@ -60,7 +69,7 @@ body.hasbell main{padding-top:max(76px,calc(env(safe-area-inset-top) + 60px))}.n
     const li = (i, h) => `<li><span class="n">${i}</span><span>${h}</span></li>`;
     if (inApp) return `<p class="pl">Сейчас сайт открыт внутри другого приложения. Установить отсюда нельзя.</p><ol>${li(1, 'Нажмите <b>⋯</b> или <b>⋮</b> в углу')}${li(2, isIOS ? 'Выберите <b>«Открыть в Safari»</b>' : 'Выберите <b>«Открыть в браузере»</b>')}${li(3, 'И нажмите здесь «Установить» ещё раз')}</ol>`;
     if (isIOS) return `<p class="pl">Иконка появится на экране телефона, игры откроются на весь экран, и можно будет включить уведомления.</p><ol>
-${li(1, `Нажмите ${ICON_SHARE}<b>«Поделиться»</b> внизу экрана<br><small style="color:#8A5570">в новом Safari: сначала <b>⋯</b></small>`)}
+${li(1, `Нажмите ${ICON_SHARE}<b>«Поделиться»</b> внизу экрана<br><small>в новом Safari: сначала <b>⋯</b></small>`)}
 ${li(2, `Пролистайте и выберите ${ICON_PLUS}<b>«На экран „Домой“»</b>`)}
 ${li(3, 'Нажмите <b>«Добавить»</b>')}</ol>
 <p class="pnote">💡 В приложении у iPhone отдельная память. Чтобы друзья и статистика перенеслись, сначала сохраните профиль: <b>Друзья → Сохранить через Google</b>, а в приложении войдите тем же аккаунтом.</p>`;
