@@ -106,6 +106,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 <body>
 <div id="hearts" aria-hidden="true"></div>
 <main>
+  <button class="notibtn" id="bell" type="button" hidden></button>
   <button class="statbtn" id="st" type="button" aria-label="Статистика" title="Статистика">📊</button>
   <h1>Во что сыграем?<span class="h1s">Игры для двоих онлайн</span></h1>
   <p class="lead">Выберите игру <b>→</b> отправьте ссылку <b>→</b> играйте</p>
@@ -162,6 +163,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
     <p>Здесь можно играть в крестики-нолики (3 или 5 в ряд), угадывать числа и слова друг друга, искать пары карточек, рисовать на общем холсте, создавать смешных монстров, играть в «Не урони яйцо» и «Чипсы-сюрприз», а в игре «Вопросы друг другу» узнать, насколько вы похожи.</p>
     <p class="about-links">Подборки: <a href="igry-dlya-par-na-rasstoyanii.html">игры для пар на расстоянии</a> · <a href="voprosy-dlya-pary.html">вопросы для пары</a> · <a href="risovat-vmeste-onlayn.html">рисовать вместе</a> · <a href="krestiki-noliki-onlayn.html">крестики-нолики</a> · <a href="ugadaj-chislo-onlayn.html">угадай число</a></p>
   </section>
+  <button class="instbtn" id="inst" type="button" hidden>📲 Установить как приложение</button>
   <button class="sharesite" id="sharesite">💌 Рассказать друзьям</button>
   <p class="foot"><a href="privacy.html">Конфиденциальность</a><br><span id="ver"></span></p>
 </main>
@@ -185,6 +187,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 <script src="profile.js"></script>
 <script src="ads.js" data-mode="home"></script>
 <script src="stats.js"></script>
+<script src="push.js"></script>
 <script src="friends.js"></script>
 <script src="fx.js"></script>
 <script>
@@ -227,6 +230,9 @@ if (!Profile.has() && !Profile.skipped()) Profile.ask().then(paintWho);
 $('#fr').onclick = () => Friends.open();
 $('#st').onclick = () => Stats.open();
 Friends.init();
+Push.installButton($('#inst'));
+Push.bellButton($('#bell'));
+setTimeout(() => { if (window.firebase && firebase.apps.length) Push.refresh(); }, 3000);
 $('#sharesite').onclick = e => Fx.shareSite(e.currentTarget);
 try { if (localStorage.getItem('kh_owner') === '1') Ver.mount($('#ver')); } catch (e) {}
 $('#x').onclick = () => dlg.close();

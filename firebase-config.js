@@ -9,3 +9,7 @@ window.FIREBASE_CONFIG = {
   measurementId: "G-1FT0VMKQPK",   // для статистики: Firebase → Project settings → Integrations → Google Analytics, формат G-XXXXXXXXXX
   appId: "1:804326345109:web:89cbb90a38e2fae1c28e9c"
 };
+
+// Ключ для уведомлений: Firebase → Настройки проекта → Cloud Messaging → Web Push certificates → Generate key pair.
+// Вставьте сюда «Key pair» (это публичный ключ, он не секретный). Пока пусто — блок уведомлений скрыт.
+window.PUSH_VAPID_KEY = '';
