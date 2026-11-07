@@ -123,7 +123,7 @@
         up['friends/' + me + '/' + uid] = { status: 'out', name: u.name || null, avatar: u.avatar || null, t };
         up['friends/' + uid + '/' + me] = { status: 'in', name: P.name(), avatar: P.avatar() || null, t };
       }
-      await db.ref().update(up); ev(cur && cur.status === 'in' ? 'friend_added' : 'friend_request');
+      await db.ref().update(up); ev(cur && cur.status === 'in' ? 'friend_added' : 'friend_request'); F.notify(cur && cur.status === 'in' ? 'accepted' : 'friend', uid);
       const i = $('#fin'); if (i) i.value = '';
       say(cur && cur.status === 'in' ? 'Вы теперь друзья!' : 'Запрос отправлен');
     } catch (e) { say('Не получилось. Проверьте интернет и правила базы.'); }
@@ -182,7 +182,7 @@
         else if (a === 'copy') { try { await navigator.clipboard.writeText(myCode); } catch (_) { const i = $('#fcode'); getSelection().selectAllChildren(i); document.execCommand('copy'); } say('Код скопирован'); }
         else if (a === 'share') { if (navigator.share) { try { await navigator.share({ title: 'Во что сыграем?', text: shareText(), url: shareUrl() }); } catch (_) {} } else { await navigator.clipboard.writeText(shareText() + ' ' + shareUrl()); say('Ссылка скопирована'); } }
         else if (a === 'add') await addByCode($('#fin').value);
-        else if (a === 'accept') { await ensureName(); const up = {}; up['friends/' + me + '/' + u + '/status'] = 'ok'; up['friends/' + u + '/' + me + '/status'] = 'ok'; await db.ref().update(up); ev('friend_added'); }
+        else if (a === 'accept') { await ensureName(); const up = {}; up['friends/' + me + '/' + u + '/status'] = 'ok'; up['friends/' + u + '/' + me + '/status'] = 'ok'; await db.ref().update(up); ev('friend_added'); F.notify('accepted', u); }
         else if (a === 'remove') await unlink(u);
         else if (a === 'google') {
           say('Открываем вход…');
@@ -214,9 +214,24 @@
 
   F.target = () => target;
   F.clearTarget = () => { target = null; hideTarget(); };
-  F.sendInvite = (page, room) => (ev('invite_sent', { game: String(page).replace(/\.html$/, '') }), Promise.resolve(db.ref('invites/' + target.uid).push({
-    from: me, name: P.name() || null, avatar: P.avatar() || null, page: String(page).replace(/\.html$/, ''), room, t: Date.now()
-  })));
+  // Уведомление на телефон друга (через Cloudflare Worker, адрес в firebase-config.js → PUSH_URL)
+  F.notify = async (type, to, key) => {
+    const url = window.PUSH_URL; if (!url || !to) return;
+    try {
+      const u = firebase.auth().currentUser; if (!u) return;
+      const tok = await u.getIdToken();
+      const c = new AbortController(), tm = setTimeout(() => c.abort(), 5000);
+      await fetch(url, { method: 'POST', headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: JSON.stringify({ type, to, key }), signal: c.signal });
+      clearTimeout(tm);
+    } catch (e) {}
+  };
+  F.sendInvite = (page, room) => {
+    ev('invite_sent', { game: String(page).replace(/\.html$/, '') });
+    const to = target.uid;
+    const ref = db.ref('invites/' + to).push({ from: me, name: P.name() || null, avatar: P.avatar() || null, page: String(page).replace(/\.html$/, ''), room, t: Date.now() });
+    // ждём отправку уведомления не дольше 1.5 с, чтобы не задерживать переход в игру
+    return Promise.resolve(ref).then(() => Promise.race([F.notify('invite', to, ref.key), new Promise(r => setTimeout(r, 1500))]));
+  };
 
   F.open = async function () {
     if (!ready) F.init();

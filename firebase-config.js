@@ -13,3 +13,5 @@ window.FIREBASE_CONFIG = {
 // Ключ для уведомлений: Firebase → Настройки проекта → Cloud Messaging → Web Push certificates → Generate key pair.
 // Вставьте сюда «Key pair» (это публичный ключ, он не секретный). Пока пусто — блок уведомлений скрыт.
 window.PUSH_VAPID_KEY = 'BOosaja1j7i455dy9BvThNUjdfDIS5ppt54zxxhg0jOu3wJT8KafxA08458hM5P8V-aYHiSB4qjXU49Ki5MJcIc';
+// Адрес Cloudflare Worker для отправки уведомлений (этап 2). Пока пусто — уведомления друзьям не отправляются.
+window.PUSH_URL = 'https://twosome-push.sergiykudrych2001.workers.dev/';
