@@ -18,7 +18,7 @@
 body{min-height:100dvh;font:500 16px/1.55 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed}
 main{max-width:600px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 20px max(40px,env(safe-area-inset-bottom))}
 a.back{display:inline-block;margin-bottom:12px;color:var(--deep);font-weight:700;text-decoration:none}
-h1{font:400 clamp(38px,11vw,54px)/1.1 'Marck Script',cursive;color:var(--deep);margin-bottom:14px}
+h1{font:400 clamp(38px,11vw,54px)/1.1 'Marck Script',cursive;color:var(--deep);margin-bottom:14px;overflow-wrap:anywhere}main p+p{margin-top:10px}
 h2{margin:22px 0 6px;font-size:18px;color:var(--deep)}
 p,li{color:var(--ink)}ul{padding-left:22px}li{margin:4px 0}
 .card{margin-top:22px;padding:18px;border-radius:22px;background:rgba(255,255,255,.85)}
@@ -32,13 +32,20 @@ button.y{background:var(--rose);color:#fff}
 <a class="back" href="index.html">← Игры</a>
 <h1>Конфиденциальность</h1>
 <p>Сайт «Во что сыграем?» — игры для двоих. Вот что с вашими данными.</p>
+<p><b>Возраст.</b> Сайт предназначен для пользователей от 16 лет. Если вам меньше 16, пользуйтесь сайтом только с разрешения родителей.</p>
 
 <h2>Что нужно, чтобы игры работали</h2>
 <ul>
 <li>Имя и аватарка, которые вы выбрали, — они видны второму игроку.</li>
 <li>Ход игры, результаты партий и список друзей — они хранятся в базе Firebase (Google).</li>
 <li>Если вы сохранили профиль через Google, входом служит ваш аккаунт Google (почту видите только вы).</li>
+<li>Имя, аватарка и настройки также запоминаются на вашем устройстве, чтобы не вводить их каждый раз.</li>
 </ul>
+
+<h2>Уведомления (если вы их включили)</h2>
+<p>Если вы нажали 🔔 и разрешили уведомления, мы сохраняем в базе Firebase технический адрес вашего устройства для уведомлений (без имени, почты и номера телефона). По нему приходят сообщения, когда друг зовёт вас играть, хочет добавить вас в друзья или принял вашу заявку.</p>
+<p>Уведомления доставляет сервис Firebase Cloud Messaging (Google). Отправляет их наша небольшая серверная функция на Cloudflare: она получает только, кто кого пригласил и в какую игру, проверяет, что приглашение настоящее, и ничего не хранит у себя.</p>
+<p>Выключить уведомления можно кнопкой 🔔 на главной или в настройках телефона. После выключения адрес устройства удаляется из базы.</p>
 
 <h2>Реклама на сайте</h2>
 <p>На сайте могут показываться рекламные баннеры с пометкой «Реклама». Мы считаем только общее число показов и нажатий на каждый баннер, без имён, почт и идентификаторов, чтобы рекламодатель видел результат. Если вы закрыли баннер, мы запоминаем это на вашем устройстве, чтобы не показывать его снова какое-то время.</p>
@@ -51,6 +58,13 @@ button.y{background:var(--rose);color:#fff}
 <b id="st">Статистика: —</b>
 <div class="row"><button type="button" data-v="denied">Отказаться</button><button type="button" class="y" data-v="granted">Принять</button></div>
 </div>
+<h2>Как удалить свои данные</h2>
+<ul>
+<li>Друзей можно удалить в окне «Друзья», уведомления — выключить кнопкой 🔔.</li>
+<li>Если очистить данные сайта в браузере, профиль на этом устройстве удалится. Старые комнаты игр и результаты больше ни с кем не связаны.</li>
+</ul>
+<p style="opacity:.7;font-size:13px">Обновлено: 7 ноября 2026</p>
+
 </main>
 <script src="firebase-config.js"></script>
 <script src="analytics.js"></script>
