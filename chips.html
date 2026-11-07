@@ -120,8 +120,9 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 .board4 .cell .b{top:2px;right:6px;font-size:20px}
 .board4.b3{grid-template-columns:repeat(3,1fr);max-width:min(300px,36dvh);gap:8px}
 .b3row{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
-.b3col{--bw:min(340px,40dvh);width:calc(var(--bw) + 24px);max-width:100%;display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:26px;background:rgba(255,255,255,.6);transition:box-shadow .2s,background .2s}
-.b3col:not(.act){--bw:min(220px,27dvh)}
+.b3col{--free:calc(100dvh - 230px);--bw:min(340px,calc(var(--free) * .6));width:calc(var(--bw) + 24px);max-width:100%;display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:26px;background:rgba(255,255,255,.6);transition:box-shadow .2s,background .2s}
+.b3col:not(.act){--bw:min(220px,calc(var(--free) * .4))}
+body:has(> .adx-game) .b3col{--free:calc(100dvh - 310px)}
 .b3col.ring{background:#fff;box-shadow:0 0 0 4px #E8548C,0 14px 26px -16px rgba(142,15,69,.6)}
 .b3col .ph{display:flex;align-items:center;gap:8px;min-width:0;font-weight:800;font-size:14px;color:var(--deep)}
 .b3col .ph i{flex:none;font-style:normal;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#FFE3EE;font-size:15px}
@@ -133,6 +134,9 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 .board4 .cell:not(.sel){background:#FFF1F6}
 .b3col .board4 .cell .c{width:70%;height:54%}
 .cap{font-weight:800;font-size:14px;color:var(--mute);text-align:center}
+
+/* игра по центру (чуть ниже) */
+#ui{justify-content:center}#ui::before{content:"";flex:none;height:3vh}@media(max-height:760px){#ui::before{display:none}}
 </style>
 <link rel="stylesheet" href="gamehead.css?v=2">
 <link rel="stylesheet" href="gamestyle.css?v=7">
