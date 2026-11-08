@@ -28,3 +28,8 @@ header{position:relative;z-index:20}
 #ui{justify-content:flex-start!important;overflow-y:auto;overflow-x:hidden}
 #ui::before{content:"";flex:none;margin-top:auto}
 #ui::after{content:"";flex:none;margin-bottom:auto}
+
+/* Чат: кнопка 💬 рядом с 💗, имя партнёра по центру шапки */
+header #inv{position:absolute;left:50%;transform:translateX(-50%);max-width:calc(100% - 232px)!important}
+header .ch-b{margin-left:auto}
+header #fx-btn{margin-left:0}
