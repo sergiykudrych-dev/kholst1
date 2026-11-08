@@ -64,6 +64,12 @@ dialog::backdrop{background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
 .rfr .r button{flex:none;padding:8px 14px;border:0;border-radius:99px;background:linear-gradient(90deg,#E8548C,#C2185B);color:#fff;font:800 13px Manrope,sans-serif;cursor:pointer}
 .rfr .r button:disabled{opacity:.6}
 .rfr .or{font:700 13px Manrope,sans-serif;color:var(--mute);text-align:center;margin:12px 0 0}
+.back2{display:flex;align-items:center;gap:12px;width:100%;padding:12px 12px 12px 14px;border:0;border-radius:24px;background:linear-gradient(90deg,#FFE08A,#FFC94D);color:#4A1236;text-align:left;cursor:pointer;box-shadow:0 14px 28px -16px rgba(20,0,30,.7);font:inherit}
+.back2[hidden]{display:none}
+.back2 i{font-style:normal;flex:none;width:44px;height:44px;border-radius:14px;background:#fff;display:grid;place-items:center;font-size:24px}
+.back2 b{display:block;font:800 16px/1.2 Manrope,sans-serif}.back2 small{display:block;font:700 13px Manrope,sans-serif;opacity:.75}
+.back2 span.t{flex:1;min-width:0}
+.back2 .bx{flex:none;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.7);display:grid;place-items:center;font-size:14px;color:#8A5570}
 dialog h2{font:400 38px/1.1 'Marck Script',cursive;color:var(--deep);text-align:center}
 dialog p{text-align:center;color:var(--mute);font-size:14px;margin:8px 0 16px}
 .link{width:100%;padding:12px 14px;border:1.5px solid #F3B6CC;border-radius:14px;background:#fff;font:600 14px Manrope,sans-serif;color:var(--ink)}
@@ -121,6 +127,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
   <h1>Во что сыграем?<span class="h1s">Игры для двоих онлайн</span></h1>
   <p class="lead">Выберите игру <b>→</b> отправьте ссылку <b>→</b> играйте</p>
   <div class="toprow"><button class="who" id="who" type="button"></button><button class="who ic fr" id="fr" type="button" aria-label="Друзья" title="Друзья">👥 Друзья</button></div>
+  <button class="back2" id="back2" type="button" hidden></button>
   <button class="game hero" id="qs">
     <span class="tile"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M6 4h22a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H16l-7 6v-6H6a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="#fff"/><path d="M14 11a4 4 0 1 1 5 4v2" stroke="#C2185B" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="19" cy="21" r="1.8" fill="#C2185B"/></svg></span>
     <span><b>Вопросы друг другу</b><small>Выбирайте и узнайте, насколько вы похожи</small></span>
@@ -210,7 +217,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 <script src="stats.js"></script>
 <script src="push.js"></script>
 <script src="friends.js"></script>
-<script src="fx.js"></script>
+<script src="fx.js?v=2"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), dlg = $('#dlg'), link = $('#link');
@@ -274,6 +281,20 @@ $('#rfr').onclick = e => {
 Push.installButton($('#inst'));
 Push.bellButton($('#bell'));
 setTimeout(() => { if (window.firebase && firebase.apps.length) Push.refresh(); }, 3000);
+
+(() => {
+  const NAMES = { paint: ['🎨', 'Холст'], word: ['🔤', 'Угадай слово'], number: ['🔢', 'Угадай число'], egg: ['🥚', 'Не урони яйцо'], chips: ['🎁', 'Фишки'], tictactoe: ['❌', 'Крестики-нолики'], memory: ['🧩', 'Найди пару'], questions: ['❓', 'Вопросы друг другу'], monster: ['👾', 'Создай монстра'], seabattle: ['🚢', 'Морской бой'], truth: ['🤔', 'Правда или действие'] };
+  let L = null; try { L = JSON.parse(localStorage.getItem('kh_last') || 'null'); } catch (e) {}
+  const b = $('#back2');
+  if (!L || !NAMES[L.p] || !/^[\w-]+$/.test(L.r || '') || Date.now() - (L.t || 0) > 12 * 3600e3) return;
+  const [em, nm] = NAMES[L.p], ago = Math.round((Date.now() - L.t) / 60000);
+  b.innerHTML = `<i>${em}</i><span class="t"><b>Вернуться в игру</b><small>${nm} · ${ago < 1 ? 'только что' : ago < 60 ? ago + ' мин назад' : Math.round(ago / 60) + ' ч назад'}</small></span><span class="bx" data-x="1" aria-label="Скрыть">✕</span>`;
+  b.hidden = false;
+  b.onclick = e => {
+    if (e.target.closest('[data-x]')) { try { localStorage.removeItem('kh_last'); } catch (_) {} b.hidden = true; return; }
+    location.href = new URL(L.p + '.html#room=' + L.r + (L.h ? '&host=1' : ''), location.href).href;
+  };
+})();
 $('#sharesite').onclick = e => Fx.shareSite(e.currentTarget);
 try { if (localStorage.getItem('kh_owner') === '1') Ver.mount($('#ver')); } catch (e) {}
 $('#x').onclick = () => dlg.close();

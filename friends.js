@@ -224,9 +224,8 @@
     try {
       const u = firebase.auth().currentUser; if (!u) return;
       const tok = await u.getIdToken();
-      const c = new AbortController(), tm = setTimeout(() => c.abort(), 5000);
-      await fetch(url, { method: 'POST', headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: JSON.stringify({ type, to, key }), signal: c.signal });
-      clearTimeout(tm);
+      // keepalive: запрос дойдёт, даже если страница сразу переходит в игру
+      await fetch(url, { method: 'POST', keepalive: true, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: JSON.stringify({ type, to, key }) });
     } catch (e) {}
   };
   F.sendInvite = (page, room) => {
@@ -234,7 +233,7 @@
     const to = target.uid;
     const ref = db.ref('invites/' + to).push({ from: me, name: P.name() || null, avatar: P.avatar() || null, page: String(page).replace(/\.html$/, ''), room, t: Date.now() });
     // ждём отправку уведомления не дольше 1.5 с, чтобы не задерживать переход в игру
-    return Promise.resolve(ref).then(() => Promise.race([F.notify('invite', to, ref.key), new Promise(r => setTimeout(r, 1500))]));
+    return Promise.resolve(ref).then(() => Promise.race([F.notify('invite', to, ref.key), new Promise(r => setTimeout(r, 2500))]));
   };
 
   F.open = async function () {

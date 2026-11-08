@@ -130,6 +130,7 @@
   /* Игра вызывает Profile.start(room, me, перерисовать) сразу после firebase.initializeApp. */
   P.start = function (room, me, onChange) {
     P.room = room; P.me = me;
+    try { localStorage.setItem('kh_last', JSON.stringify({ p: (location.pathname.split('/').pop() || '').replace(/\.html$/, ''), r: room, h: me === 1 ? 1 : 0, t: Date.now() })); } catch (e) {}
     if (me === 2) ev('room_joined');
     const db = firebase.database(), TS = firebase.database.ServerValue.TIMESTAMP;
     const chip = document.getElementById('me');

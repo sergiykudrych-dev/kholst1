@@ -13,7 +13,7 @@
   const ac = () => {
     try {
       if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (C) ctx = new C(); }
-      if (ctx && ctx.state === 'suspended') ctx.resume();
+      if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
     } catch (e) {}
     return ctx;
   };
@@ -39,7 +39,8 @@
   F.play = doPlay;
   const play = n => F.play(n);
   const unlock = () => { ac(); };
-  ['pointerdown', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, () => { lastIn = Date.now(); unlock(); }, { capture: true, passive: true }));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx) unlock(); });
+  ['pointerdown', 'touchstart', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, () => { lastIn = Date.now(); unlock(); }, { capture: true, passive: true }));
 
   /* ——— события игры (вызывает profile.js) ——— */
   let first = true, prevSig = '', prevRes = null;

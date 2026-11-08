@@ -1,28 +1,21 @@
-/* Фоновый обработчик уведомлений. Должен лежать в корне сайта рядом с index.html. */
-self.window = self;
-importScripts(
-  'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js',
-  'firebase-config.js'
-);
-
+/* Фоновый обработчик уведомлений. Должен лежать в корне сайта рядом с index.html.
+   Без Firebase SDK: показываем уведомление на КАЖДЫЙ push — иначе iPhone считает push «тихим»
+   и после нескольких таких может отключить уведомления для сайта. */
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
-firebase.initializeApp(self.FIREBASE_CONFIG);
-const messaging = firebase.messaging();
-
-// Сервер присылает только data: { title, body, url, tag }
-messaging.onBackgroundMessage(p => {
-  const d = (p && p.data) || {};
-  return self.registration.showNotification(d.title || 'Во что сыграем?', {
+self.addEventListener('push', e => {
+  let j = {};
+  try { j = e.data ? e.data.json() : {}; } catch (_) { try { j = { data: { body: e.data.text() } }; } catch (__) {} }
+  const d = Object.assign({}, j.notification || {}, j.data || {}, (j.data && j.data.data) || {});
+  e.waitUntil(self.registration.showNotification(d.title || 'Во что сыграем?', {
     body: d.body || '',
     icon: 'icon-192.png',
     badge: 'icon-192.png',
     tag: d.tag || undefined,
     renotify: !!d.tag,
     data: { url: d.url || './' }
-  });
+  }));
 });
 
 self.addEventListener('notificationclick', e => {

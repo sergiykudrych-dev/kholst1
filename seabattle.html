@@ -54,19 +54,19 @@ h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
 .big2{font-size:64px;line-height:1.1}
 .start{width:100%;max-width:340px;padding:15px;border-radius:99px;background:var(--rose);color:#fff;font-weight:800;font-size:17px}
 .start:disabled{opacity:.4;cursor:default}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 12px));transform:translateX(-50%);white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis;z-index:9;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
 .toast.on{opacity:1}
 .beat{font-size:64px;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
 @keyframes beat{50%{transform:scale(1.18)}}
 html,body,button,input,a{touch-action:manipulation}
 body{-webkit-user-select:none;user-select:none;height:100vh;height:100dvh;min-height:0;overflow:hidden}
 #view,.mid{min-height:0}
-#ui{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%}
+#ui{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%}
 /* поле */
-.sea{--free:calc(100dvh - 230px);position:relative;display:grid;grid-template-columns:14px repeat(10,1fr);grid-template-rows:14px repeat(10,1fr);gap:2px;padding:6px 8px 8px 4px;border-radius:20px;background:rgba(255,255,255,.6);aspect-ratio:1;flex-shrink:0}
-body:has(> .adx-game) .sea{--free:calc(100dvh - 310px)}
-.sea.big{width:min(100%,calc(var(--free) * .64))}
-.sea.small{width:min(52%,calc(var(--free) * .34));padding:4px;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);gap:1px;border-radius:12px}
+.sea{--free:calc(100dvh - 252px - env(safe-area-inset-top) - env(safe-area-inset-bottom));position:relative;display:grid;grid-template-columns:14px repeat(10,1fr);grid-template-rows:14px repeat(10,1fr);gap:2px;padding:6px 8px 8px 4px;border-radius:20px;background:rgba(255,255,255,.6);aspect-ratio:1;flex-shrink:0}
+body:has(> .adx-game) .sea{--free:calc(100dvh - 326px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+.sea.big{width:min(100%,calc(var(--free) * .66))}
+.sea.small{width:min(56%,calc(var(--free) * .34));padding:4px;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);gap:1px;border-radius:12px}
 .sea.setup{width:min(100%,calc(100dvh - 330px));touch-action:none}
 body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
 .sea .co{display:grid;place-items:center;font:800 9px Manrope,sans-serif;color:#B07A95}
@@ -91,7 +91,7 @@ body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .shake{animation:shake .25s 2}
 </style>
-<link rel="stylesheet" href="gamehead.css?v=4">
+<link rel="stylesheet" href="gamehead.css?v=5">
 <style>header #inv.has{display:none}</style>
 <link rel="stylesheet" href="gamekit.css?v=7">
 </head>
@@ -109,7 +109,7 @@ body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
 <script src="firebase-config.js"></script>
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
-<script src="fx.js"></script>
+<script src="fx.js?v=2"></script>
 <script src="gamekit.js?v=1"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
@@ -268,7 +268,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     clearTimeout(overT); if (p !== 'over') showOver = false;
     const shotsN = [...(S['x' + S.win] || '')].filter(x => x === '1').length;
     const ov = p === 'over' && showOver ? `<div class="over"><div class="card" id="ovc"><div class="big2">${won ? '🚢🎉' : '💌'}</div><h2>${won ? 'Вы победили!' : 'Победил ' + Kit.esc(Kit.nm(other))}</h2><p class="hint" style="margin-top:6px">Весь флот потоплен за ${shotsN} ${pl3(shotsN)}</p><button class="again start" data-act="again">Играть ещё</button><a class="home" href="index.html">На главную</a></div></div>` : '';
-    ui.innerHTML = `<div class="k-pl">${pl(me)}${pl(other)}</div>` + (st ? `<div class="k-pill ${myTurn && S.lb === me && S.lr !== 'm' ? 'ok' : ''}" style="min-height:44px;font-size:17px">${st}</div>` : '') +
+    ui.innerHTML = `<div class="k-pl">${pl(me)}${pl(other)}</div>` + (st ? `<div class="k-pill ${myTurn && S.lb === me && S.lr !== 'm' ? 'ok' : ''}" style="min-height:40px;font-size:16px">${st}</div>` : '') +
       `<div class="lab">${Kit.esc(Kit.av(other))} Флот партнёра <em>осталось ${A.left} из 10</em></div>` +
       board({ fleet: thF, shots: myShots, showShips: p === 'over', cls: 'big', clickable: myTurn, last: S.lb === me && S.lr !== 'k' ? S.li : -1 }) +
       `<div class="lab">Ваш флот</div>` + board({ fleet: myF, shots: thShots, showShips: true, cls: 'small', last: S.lb === other && S.lr !== 'k' ? S.li : -1 }) + ov;
@@ -338,7 +338,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     if (!d.moved) { // поворот
       const o = draft[d.i], rot = [o[0], o[1], o[2], o[3] ? 0 : 1];
       if (o[2] > 1 && fits(draft, rot, d.i)) draft[d.i] = rot; else if (o[2] > 1) { toast('Здесь не повернуть'); }
-    } else if (d.ok) draft[d.i] = d.s; else toast('Корабли не должны касаться');
+    } else if (d.ok) draft[d.i] = d.s; else toast('Корабли не должны касаться 🚫');
     render();
   };
   ui.addEventListener('pointerup', endDrag); ui.addEventListener('pointercancel', () => { drag = null; render(); });

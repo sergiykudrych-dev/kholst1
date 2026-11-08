@@ -71,13 +71,13 @@ h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
 .card h2{font:400 42px/1.1 'Marck Script',cursive;color:var(--deep)}
 .big{margin:10px 0 14px;font-weight:700;font-size:26px;letter-spacing:2px;text-transform:uppercase;color:var(--rose);word-break:break-word}
 .card a{display:inline-block;margin-top:12px;color:var(--mute);font-size:14px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 12px));transform:translateX(-50%);white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
 .toast.on{opacity:1}
 @media(prefers-reduced-motion:reduce){.beat{animation:none}}
 html,body,button,input,a{touch-action:manipulation}
 body{-webkit-user-select:none;user-select:none}
 </style>
-<link rel="stylesheet" href="gamehead.css?v=4">
+<link rel="stylesheet" href="gamehead.css?v=5">
 <link rel="stylesheet" href="gamestyle.css?v=7">
 </head>
 <body>
@@ -94,7 +94,7 @@ body{-webkit-user-select:none;user-select:none}
 <script src="firebase-config.js"></script>
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
-<script src="fx.js"></script>
+<script src="fx.js?v=2"></script>
 <script src="gamekit.js?v=1"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>

@@ -112,7 +112,7 @@ ${li(3, 'Нажмите <b>«Добавить»</b>')}</ol>
   });
   async function token() {
     await loadSdk();
-    const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+    const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js', { updateViaCache: 'none' });
     await navigator.serviceWorker.ready;
     const t = await firebase.messaging().getToken({ vapidKey: VAPID(), serviceWorkerRegistration: reg });
     if (!t) throw new Error('token');
