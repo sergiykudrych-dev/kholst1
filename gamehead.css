@@ -25,8 +25,8 @@ body:has(.over) #view > :not(#ui):not(.over),body:has(.over) #ui > :not(.over),b
 /* Шапка всегда поверх игры (кнопки ← и 💗 нажимаются целиком) */
 header{position:relative;z-index:20}
 /* Если игра не помещается — она не уезжает вверх под шапку, а прокручивается */
-#ui{justify-content:flex-start!important;overflow-y:auto;overflow-x:hidden}
-#ui::before{content:"";flex:none;margin-top:auto}
+#ui{justify-content:flex-start!important;overflow-y:auto;overflow-x:hidden;padding:6px}
+#ui::before{content:"";flex:none;margin-top:auto;min-height:4px}
 #ui::after{content:"";flex:none;margin-bottom:auto}
 
 /* Чат: кнопка 💬 рядом с 💗, имя партнёра по центру шапки */

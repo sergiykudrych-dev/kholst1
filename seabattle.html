@@ -63,8 +63,8 @@ body{-webkit-user-select:none;user-select:none;height:100vh;height:100dvh;min-he
 #view,.mid{min-height:0}
 #ui{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%}
 /* поле */
-.sea{--free:calc(100dvh - 252px - env(safe-area-inset-top) - env(safe-area-inset-bottom));position:relative;display:grid;grid-template-columns:14px repeat(10,1fr);grid-template-rows:14px repeat(10,1fr);gap:2px;padding:6px 8px 8px 4px;border-radius:20px;background:rgba(255,255,255,.6);aspect-ratio:1;flex-shrink:0}
-body:has(> .adx-game) .sea{--free:calc(100dvh - 326px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+.sea{--free:calc(100dvh - 268px - env(safe-area-inset-top) - env(safe-area-inset-bottom));position:relative;display:grid;grid-template-columns:14px repeat(10,1fr);grid-template-rows:14px repeat(10,1fr);gap:2px;padding:6px 8px 8px 4px;border-radius:20px;background:rgba(255,255,255,.6);aspect-ratio:1;flex-shrink:0}
+body:has(> .adx-game) .sea{--free:calc(100dvh - 342px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 .sea.big{width:min(100%,calc(var(--free) * .66))}
 .sea.small{width:min(56%,calc(var(--free) * .34));padding:4px;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);gap:1px;border-radius:12px}
 .sea.setup{width:min(100%,calc(100dvh - 330px));touch-action:none}
@@ -91,7 +91,7 @@ body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .shake{animation:shake .25s 2}
 </style>
-<link rel="stylesheet" href="gamehead.css?v=8">
+<link rel="stylesheet" href="gamehead.css?v=9">
 <style>header #inv.has{display:none}</style>
 <link rel="stylesheet" href="gamekit.css?v=7">
 <link rel="stylesheet" href="bg.css?v=1">
@@ -111,7 +111,7 @@ body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
 <script src="analytics.js"></script>
 <script src="profile.js"></script>
 <script src="fx.js?v=2"></script>
-<script src="chat.js?v=1"></script>
+<script src="chat.js?v=2"></script>
 <script src="gamekit.js?v=2"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
