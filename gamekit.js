@@ -24,10 +24,10 @@
     burst(x, y, n) {
       try {
         if (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-        const cols = ['#FF4D8D', '#FFD36B', '#fff', '#7FD6FF', '#B28DFF', '#6EE7B7'];
+        const cols = ['#E8548C', '#C2185B', '#F5B400', '#7B4DFF', '#1DA597', '#FF7A3D'];
         for (let i = 0; i < (n || 30); i++) {
           const d = document.createElement('i'), a = Math.random() * Math.PI * 2, v = 90 + Math.random() * 230;
-          d.style.cssText = 'position:fixed;z-index:90;pointer-events:none;left:' + x + 'px;top:' + y + 'px;width:' + (8 + Math.random() * 6) + 'px;height:' + (13 + Math.random() * 7) + 'px;border-radius:3px;background:' + cols[i % cols.length];
+          d.style.cssText = 'position:fixed;z-index:90;pointer-events:none;left:' + x + 'px;top:' + y + 'px;width:' + (10 + Math.random() * 7) + 'px;height:' + (15 + Math.random() * 9) + 'px;border-radius:3px;background:' + cols[i % cols.length];
           document.body.appendChild(d);
           const an = d.animate([{ transform: 'translate(0,0) rotate(0)', opacity: 1 }, { transform: 'translate(' + Math.cos(a) * v + 'px,' + (Math.sin(a) * v + 170) + 'px) rotate(' + (Math.random() * 720 - 360) + 'deg)', opacity: 0 }], { duration: 1000 + Math.random() * 600, easing: 'cubic-bezier(.2,.7,.4,1)' });
           an.onfinish = () => d.remove();
