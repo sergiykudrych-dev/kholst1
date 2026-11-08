@@ -63,10 +63,10 @@ body{-webkit-user-select:none;user-select:none;height:100vh;height:100dvh;min-he
 #view,.mid{min-height:0}
 #ui{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%}
 /* поле */
-.sea{--free:calc(100dvh - 268px - env(safe-area-inset-top) - env(safe-area-inset-bottom));position:relative;display:grid;grid-template-columns:14px repeat(10,1fr);grid-template-rows:14px repeat(10,1fr);gap:2px;padding:6px 8px 8px 4px;border-radius:20px;background:rgba(255,255,255,.6);aspect-ratio:1;flex-shrink:0}
+.sea{--free:calc(100dvh - 268px - env(safe-area-inset-top) - env(safe-area-inset-bottom));position:relative;display:grid;grid-template-columns:14px repeat(10,minmax(0,1fr));grid-template-rows:14px repeat(10,minmax(0,1fr));gap:2px;padding:6px 8px 8px 4px;border-radius:20px;background:rgba(255,255,255,.6);aspect-ratio:1;flex-shrink:0}
 body:has(> .adx-game) .sea{--free:calc(100dvh - 342px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 .sea.big{width:min(100%,calc(var(--free) * .66))}
-.sea.small{width:min(56%,calc(var(--free) * .34));padding:4px;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);gap:1px;border-radius:12px}
+.sea.small{width:min(56%,calc(var(--free) * .34));padding:4px;grid-template-columns:repeat(10,minmax(0,1fr));grid-template-rows:repeat(10,minmax(0,1fr));gap:1px;border-radius:12px}
 .sea.setup{width:min(100%,calc(100dvh - 330px));touch-action:none}
 body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
 .sea .co{display:grid;place-items:center;font:800 9px Manrope,sans-serif;color:#B07A95}
@@ -77,7 +77,7 @@ body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
 .sea .cl.a::after{opacity:.55}
 .sea .cl.z{background:repeating-linear-gradient(45deg,#FBE3EC 0 4px,#fff 4px 8px)}
 .sea .cl.lst{box-shadow:0 0 0 2px #E8548C;z-index:3}
-.sea .fx{z-index:4;pointer-events:none;line-height:1;font-size:clamp(11px,4.4vw,21px)}.sea.small .fx{font-size:clamp(6px,2vw,10px)}
+.sea .fx{z-index:4;pointer-events:none;line-height:1;min-width:0;overflow:visible;font-size:clamp(11px,4.4vw,21px)}.sea.small .fx{font-size:clamp(6px,2vw,10px)}
 .sea .ship{z-index:2;pointer-events:none;position:absolute}
 .sea .ship svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 2px 2px rgba(30,20,60,.35))}
 .sea .ship.bad svg{filter:drop-shadow(0 0 0 #E8548C) drop-shadow(0 0 3px #FF2E6E);opacity:.7}
