@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const P = window.Profile; if (!P) return;
-  const GAMES = { tictactoe: 'Крестики-нолики', number: 'Угадай число', memory: 'Найди пару', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', word: 'Угадай слово', questions: 'Вопросы друг другу', monster: 'Создай монстра' };
+  const GAMES = { tictactoe: 'Крестики-нолики', number: 'Угадай число', memory: 'Найди пару', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', word: 'Угадай слово', questions: 'Вопросы друг другу', monster: 'Создай монстра' , seabattle: 'Морской бой', truth: 'Правда или действие' };
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const $ = s => document.querySelector(s);
   const St = window.Stats = {};

@@ -102,6 +102,8 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 #chips .tile{background:linear-gradient(145deg,#6FB4FF,#2F6FD6)}
 #memo .tile{background:linear-gradient(145deg,#FF7A9C,#B3124F)}
 #mons .tile{background:linear-gradient(145deg,#8C7DFF,#4B3BB5)}
+#sb .tile{background:linear-gradient(145deg,#5FA8FF,#1F5FC4)}
+#td .tile{background:linear-gradient(145deg,#FF8A65,#D81B60)}
 .about{color:rgba(255,255,255,.82)}.about h2{color:#fff}.about a{color:#FFD3E6}
 .sharesite{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.7);color:#fff}
 .foot a,.foot span{color:rgba(255,255,255,.8)}
@@ -121,12 +123,22 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
   <div class="toprow"><button class="who" id="who" type="button"></button><button class="who ic fr" id="fr" type="button" aria-label="Друзья" title="Друзья">👥 Друзья</button></div>
   <button class="game hero" id="qs">
     <span class="tile"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M6 4h22a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H16l-7 6v-6H6a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="#fff"/><path d="M14 11a4 4 0 1 1 5 4v2" stroke="#C2185B" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="19" cy="21" r="1.8" fill="#C2185B"/></svg></span>
-    <span><b>Вопросы друг другу<em class="new">Новая</em></b><small>Выбирайте и узнайте, насколько вы похожи</small></span>
+    <span><b>Вопросы друг другу</b><small>Выбирайте и узнайте, насколько вы похожи</small></span>
+    <span class="go">→</span>
+  </button>
+  <button class="game hero" id="td">
+    <span class="tile"><svg width="44" height="34" viewBox="0 0 44 34"><rect x="3" y="4" width="18" height="26" rx="4" fill="#fff" transform="rotate(-8 12 17)"/><rect x="23" y="4" width="18" height="26" rx="4" fill="#FFE08A" transform="rotate(8 32 17)"/><path d="M9 14a3 3 0 1 1 4 3v2" stroke="#C2185B" stroke-width="2.4" fill="none" stroke-linecap="round" transform="rotate(-8 12 17)"/><path d="M34 9l-5 9h4l-2 7 6-10h-4z" fill="#C2185B"/></svg></span>
+    <span><b>Правда или действие<em class="new">Новая</em></b><small>Честные вопросы и задания для двоих</small></span>
     <span class="go">→</span>
   </button>
   <button class="game hero" id="ttt">
     <span class="tile"><svg width="44" height="30" viewBox="0 0 44 30"><path d="M6 6l12 18M18 6L6 24" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="33" cy="15" r="8" stroke="#FFE08A" stroke-width="4" fill="none"/></svg></span>
     <span><b>Крестики-нолики</b><small>3 в ряд или 5 в ряд на выбор</small></span>
+    <span class="go">→</span>
+  </button>
+  <button class="game hero" id="sb">
+    <span class="tile"><svg width="46" height="30" viewBox="0 0 46 30"><path d="M3 16h40l-5 9H8z" fill="#fff"/><rect x="14" y="8" width="14" height="8" rx="2" fill="#fff"/><rect x="30" y="11" width="6" height="5" rx="1" fill="#FFE08A"/><path d="M21 8V2" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M21 3h7l-2 2.5 2 2.5h-7" fill="#FFE08A"/></svg></span>
+    <span><b>Морской бой<em class="new">Новая</em></b><small>Расставьте флот и найдите корабли партнёра</small></span>
     <span class="go">→</span>
   </button>
   <button class="game hero" id="paint">
@@ -242,6 +254,8 @@ $('#chips').onclick = () => open('chips.html');
 $('#ttt').onclick = () => open('tictactoe.html');
 $('#memo').onclick = () => open('memory.html');
 $('#qs').onclick = () => open('questions.html');
+$('#sb').onclick = () => open('seabattle.html');
+$('#td').onclick = () => open('truth.html');
 $('#mons').onclick = () => open('monster.html');
 const paintWho = () => { $('#who').textContent = Profile.has() ? (Profile.avatar() + ' ' + Profile.name()).trim() : 'Как вас зовут? ✎'; };
 $('#who').onclick = () => Profile.ask().then(paintWho); paintWho();

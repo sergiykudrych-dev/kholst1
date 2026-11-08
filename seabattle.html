@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FFEAF1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Во что сыграем?">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Морской бой</title>
+<meta name="description" content="Тебя зовут сыграть вдвоём. Открой ссылку, и игра начнётся.">
+<link rel="canonical" href="https://twosome.games/seabattle.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Во что сыграем?">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Морской бой — сыграем?">
+<meta property="og:description" content="Тебя зовут сыграть вдвоём. Открой ссылку, и игра начнётся.">
+<meta property="og:url" content="https://twosome.games/seabattle.html">
+<meta property="og:image" content="https://twosome.games/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Морской бой — сыграем?">
+<meta name="twitter:description" content="Тебя зовут сыграть вдвоём. Открой ссылку, и игра начнётся.">
+<meta name="twitter:image" content="https://twosome.games/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Marck+Script&display=swap" rel="stylesheet">
+<style>html{background:#FFE9F0}
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
+*{box-sizing:border-box;margin:0}
+body{display:flex;flex-direction:column;min-height:100dvh;font:500 16px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) 12px 6px;max-width:520px;width:100%;margin:0 auto}
+.chip{padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.78);font-weight:700;font-size:14px;color:var(--deep);text-decoration:none}
+#view{flex:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:520px;margin:0 auto;padding:0 10px max(12px,env(safe-area-inset-bottom))}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;width:100%;text-align:center}
+h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
+.pick{display:grid;gap:12px;width:100%}
+.pick button{padding:20px;border-radius:24px;background:rgba(255,255,255,.82);box-shadow:0 14px 34px -18px rgba(142,15,69,.6);font-size:22px;font-weight:700}
+.pick small{display:block;font-size:13px;font-weight:500;color:var(--mute)}
+.beat{font-size:64px;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.18)}}
+.who,.hint{color:var(--mute);font-size:14px}
+.over{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
+.card{width:100%;max-width:400px;padding:28px 22px 22px;border-radius:28px;background:#FFF8FA;text-align:center;box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
+.card h2{font:800 30px/1.1 Manrope,system-ui,sans-serif;color:var(--deep)}
+.big2{font-size:64px;line-height:1.1}
+.start{width:100%;max-width:340px;padding:15px;border-radius:99px;background:var(--rose);color:#fff;font-weight:800;font-size:17px}
+.start:disabled{opacity:.4;cursor:default}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+.beat{font-size:64px;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.18)}}
+html,body,button,input,a{touch-action:manipulation}
+body{-webkit-user-select:none;user-select:none;height:100vh;height:100dvh;min-height:0;overflow:hidden}
+#view,.mid{min-height:0}
+#ui{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%}
+/* поле */
+.sea{--free:calc(100dvh - 230px);position:relative;display:grid;grid-template-columns:14px repeat(10,1fr);grid-template-rows:14px repeat(10,1fr);gap:2px;padding:6px 8px 8px 4px;border-radius:20px;background:rgba(255,255,255,.6);aspect-ratio:1;flex-shrink:0}
+body:has(> .adx-game) .sea{--free:calc(100dvh - 310px)}
+.sea.big{width:min(100%,calc(var(--free) * .64))}
+.sea.small{width:min(52%,calc(var(--free) * .34));padding:4px;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);gap:1px;border-radius:12px}
+.sea.setup{width:min(100%,calc(100dvh - 330px));touch-action:none}
+body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
+.sea .co{display:grid;place-items:center;font:800 9px Manrope,sans-serif;color:#B07A95}
+.sea .cl{position:relative;border-radius:5px;background:#fff;display:grid;place-items:center;padding:0;font-size:inherit}
+.sea.small .cl{border-radius:2px}
+.sea button.cl:active{background:#FFE3EE}
+.sea .cl.m::after{content:'';width:28%;height:28%;border-radius:50%;background:#C9A0B6}
+.sea .cl.a::after{opacity:.55}
+.sea .cl.z{background:repeating-linear-gradient(45deg,#FBE3EC 0 4px,#fff 4px 8px)}
+.sea .cl.lst{box-shadow:0 0 0 2px #E8548C;z-index:3}
+.sea .fx{z-index:4;pointer-events:none;line-height:1;font-size:clamp(11px,4.4vw,21px)}.sea.small .fx{font-size:clamp(6px,2vw,10px)}
+.sea .ship{z-index:2;pointer-events:none;position:relative}
+.sea .ship svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 2px 2px rgba(30,20,60,.35))}
+.sea .ship.bad svg{filter:drop-shadow(0 0 0 #E8548C) drop-shadow(0 0 3px #FF2E6E);opacity:.7}
+.sea .ship.drag{z-index:6}
+.sea.setup .ship{cursor:grab}
+.lab{font-weight:800;font-size:14px;color:var(--deep);display:flex;gap:8px;align-items:center;justify-content:center;flex-shrink:0}
+.lab em{font-style:normal;font-size:12px;padding:3px 10px;border-radius:99px;background:#FFE3EE;color:var(--rose)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:400px;flex-shrink:0}
+.acts .w{background:#fff;color:var(--rose);box-shadow:0 10px 22px -12px rgba(142,15,69,.55)}
+.k-pill{flex-shrink:0}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.shake{animation:shake .25s 2}
+</style>
+<link rel="stylesheet" href="gamehead.css?v=3">
+<style>header #inv.has{display:none}</style>
+<link rel="stylesheet" href="gamekit.css?v=7">
+</head>
+<body>
+<header>
+  <a class="chip" href="index.html" aria-label="Игры">←<span class="bk"> Игры</span></a>
+  <span class="chip" id="me"></span>
+  <button class="chip" id="inv">Пригласить</button>
+</header>
+<div id="view"><div id="ui"></div></div>
+<div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="analytics.js"></script>
+<script src="profile.js"></script>
+<script src="fx.js"></script>
+<script src="gamekit.js?v=1"></script>
+<script src="ads.js" data-mode="game"></script>
+<script>
+document.addEventListener('gesturestart', e => e.preventDefault());
+const $ = s => document.querySelector(s), view = $('#view'), ui = $('#ui');
+const room = (location.hash.match(/room=([\w-]+)/) || [])[1];
+if (!room) location.replace('index.html');
+const me = /host=1/.test(location.hash) ? 1 : 2, other = 3 - me;
+$('#me').textContent = 'Вы — Игрок ' + me;
+let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2000); };
+$('#inv').onclick = async () => {
+  const u = location.href.split('#')[0] + '#room=' + room;
+  try { if (navigator.share) await navigator.share({ title: document.title, url: u }); else { await navigator.clipboard.writeText(u); toast('Ссылка скопирована'); } }
+  catch (e) { if (e.name !== 'AbortError') prompt('Скопируйте ссылку:', u); }
+};
+const cfg = window.FIREBASE_CONFIG || {};
+const N = 10, SIZES = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1], COLS = 'АБВГДЕЖЗИК';
+
+/* ---------- корабли (вид сверху) ---------- */
+function shipSVG(L, vert, sunk) {
+  const W = L * 100;
+  const [h1, h2, dk, ln, tu] = sunk ? ['#A99BAA', '#7E6E80', '#CFC4D0', '#E5DCE6', '#8E7F90'] : ['#55647F', '#2C3650', '#9AA7C2', '#C7D0E3', '#3B4763'];
+  const gid = 'g' + L + (sunk ? 's' : '') + Math.random().toString(36).slice(2, 6);
+  const tur = (x, d) => `<rect x="${d > 0 ? x : x - 30}" y="46" width="30" height="8" rx="3" fill="${tu}"/><circle cx="${x}" cy="50" r="15" fill="${tu}" stroke="${ln}" stroke-width="3"/>`;
+  const bridge = (x, w) => `<rect x="${x}" y="30" width="${w}" height="40" rx="8" fill="${ln}"/><rect x="${x + w - 14}" y="36" width="8" height="28" rx="3" fill="${h2}" opacity=".6"/>`;
+  const funnel = x => `<ellipse cx="${x}" cy="50" rx="13" ry="10" fill="${h2}" stroke="${ln}" stroke-width="3"/>`;
+  let d = '';
+  if (L === 1) d = bridge(26, 36) + tur(W - 36, 1);
+  else if (L === 2) d = tur(W - 46, 1) + bridge(W * .42 - 20, 44) + funnel(W * .42 - 46) + tur(40, -1);
+  else if (L === 3) d = tur(W - 46, 1) + tur(W - 96, 1) + bridge(W * .45 - 10, 52) + funnel(W * .45 - 40) + tur(46, -1);
+  else d = tur(W - 46, 1) + tur(W - 98, 1) + bridge(W * .48 - 10, 60) + funnel(W * .48 - 40) + funnel(W * .48 - 74) + tur(96, -1) + tur(46, -1);
+  if (sunk) d += `<path d="M${W * .3} 20 L${W * .38} 80 M${W * .62} 18 L${W * .55} 82" stroke="#5a2a3a" stroke-width="4" opacity=".5"/>`;
+  const body = `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${h1}"/><stop offset="1" stop-color="${h2}"/></linearGradient></defs>` +
+    `<path d="M10 34 Q10 12 30 12 L${W - 90} 12 Q${W - 30} 14 ${W - 4} 50 Q${W - 30} 86 ${W - 90} 88 L30 88 Q10 88 10 66 Z" fill="url(#${gid})" stroke="${h2}" stroke-width="3"/>` +
+    `<path d="M22 24 L${W - 92} 24 Q${W - 44} 26 ${W - 24} 50 Q${W - 44} 74 ${W - 92} 76 L22 76 Z" fill="${dk}" opacity=".45"/>` + d;
+  return vert ? `<svg viewBox="0 0 100 ${W}" preserveAspectRatio="none"><g transform="translate(100 0) rotate(90)">${body}</g></svg>`
+              : `<svg viewBox="0 0 ${W} 100" preserveAspectRatio="none">${body}</svg>`;
+}
+
+/* ---------- флот: [r,c,L,v] ---------- */
+const cellsOf = s => Array.from({ length: s[2] }, (_, k) => s[3] ? [s[0] + k, s[1]] : [s[0], s[1] + k]);
+const enc = f => f.map(s => s.join(',')).join(';');
+const dec = t => (t || '').split(';').filter(Boolean).map(x => x.split(',').map(Number));
+function fits(fleet, ship, skip) {
+  const cs = cellsOf(ship);
+  if (cs.some(([r, c]) => r < 0 || c < 0 || r >= N || c >= N)) return false;
+  for (let j = 0; j < fleet.length; j++) {
+    if (j === skip) continue;
+    for (const [r, c] of cellsOf(fleet[j])) for (const [a, b] of cs) if (Math.abs(r - a) <= 1 && Math.abs(c - b) <= 1) return false;
+  }
+  return true;
+}
+function randomFleet() {
+  for (let tries = 0; tries < 200; tries++) {
+    const f = []; let ok = true;
+    for (const L of SIZES) {
+      let placed = false;
+      for (let k = 0; k < 300 && !placed; k++) {
+        const v = Math.random() < .5 ? 1 : 0, s = [Math.floor(Math.random() * (v ? N - L + 1 : N)), Math.floor(Math.random() * (v ? N : N - L + 1)), L, v];
+        if (fits(f, s, -1)) { f.push(s); placed = true; }
+      }
+      if (!placed) { ok = false; break; }
+    }
+    if (ok) return f;
+  }
+  return null;
+}
+const shotsOf = (S, p) => S['x' + p] || '0'.repeat(N * N);
+function analyze(fleet, shots) { // что видно на поле fleet после выстрелов shots
+  const at = {}; fleet.forEach((s, i) => cellsOf(s).forEach(([r, c]) => at[r * N + c] = i));
+  const sunk = fleet.map(s => cellsOf(s).every(([r, c]) => shots[r * N + c] === '1'));
+  const around = new Set();
+  fleet.forEach((s, i) => { if (sunk[i]) cellsOf(s).forEach(([r, c]) => { for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) { const rr = r + dr, cc = c + dc; if (rr >= 0 && cc >= 0 && rr < N && cc < N && at[rr * N + cc] === undefined) around.add(rr * N + cc); } }); });
+  return { at, sunk, around, left: sunk.filter(x => !x).length };
+}
+
+/* ---------- отрисовка поля ---------- */
+function board({ fleet, shots, showShips, cls, clickable, zone, dragI, bad, last }) {
+  const small = /small/.test(cls), A = analyze(fleet, shots);
+  let h = `<div class="sea ${cls}">`;
+  if (!small) { h += '<span></span>'; for (let c = 0; c < N; c++) h += `<span class="co">${COLS[c]}</span>`; }
+  for (let r = 0; r < N; r++) {
+    if (!small) h += `<span class="co" style="grid-row:${r + 2};grid-column:1">${r + 1}</span>`;
+    for (let c = 0; c < N; c++) {
+      const i = r * N + c, shot = shots[i] === '1', hit = shot && A.at[i] !== undefined;
+      let k = 'cl';
+      if (shot && !hit) k += ' m'; else if (!shot && A.around.has(i)) k += ' m a';
+      if (zone && zone.has(i)) k += ' z';
+      if (last === i) k += ' lst';
+      const pos = `grid-row:${r + (small ? 1 : 2)};grid-column:${c + (small ? 1 : 2)}`;
+      const can = clickable && !shot && !A.around.has(i);
+      h += can ? `<button class="${k}" style="${pos}" data-act="fire" data-i="${i}" aria-label="${COLS[c]}${r + 1}"></button>` : `<div class="${k}" style="${pos}" data-i="${i}"></div>`;
+    }
+  }
+  fleet.forEach((s, i) => {
+    const vis = showShips || A.sunk[i]; if (!vis) return;
+    const [r, c, L, v] = s, o = small ? 1 : 2;
+    h += `<div class="ship ${dragI === i ? 'drag' : ''} ${dragI === i && bad ? 'bad' : ''}" data-s="${i}" style="grid-row:${r + o} / span ${v ? L : 1};grid-column:${c + o} / span ${v ? 1 : L}">${shipSVG(L, v, A.sunk[i] && !showShips || (showShips && A.sunk[i]))}</div>`;
+  });
+  for (let i = 0; i < N * N; i++) if (shots[i] === '1' && A.at[i] !== undefined) {
+    const r = Math.floor(i / N), c = i % N, o = small ? 1 : 2;
+    h += `<span class="fx cl" style="grid-row:${r + o};grid-column:${c + o};background:none">${A.sunk[A.at[i]] ? '💥' : '🔥'}</span>`;
+  }
+  return h + '</div>';
+}
+
+if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
+  ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
+} else {
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
+  Kit.attach();
+  Profile.track('seabattle', S => S.phase === 'over' ? (S.win === me ? 'win' : 'loss') : null);
+  const ref = firebase.database().ref('rooms/' + room + '/sb');
+  let S = null, draft = null, drag = null, wonKey = -1, showOver = false, overT;
+
+  function render() {
+    if (!S) return;
+    const p = S.phase, myF = dec(S['f' + me]), thF = dec(S['f' + other]);
+    const pl = q => `<span class="k-p ${p === 'play' && S.turn === q ? 'act' : ''}"><i>${Kit.esc(Kit.av(q))}</i><span>${q === me ? 'Вы' : Kit.esc(Kit.nm(q))}</span>${S.games ? `<em class="k-w">${S['w' + q] || 0}</em>` : ''}</span>`;
+    if (p === 'setup') {
+      if (S['r' + me]) {
+        ui.innerHTML = `<div class="beat">♥&#xFE0E;</div><h1 class="k-ttl">Ждём партнёра…</h1><p class="hint">Партнёр расставляет свой флот</p>${board({ fleet: myF, shots: '0'.repeat(100), showShips: true, cls: 'small' })}`;
+        return;
+      }
+      if (!draft) draft = randomFleet();
+      const zone = new Set();
+      if (drag) draft.forEach((s, j) => { if (j !== drag.i) cellsOf(s).forEach(([r, c]) => { for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) { const rr = r + dr, cc = c + dc; if (rr >= 0 && cc >= 0 && rr < N && cc < N) zone.add(rr * N + cc); } }); });
+      const f = drag ? draft.map((s, j) => j === drag.i ? drag.s : s) : draft;
+      ui.innerHTML = `<h1 class="k-ttl">Расставьте флот</h1><p class="hint">Нажмите на корабль — повернуть, перетащите — переставить.<br>Корабли не касаются друг друга, даже углами</p>` +
+        board({ fleet: f, shots: '0'.repeat(100), showShips: true, cls: 'setup', zone, dragI: drag ? drag.i : -1, bad: drag && !drag.ok }) +
+        `<div class="acts"><button class="start w" data-act="rand">🎲 Случайно</button><button class="start" data-act="ready">Готово</button></div>`;
+      return;
+    }
+    // игра / итог
+    const myShots = shotsOf(S, me), thShots = shotsOf(S, other), A = analyze(thF, myShots);
+    const myTurn = p === 'play' && S.turn === me, won = p === 'over' && S.win === me;
+    let st = '';
+    if (p === 'play') {
+      if (myTurn) st = S.lb === me && S.lr === 'k' ? 'Потопил! 💥 Ходите ещё' : S.lb === me && S.lr === 'h' ? 'Попал! 🔥 Ходите ещё' : S.lb === other && S.lr === 'm' ? 'Мимо! Ваш ход 🎯' : 'Ваш ход: стреляйте 🎯';
+      else st = S.lb === other && S.lr === 'k' ? 'Партнёр потопил ваш корабль 💥' : S.lb === other && S.lr === 'h' ? 'Партнёр попал 🔥' : 'Ход партнёра…';
+    }
+    clearTimeout(overT); if (p !== 'over') showOver = false;
+    const shotsN = [...(S['x' + S.win] || '')].filter(x => x === '1').length;
+    const ov = p === 'over' && showOver ? `<div class="over"><div class="card" id="ovc"><div class="big2">${won ? '🚢🎉' : '💌'}</div><h2>${won ? 'Вы победили!' : 'Победил ' + Kit.esc(Kit.nm(other))}</h2><p class="hint" style="margin-top:6px">Весь флот потоплен за ${shotsN} ${pl3(shotsN)}</p><button class="again start" data-act="again">Играть ещё</button><a class="home" href="index.html">На главную</a></div></div>` : '';
+    ui.innerHTML = `<div class="k-pl">${pl(me)}${pl(other)}</div>` + (st ? `<div class="k-pill ${myTurn && S.lb === me && S.lr !== 'm' ? 'ok' : ''}" style="min-height:44px;font-size:17px">${st}</div>` : '') +
+      `<div class="lab">${Kit.esc(Kit.av(other))} Флот партнёра <em>осталось ${A.left} из 10</em></div>` +
+      board({ fleet: thF, shots: myShots, showShips: p === 'over', cls: 'big', clickable: myTurn, last: S.lb === me ? S.li : -1 }) +
+      `<div class="lab">Ваш флот</div>` + board({ fleet: myF, shots: thShots, showShips: true, cls: 'small', last: S.lb === other ? S.li : -1 }) + ov;
+    if (p === 'over' && !showOver) overT = setTimeout(() => { showOver = true; render(); }, 1400);
+    if (won && showOver && wonKey !== S.games) { wonKey = S.games; const el = document.getElementById('ovc'); if (el) { const r = el.getBoundingClientRect(); setTimeout(() => Kit.burst(r.left + r.width / 2, r.top + r.height / 2, 40), 350); } }
+  }
+  const pl3 = n => (n % 10 === 1 && n % 100 !== 11) ? 'выстрел' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 'выстрела' : 'выстрелов';
+
+  Profile.on(ref, s => {
+    S = s.val();
+    if (!S) { ref.transaction(x => x || { phase: 'setup', games: 0, w1: 0, w2: 0 }); return; }
+    if (S.phase === 'setup' && !S['r' + me] && S['f' + me] && !draft) draft = dec(S['f' + me]);
+    render();
+  });
+
+  function ready() {
+    if (!draft) return;
+    ref.transaction(s => {
+      if (!s || s.phase !== 'setup') return;
+      const t = { ...s }; t['f' + me] = enc(draft); t['r' + me] = 1;
+      if (t['r' + other]) { t.phase = 'play'; t.turn = 1 + ((s.games || 0) % 2); t.x1 = '0'.repeat(100); t.x2 = '0'.repeat(100); delete t.lb; delete t.lr; delete t.li; }
+      return t;
+    });
+  }
+  function fire(i) {
+    ref.transaction(s => {
+      if (!s || s.phase !== 'play' || s.turn !== me) return;
+      const x = shotsOf(s, me); if (x[i] === '1') return;
+      const fleet = dec(s['f' + other]), before = analyze(fleet, x); if (before.around.has(i)) return;
+      const nx = x.slice(0, i) + '1' + x.slice(i + 1), A = analyze(fleet, nx), t = { ...s };
+      t['x' + me] = nx; t.lb = me; t.li = i;
+      const si = A.at[i];
+      if (si === undefined) { t.lr = 'm'; t.turn = other; }
+      else { t.lr = A.sunk[si] ? 'k' : 'h'; if (A.left === 0) { t.phase = 'over'; t.win = me; t['w' + me] = (s['w' + me] || 0) + 1; t.games = (s.games || 0) + 1; } }
+      return t;
+    });
+  }
+  function again() {
+    draft = null;
+    ref.transaction(s => {
+      if (!s || s.phase !== 'over') return;
+      return { phase: 'setup', games: s.games || 0, w1: s.w1 || 0, w2: s.w2 || 0 };
+    });
+  }
+
+  /* перетаскивание и поворот при расстановке */
+  const cellAt = (x, y) => { const el = document.elementFromPoint(x, y), c = el && el.closest('.sea.setup .cl'); return c ? +c.dataset.i : -1; };
+  ui.addEventListener('pointerdown', e => {
+    if (!S || S.phase !== 'setup' || S['r' + me] || !draft) return;
+    const i0 = cellAt(e.clientX, e.clientY); if (i0 < 0) return;
+    const si = draft.findIndex(s => cellsOf(s).some(([r, c]) => r * N + c === i0)); if (si < 0) return;
+    e.preventDefault();
+    const s = draft[si], r0 = Math.floor(i0 / N), c0 = i0 % N;
+    drag = { i: si, s: s.slice(), ok: true, dr: r0 - s[0], dc: c0 - s[1], moved: false, x: e.clientX, y: e.clientY, last: i0 };
+    try { ui.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  ui.addEventListener('pointermove', e => {
+    if (!drag) return;
+    if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+    drag.moved = true;
+    const i = cellAt(e.clientX, e.clientY); if (i < 0 || i === drag.last) return; drag.last = i;
+    const o = draft[drag.i]; drag.s = [Math.floor(i / N) - drag.dr, i % N - drag.dc, o[2], o[3]];
+    drag.ok = fits(draft, drag.s, drag.i); render();
+  });
+  const endDrag = () => {
+    if (!drag) return; const d = drag; drag = null;
+    if (!d.moved) { // поворот
+      const o = draft[d.i], rot = [o[0], o[1], o[2], o[3] ? 0 : 1];
+      if (o[2] > 1 && fits(draft, rot, d.i)) draft[d.i] = rot; else if (o[2] > 1) { toast('Здесь не повернуть'); }
+    } else if (d.ok) draft[d.i] = d.s; else toast('Корабли не должны касаться');
+    render();
+  };
+  ui.addEventListener('pointerup', endDrag); ui.addEventListener('pointercancel', () => { drag = null; render(); });
+
+  view.onclick = e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return; const a = b.dataset.act;
+    if (a === 'rand') { draft = randomFleet(); render(); }
+    else if (a === 'ready') ready();
+    else if (a === 'fire') fire(+b.dataset.i);
+    else if (a === 'again') again();
+  };
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FFEAF1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Во что сыграем?">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Правда или действие</title>
+<meta name="description" content="Тебя зовут сыграть вдвоём. Открой ссылку, и игра начнётся.">
+<link rel="canonical" href="https://twosome.games/truth.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Во что сыграем?">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Правда или действие — сыграем?">
+<meta property="og:description" content="Тебя зовут сыграть вдвоём. Открой ссылку, и игра начнётся.">
+<meta property="og:url" content="https://twosome.games/truth.html">
+<meta property="og:image" content="https://twosome.games/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Правда или действие — сыграем?">
+<meta name="twitter:description" content="Тебя зовут сыграть вдвоём. Открой ссылку, и игра начнётся.">
+<meta name="twitter:image" content="https://twosome.games/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Marck+Script&display=swap" rel="stylesheet">
+<style>html{background:#FFE9F0}
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570}
+*{box-sizing:border-box;margin:0}
+body{display:flex;flex-direction:column;min-height:100dvh;font:500 16px/1.4 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) 12px 6px;max-width:520px;width:100%;margin:0 auto}
+.chip{padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.78);font-weight:700;font-size:14px;color:var(--deep);text-decoration:none}
+#view{flex:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:520px;margin:0 auto;padding:0 10px max(12px,env(safe-area-inset-bottom))}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;width:100%;text-align:center}
+h1{font:400 clamp(34px,10vw,48px)/1.1 'Marck Script',cursive;color:var(--deep)}
+.pick{display:grid;gap:12px;width:100%}
+.pick button{padding:20px;border-radius:24px;background:rgba(255,255,255,.82);box-shadow:0 14px 34px -18px rgba(142,15,69,.6);font-size:22px;font-weight:700}
+.pick small{display:block;font-size:13px;font-weight:500;color:var(--mute)}
+.beat{font-size:64px;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.18)}}
+.who,.hint{color:var(--mute);font-size:14px}
+.over{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
+.card{width:100%;max-width:400px;padding:28px 22px 22px;border-radius:28px;background:#FFF8FA;text-align:center;box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}
+.cardq{width:100%;max-width:400px;padding:28px 22px 22px;border-radius:28px;background:#FFF8FA;text-align:center;box-shadow:0 30px 70px -20px rgba(74,18,54,.6)}.cardq h2{font:800 26px/1.15 Manrope,system-ui,sans-serif;color:var(--deep)}
+.card h2{font:800 28px/1.15 Manrope,system-ui,sans-serif;color:var(--deep)}
+.start{width:100%;max-width:400px;padding:15px;border-radius:99px;background:linear-gradient(90deg,#E8548C,#C2185B);color:#fff;font-weight:800;font-size:17px;box-shadow:0 12px 24px -12px rgba(194,24,91,.8)}
+.start.w{background:#fff;color:var(--rose);box-shadow:0 10px 22px -12px rgba(142,15,69,.55)}
+.start:disabled{opacity:.45;cursor:default}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+.beat{font-size:56px;color:var(--rose);animation:beat 1.4s ease-in-out infinite;line-height:1}
+@keyframes beat{50%{transform:scale(1.18)}}
+html,body,button,input,a{touch-action:manipulation}
+body{-webkit-user-select:none;user-select:none;height:100vh;height:100dvh;min-height:0;overflow:hidden}
+#view{min-height:0}
+#ui{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;padding-top:6px}
+.mid{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:16px;width:100%;text-align:center}
+.moods{display:grid;gap:12px;width:100%;max-width:420px}
+.moods button{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:24px;background:#fff;text-align:left;box-shadow:0 10px 22px -14px rgba(142,15,69,.55)}
+.moods button em{font-style:normal;font-size:34px;flex:none}.moods button b{font-size:19px;font-weight:800;color:var(--deep);display:block}.moods button small{font-size:13px;color:var(--mute);font-weight:700}
+.moods button.on{box-shadow:0 0 0 4px #E8548C,0 10px 22px -14px rgba(142,15,69,.55)}
+.td{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:420px}
+.td button{border-radius:30px;padding:26px 10px;background:#fff;box-shadow:0 16px 30px -18px rgba(142,15,69,.65);font-weight:800;font-size:22px;color:var(--deep)}
+.td button em{display:block;font-style:normal;font-size:52px;margin-bottom:8px;line-height:1}
+.td button small{display:block;font-size:13px;color:var(--mute);margin-top:4px;font-weight:700}
+.td button.d{background:linear-gradient(145deg,#E8548C,#C2185B);color:#fff}.td button.d small{color:#FFD3E6}
+.td button:active{transform:scale(.97)}
+.tcard{width:100%;max-width:420px;border-radius:32px;background:#fff;padding:24px 22px;box-shadow:0 20px 40px -20px rgba(142,15,69,.7);text-align:left}
+.tcard .k{display:inline-block;padding:6px 14px;border-radius:99px;background:#FFE3EE;color:var(--rose);font-weight:800;font-size:13px;letter-spacing:.06em}
+.tcard.d .k{background:linear-gradient(90deg,#E8548C,#C2185B);color:#fff}
+.tcard p{margin-top:14px;font-weight:800;font-size:clamp(20px,6vw,25px);line-height:1.22;color:var(--deep)}
+.tcard .who{margin-top:14px;font-weight:700;font-size:13px;color:var(--mute)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:420px}
+.acts .start{font-size:16px;padding:14px 8px}
+.sc{display:flex;gap:10px;width:100%;max-width:420px;flex-shrink:0}
+.sc div{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:16px;background:rgba(255,255,255,.7);font-weight:700;font-size:14px;color:var(--mute)}
+.sc div.a{background:#fff;box-shadow:0 0 0 3px #E8548C}
+.sc div i{font-style:normal;flex:none;width:28px;height:28px;border-radius:50%;background:#FFE3EE;display:grid;place-items:center;font-size:16px}
+.sc div span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc div b{margin-left:auto;font-size:17px;color:var(--deep);white-space:nowrap}
+.mood{flex-shrink:0;padding:6px 14px;border-radius:99px;background:rgba(255,255,255,.7);font-weight:700;font-size:13px;color:var(--mute)}
+.mood u{color:var(--rose);text-decoration:underline;cursor:pointer}
+.res{flex-shrink:0;font-weight:800;color:var(--rose);font-size:15px;min-height:20px}
+.hint{color:var(--mute);font-size:14px;font-weight:700}
+@media(prefers-reduced-motion:reduce){.beat{animation:none}}
+</style>
+<link rel="stylesheet" href="gamehead.css?v=3">
+<link rel="stylesheet" href="gamekit.css?v=7">
+</head>
+<body>
+<header>
+  <a class="chip" href="index.html" aria-label="Игры">←<span class="bk"> Игры</span></a>
+  <span class="chip" id="me"></span>
+  <button class="chip" id="inv">Пригласить</button>
+</header>
+<div id="view"><div id="ui"></div></div>
+<div class="toast" id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="analytics.js"></script>
+<script src="profile.js"></script>
+<script src="fx.js"></script>
+<script src="gamekit.js?v=1"></script>
+<script src="ads.js" data-mode="game"></script>
+<script>
+document.addEventListener('gesturestart', e => e.preventDefault());
+const $ = s => document.querySelector(s), view = $('#view'), ui = $('#ui');
+const room = (location.hash.match(/room=([\w-]+)/) || [])[1];
+if (!room) location.replace('index.html');
+const me = /host=1/.test(location.hash) ? 1 : 2, other = 3 - me;
+$('#me').textContent = 'Вы — Игрок ' + me;
+let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2200); };
+$('#inv').onclick = async () => {
+  const u = location.href.split('#')[0] + '#room=' + room;
+  try { if (navigator.share) await navigator.share({ title: document.title, url: u }); else { await navigator.clipboard.writeText(u); toast('Ссылка скопирована'); } }
+  catch (e) { if (e.name !== 'AbortError') prompt('Скопируйте ссылку:', u); }
+};
+const cfg = window.FIREBASE_CONFIG || {};
+const MOODS = { cute: ['💗', 'Мило', 'Тёплые вопросы и милые задания'], fun: ['😂', 'Смешно', 'Глупые задания и смешные признания'], bold: ['🔥', 'Смело', 'Флирт и откровенные вопросы · 18+'] };
+const BANK = {"cute": {"t": ["Какой момент нашей первой встречи ты помнишь лучше всего?", "Что ты подумал(а) обо мне в первый день?", "Какая моя привычка тебя умиляет?", "Когда ты впервые понял(а), что я тебе нравлюсь?", "Какое наше свидание было самым лучшим?", "За что ты мне больше всего благодарен(на)?", "Какая песня напоминает тебе обо мне?", "Что тебе больше всего нравится в моём голосе?", "Куда бы ты хотел(а) поехать со мной?", "Какой мой подарок тебе запомнился больше всего?", "Что ты делаешь, когда скучаешь по мне?", "Какое моё сообщение ты перечитывал(а) не один раз?", "Что в нас тебе кажется особенным?", "Каким ты видишь наш идеальный выходной?", "Какое моё качество ты хотел(а) бы перенять?", "Когда тебе со мной спокойнее всего?", "Какой наш момент ты бы пережил(а) ещё раз?", "Какое ласковое прозвище для меня тебе нравится больше всего?", "Чем я рассмешил(а) тебя в последний раз?", "Какую мечту ты хотел(а) бы исполнить вместе?", "О чём ты думаешь перед сном, когда меня нет рядом?", "Какой фильм ты хотел(а) бы посмотреть со мной?", "Что для тебя значит забота в отношениях?", "Какая наша фотография твоя любимая?", "Чем я удивил(а) тебя больше всего?", "Какой запах напоминает тебе обо мне?", "Что бы ты написал(а) мне в письме через 10 лет?", "Когда ты в последний раз хвастался(ась) мной кому-то?", "Какое блюдо ты хочешь приготовить вместе со мной?", "Что тебе хочется сказать мне прямо сейчас?"], "d": ["Отправь голосовое: спой 10 секунд любой песни про любовь 🎤", "Пришли селфи прямо сейчас — без фильтров 📸", "Напиши три вещи, за которые ты меня ценишь", "Нарисуй меня за 30 секунд и пришли фото рисунка", "Пришли фото того, что сейчас у тебя за окном", "Запиши голосовое «спокойной ночи», как будто я уже засыпаю", "Пришли самую милую нашу фотографию из галереи", "Опиши наше первое свидание тремя эмодзи", "Скажи мне комплимент на другом языке", "Покажи на видео свою любимую вещь в комнате и расскажи, почему она любимая", "Придумай мне новое ласковое прозвище", "Пришли песню, которая сейчас у тебя на душе", "Напиши мне короткое стихотворение из 4 строк", "Поставь мою фотографию на заставку телефона на 1 час", "Пришли фото своей руки — как будто держишь мою 🤝", "Расскажи, что ты сегодня ел(а), в стиле кулинарного блогера", "Пошли мне воздушный поцелуй на видео 😘", "Сфотографируй свою улыбку и пришли", "Напиши план нашего следующего свидания из 3 пунктов", "Скажи «я скучаю» тремя разными голосами в голосовом", "Пришли фото чего-то, что напоминает тебе обо мне", "Нарисуй сердце на бумаге и пришли фото", "Напиши мне пожелание на завтра", "Признайся мне в любви голосом диктора новостей", "Обними подушку и пришли фото с подписью «это ты»", "Включи нашу песню на видеозвонке и потанцуй 15 секунд", "Отправь 5 эмодзи, которые описывают меня", "Расскажи анекдот голосовым", "Пришли фото вида из окна с подписью «жду тебя»", "Напиши сообщение, которое я прочитаю завтра утром"]}, "fun": {"t": ["Какую самую глупую вещь ты гуглил(а)?", "Какая у тебя самая странная привычка?", "Что ты ешь, когда никто не видит?", "Над каким фильмом ты плакал(а), хотя стыдно признаться?", "Какой самый неловкий момент был у тебя на свидании?", "Если бы ты был(а) животным, то каким?", "Какой твой самый ужасный модный выбор в прошлом?", "Что бы ты сделал(а), если бы на день стал(а) мной?", "Какую песню ты поёшь в душе?", "Какое самое странное сообщение ты отправлял(а) не тому человеку?", "Чего ты больше всего боялся(ась) в детстве?", "Какую суперсилу ты бы выбрал(а) и зачем?", "Какое прозвище у тебя было в школе?", "Сколько будильников ты ставишь утром?", "Какая еда тебе нравится, хотя все считают её странной?", "Кого из знаменитостей ты бы позвал(а) на ужин?", "Что самое смешное ты делал(а) от скуки?", "Какую самую нелепую вещь ты покупал(а)?", "Если бы о твоей жизни сняли фильм, как бы он назывался?", "Ты разговариваешь сам(а) с собой? О чём?", "Какой твой самый странный сон?", "Какое слово ты постоянно произносишь неправильно?", "Что ты делаешь, когда остаёшься дома один(одна)?", "Какой самый бесполезный навык у тебя есть?", "За что тебя чаще всего ругали в детстве?", "Какую вещь ты никак не можешь выбросить?", "Что ты обычно делаешь вместо того, чтобы лечь спать?", "Кем ты хотел(а) стать в детстве?", "Какой мем лучше всего описывает тебя?", "Что бы ты взял(а) на необитаемый остров, кроме меня?"], "d": ["Скажи голосовым «Шла Саша по шоссе» три раза подряд быстро", "Пришли селфи с самой смешной гримасой 🤪", "Изобрази на видео любое животное 10 секунд", "Расскажи голосом мультяшного героя, как прошёл твой день", "Сфотографируйся с предметом на голове", "Зачитай «В лесу родилась ёлочка» в стиле рэпа", "Пришли последнее фото из галереи — без объяснений", "Изобрази меня в голосовом 10 секунд", "Опиши свой день одними эмодзи", "Сделай селфи в стиле обложки журнала", "Станцуй 15 секунд под первую песню из рекомендаций и пришли видео", "Прочитай любой текст голосовым, как будто это детектив", "Пришли фото самой странной вещи в своей комнате", "Скажи «я тебя люблю» с акцентом пирата", "Нарисуй себя левой рукой и пришли", "Покажи на видео свой лучший злодейский смех", "Сфотографируй свой холодильник изнутри", "Расскажи сказку «Колобок» голосовым за 20 секунд", "Пришли селфи с носком на руке, как с куклой", "Изобрази диктора прогноза погоды для своей комнаты", "Отправь голосовое, где 10 секунд издаёшь звуки дельфина", "Сделай причёску «как у сумасшедшего учёного» и пришли фото", "Придумай название нашей будущей рок-группы", "Произнеси алфавит голосовым как можно быстрее", "Пришли фото с самым серьёзным лицом", "Перескажи последний фильм, который смотрел(а), тремя эмодзи", "Сфотографируйся с ложкой на носу", "Спой своё имя оперным голосом", "Пришли фото еды, которую приготовил(а) бы мне на ужин", "Изобрази на видео, как ты просыпаешься по будильнику"]}, "bold": {"t": ["Что в моей внешности тебя привлекает больше всего?", "Какой наш поцелуй ты помнишь лучше всего?", "Где бы ты хотел(а) оказаться со мной прямо сейчас?", "Что ты думаешь, когда смотришь на мои фото?", "Какая моя одежда тебе нравится больше всего?", "Когда ты в последний раз думал(а) обо мне перед сном?", "Какой комплимент от меня ты хотел(а) бы услышать?", "Что во мне притягивает тебя сильнее всего?", "Каким было бы наше идеальное романтическое свидание?", "Что бы ты сделал(а), если бы я сейчас был(а) рядом?", "Какой момент между нами ты считаешь самым романтичным?", "Что ты чувствуешь, когда слышишь мой голос?", "Ты когда-нибудь ревновал(а) меня? К кому?", "Какое твоё самое смелое желание, связанное со мной?", "Какой запах на мне тебе нравится больше всего?", "Куда бы ты поцеловал(а) меня прямо сейчас? 😏", "Какая моя фотография тебе нравится больше всего?", "Что ты хотел(а) мне сказать, но стеснялся(ась)?", "Какое место для свидания тебе кажется самым романтичным?", "Какая моя привычка кажется тебе самой привлекательной?", "Что бы ты хотел(а) сделать со мной в отпуске?", "Какой наш момент ты вспоминаешь чаще всего?", "Что бы ты подарил(а) мне, если бы не было никаких ограничений?", "Каким ты представляешь наше утро вдвоём?", "Чего тебе больше всего не хватает, когда мы далеко?", "Какой фильм или песня ассоциируется у тебя с нами?", "Что тебя больше всего смущает в отношениях?", "Когда ты впервые захотел(а) меня поцеловать?", "Что ты чаще всего представляешь, когда скучаешь по мне?", "Если бы у нас был целый день только вдвоём, как бы он прошёл?"], "d": ["Пришли голосовое и скажи мне что-нибудь нежное шёпотом", "Пришли селфи с самым соблазнительным взглядом 😏", "Напиши, что бы ты сделал(а), если бы я сейчас был(а) рядом", "Пошли воздушный поцелуй и опиши, куда он прилетит", "Пришли фото, где ты улыбаешься только для меня", "Опиши наше идеальное свидание тремя предложениями", "Запиши «спокойной ночи» самым тёплым голосом", "Сделай комплимент моим глазам — не меньше двух предложений", "Пришли фото в одежде, в которой ты чувствуешь себя самым красивым(ой)", "Напиши сообщение, от которого я покраснею 😊", "Опиши, как бы ты обнял(а) меня прямо сейчас", "Отправь 15 секунд романтичной песни, которая про нас", "Пришли фото своих губ 💋", "Назови 5 вещей, которые хочешь сделать со мной этим летом", "Отправь эмодзи, которые описывают твои мысли обо мне прямо сейчас", "Пришли селфи перед сном", "Расскажи голосовым, каким был бы наш романтический вечер", "Напиши мне любовное письмо из трёх строк", "Покажи на видеозвонке медленный танец с подушкой", "Признайся, о чём ты думал(а), когда в последний раз смотрел(а) на меня", "Пришли фото того, что на тебе сейчас надето (в рамках приличного 😉)", "Пообещай мне одно свидание и опиши его", "Скажи «хочу тебя увидеть» пятью разными голосами", "Отправь голосовое со смехом, которым ты смеёшься только со мной", "Пришли своё отражение в зеркале", "Опиши мой голос тремя словами", "Напиши, что ты сделаешь, когда мы увидимся в следующий раз", "Пришли селфи с подмигиванием 😉", "Расскажи о своей самой смелой мечте про нас", "Сделай мне комплимент, которого ещё никогда не говорил(а)"]}};
+const ls = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+const adult = () => ls.get('td18') === '1';
+const hearts = n => n + ' 💗';
+
+if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
+  ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
+} else {
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  Profile.start(room, me, () => { if (S) render(); });
+  Kit.attach();
+  Profile.track('truth', S => S.phase === 'play' && S.stage === 'pick' && S.round && S.round % 10 === 0 ? 'coop' : null);
+  const ref = firebase.database().ref('rooms/' + room + '/td');
+  let S = null, pick = 'cute', ask18 = false;
+
+  function render() {
+    if (!S) return;
+    const nm = q => q === me ? 'Вы' : Kit.esc(Kit.nm(q));
+    if (S.phase !== 'play') {
+      ui.innerHTML = `<div class="mid"><h1 class="k-ttl">Правда или действие</h1><p class="hint">Выберите настроение — вопросы и задания будут под него</p><div class="moods">` +
+        Object.entries(MOODS).map(([k, m]) => `<button class="${pick === k ? 'on' : ''}" data-act="mood" data-m="${k}"><em>${m[0]}</em><span><b>${m[1]}</b><small>${m[2]}</small></span></button>`).join('') +
+        `</div><button class="start" data-act="begin">Начать</button></div>` + (ask18 ? confirm18() : '');
+      return;
+    }
+    if (S.mood === 'bold' && !adult()) { ui.innerHTML = `<div class="mid"></div>` + confirm18(true); return; }
+    const m = MOODS[S.mood] || MOODS.cute, myTurn = S.turn === me;
+    const sc = `<div class="sc">${[me, other].map(q => `<div class="${S.turn === q ? 'a' : ''}"><i>${Kit.esc(Kit.av(q))}</i><span>${nm(q)}</span><b>${hearts(S['s' + q] || 0)}</b></div>`).join('')}</div>`;
+    const moodBar = `<div class="mood">${m[0]} ${m[1]} · <u data-act="moods">сменить</u></div>`;
+    let body = '';
+    if (S.stage === 'pick') {
+      const r = S.res;
+      const resTxt = r ? (r.who === me ? (r.d > 0 ? `Вы получили +${r.d} 💗` : r.d < 0 ? 'Вы пропустили задание: −1 💗' : 'Ваш ответ не засчитан') : Kit.esc(Kit.nm(r.who)) + (r.d > 0 ? `: +${r.d} 💗` : r.d < 0 ? ': пропуск, −1 💗' : ': не засчитано')) : '';
+      body = `<div class="res">${resTxt}</div>` + (myTurn
+        ? `<div class="k-pill">Ваш ход: что выберете?</div><div class="td"><button data-act="kind" data-k="t"><em>🤔</em>Правда<small>ответить честно</small></button><button class="d" data-act="kind" data-k="d"><em>⚡</em>Действие<small>выполнить задание</small></button></div><p class="hint">Правда — +1 💗, действие — +2 💗</p>`
+        : `<div class="beat">♥&#xFE0E;</div><div class="k-pill">${Kit.esc(Kit.nm(other))} выбирает…</div><p class="hint">Правда или действие?</p>`);
+    } else {
+      const d = S.kind === 'd', text = ((BANK[S.mood] || BANK.cute)[S.kind] || [])[S.ci] || '';
+      const who = myTurn ? (d ? 'Выполните и нажмите «Готово» — партнёр засчитает' : 'Ответьте в звонке или в чате — партнёр засчитает')
+                         : (d ? `${Kit.esc(Kit.nm(other))} выполняет задание` : `${Kit.esc(Kit.nm(other))} отвечает — в звонке или в чате`);
+      body = `<div class="tcard ${d ? 'd' : ''}"><span class="k">${d ? '⚡ ДЕЙСТВИЕ' : '🤔 ПРАВДА'}</span><p>${Kit.esc(text)}</p><div class="who">${who}</div></div>`;
+      if (myTurn) body += S.done ? `<div class="k-pill sm">Ждём, пока ${Kit.esc(Kit.nm(other))} засчитает…</div><button class="start w" data-act="skip" style="max-width:420px">Пропустить −1 💗</button>`
+                                 : `<div class="acts"><button class="start w" data-act="skip">Пропустить −1 💗</button><button class="start" data-act="done">Готово ✓</button></div>`;
+      else body += (S.done ? `<div class="k-pill sm">${Kit.esc(Kit.nm(other))}: готово ✓</div>` : '') + `<div class="acts"><button class="start w" data-act="judge" data-v="0">Не засчитать</button><button class="start" data-act="judge" data-v="1">Засчитать 👍</button></div>`;
+    }
+    ui.innerHTML = sc + moodBar + `<div class="mid">${body}</div>`;
+  }
+  function confirm18(inGame) {
+    return `<div class="over"><div class="cardq"><div class="big2" style="font-size:56px">🔥</div><h2>Режим «Смело» — только для 18+</h2><p class="hint" style="margin:8px 0 16px">Флирт и откровенные вопросы для пар. Вам есть 18 лет?</p>` +
+      `<button class="start" data-act="y18">Да, мне есть 18</button><button class="start w" data-act="n18" style="margin-top:10px">${inGame ? 'Нет — сменить на «Мило»' : 'Нет'}</button></div></div>`;
+  }
+
+  Profile.on(ref, s => { S = s.val(); if (!S) { ref.transaction(x => x || { phase: 'mood', s1: 0, s2: 0, round: 0 }); return; } if (S.mood && S.phase !== 'play') pick = S.mood; render(); });
+
+  function begin() {
+    ref.transaction(s => { s = s || {}; if (s.phase === 'play') return; return { ...s, phase: 'play', mood: pick, stage: 'pick', turn: s.turn || 1, s1: s.s1 || 0, s2: s.s2 || 0, round: s.round || 0, res: null }; });
+  }
+  function choose(k) {
+    ref.transaction(s => {
+      if (!s || s.phase !== 'play' || s.stage !== 'pick' || s.turn !== me) return;
+      const list = (BANK[s.mood] || BANK.cute)[k], key = 'u_' + s.mood + '_' + k, used = (s[key] || '').split(',').filter(Boolean).map(Number);
+      let free = list.map((_, i) => i).filter(i => !used.includes(i)); let nu = used;
+      if (!free.length) { free = list.map((_, i) => i); nu = []; }
+      const ci = free[Math.floor(Math.random() * free.length)];
+      return { ...s, stage: 'card', kind: k, ci, done: 0, [key]: [...nu, ci].join(',') };
+    });
+  }
+  function finish(delta) { // delta для исполнителя
+    ref.transaction(s => {
+      if (!s || s.phase !== 'play' || s.stage !== 'card') return;
+      const p = s.turn, t = { ...s }; t['s' + p] = Math.max(0, (s['s' + p] || 0) + delta);
+      t.res = { who: p, d: delta }; t.stage = 'pick'; t.turn = 3 - p; t.round = (s.round || 0) + 1; t.done = 0; delete t.kind; delete t.ci;
+      return t;
+    });
+  }
+  view.onclick = e => {
+    const b = e.target.closest('button,u'); if (!b) return; const a = b.dataset.act;
+    if (a === 'mood') { pick = b.dataset.m; if (pick === 'bold' && !adult()) ask18 = true; render(); }
+    else if (a === 'begin') { if (pick === 'bold' && !adult()) { ask18 = true; render(); return; } begin(); }
+    else if (a === 'y18') { ls.set('td18', '1'); ask18 = false; render(); }
+    else if (a === 'n18') { ask18 = false; if (S && S.phase === 'play' && S.mood === 'bold') ref.transaction(s => s && s.mood === 'bold' ? { ...s, mood: 'cute' } : undefined); pick = 'cute'; render(); }
+    else if (a === 'kind') choose(b.dataset.k);
+    else if (a === 'done') ref.transaction(s => s && s.stage === 'card' && s.turn === me ? { ...s, done: 1 } : undefined);
+    else if (a === 'skip') { if (S && S.turn === me) finish(-1); }
+    else if (a === 'judge') { if (S && S.turn !== me) finish(b.dataset.v === '1' ? (S.kind === 'd' ? 2 : 1) : 0); }
+    else if (a === 'moods') ref.transaction(s => s ? { ...s, phase: 'mood', stage: 'pick', done: 0 } : s);
+  };
+}
+</script>
+</body>
+</html>

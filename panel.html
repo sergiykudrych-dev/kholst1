@@ -70,7 +70,7 @@ button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--r
 <script src="ads.js"></script>
 <script>
 const $ = s => document.querySelector(s), out = $('#out');
-const GAMES = { paint: 'Холст', word: 'Угадай слово', number: 'Угадай число', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', tictactoe: 'Крестики-нолики', memory: 'Найди пару', questions: 'Вопросы друг другу', monster: 'Создай монстра' };
+const GAMES = { paint: 'Холст', word: 'Угадай слово', number: 'Угадай число', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', tictactoe: 'Крестики-нолики', memory: 'Найди пару', questions: 'Вопросы друг другу', monster: 'Создай монстра' , seabattle: 'Морской бой', truth: 'Правда или действие' };
 const ymd = d => d.toISOString().slice(0, 10);
 const days = n => Array.from({ length: n }, (_, i) => ymd(new Date(Date.now() - (n - 1 - i) * 864e5)));
 const pct = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
