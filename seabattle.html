@@ -78,7 +78,7 @@ body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
 .sea .cl.z{background:repeating-linear-gradient(45deg,#FBE3EC 0 4px,#fff 4px 8px)}
 .sea .cl.lst{box-shadow:0 0 0 2px #E8548C;z-index:3}
 .sea .fx{z-index:4;pointer-events:none;line-height:1;font-size:clamp(11px,4.4vw,21px)}.sea.small .fx{font-size:clamp(6px,2vw,10px)}
-.sea .ship{z-index:2;pointer-events:none;position:relative}
+.sea .ship{z-index:2;pointer-events:none;position:absolute}
 .sea .ship svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 2px 2px rgba(30,20,60,.35))}
 .sea .ship.bad svg{filter:drop-shadow(0 0 0 #E8548C) drop-shadow(0 0 3px #FF2E6E);opacity:.7}
 .sea .ship.drag{z-index:6}
@@ -91,7 +91,7 @@ body:has(> .adx-game) .sea.setup{width:min(100%,calc(100dvh - 410px))}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .shake{animation:shake .25s 2}
 </style>
-<link rel="stylesheet" href="gamehead.css?v=3">
+<link rel="stylesheet" href="gamehead.css?v=4">
 <style>header #inv.has{display:none}</style>
 <link rel="stylesheet" href="gamekit.css?v=7">
 </head>
@@ -207,7 +207,7 @@ function board({ fleet, shots, showShips, cls, clickable, zone, dragI, bad, last
   fleet.forEach((s, i) => {
     const vis = showShips || A.sunk[i]; if (!vis) return;
     const [r, c, L, v] = s, o = small ? 1 : 2;
-    h += `<div class="ship ${dragI === i ? 'drag' : ''} ${dragI === i && bad ? 'bad' : ''}" data-s="${i}" style="grid-row:${r + o} / span ${v ? L : 1};grid-column:${c + o} / span ${v ? 1 : L}">${shipSVG(L, v, A.sunk[i] && !showShips || (showShips && A.sunk[i]))}</div>`;
+    h += `<div class="ship ${dragI === i ? 'drag' : ''} ${dragI === i && bad ? 'bad' : ''}" data-s="${i}" data-a="${r * N + c}" data-b="${(v ? r + L - 1 : r) * N + (v ? c : c + L - 1)}" style="visibility:hidden">${shipSVG(L, v, A.sunk[i])}</div>`;
   });
   for (let i = 0; i < N * N; i++) if (shots[i] === '1' && A.at[i] !== undefined) {
     const r = Math.floor(i / N), c = i % N, o = small ? 1 : 2;
@@ -216,6 +216,18 @@ function board({ fleet, shots, showShips, cls, clickable, zone, dragI, bad, last
   return h + '</div>';
 }
 
+
+function layoutShips() {
+  document.querySelectorAll('.sea').forEach(sea => {
+    const R = sea.getBoundingClientRect();
+    sea.querySelectorAll('.ship').forEach(sh => {
+      const a = sea.querySelector('.cl[data-i="' + sh.dataset.a + '"]'), b = sea.querySelector('.cl[data-i="' + sh.dataset.b + '"]'); if (!a || !b) return;
+      const A = a.getBoundingClientRect(), B = b.getBoundingClientRect();
+      Object.assign(sh.style, { left: (A.left - R.left) + 'px', top: (A.top - R.top) + 'px', width: (B.right - A.left) + 'px', height: (B.bottom - A.top) + 'px', visibility: 'visible' });
+    });
+  });
+}
+addEventListener('resize', () => layoutShips());
 if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   ui.innerHTML = '<div class="mid"><h1>Нет связи</h1><p class="hint">Заполните firebase-config.js и откройте игру через интернет.</p></div>';
 } else {
@@ -226,7 +238,8 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   const ref = firebase.database().ref('rooms/' + room + '/sb');
   let S = null, draft = null, drag = null, wonKey = -1, showOver = false, overT;
 
-  function render() {
+  function render() { render0(); layoutShips(); }
+  function render0() {
     if (!S) return;
     const p = S.phase, myF = dec(S['f' + me]), thF = dec(S['f' + other]);
     const pl = q => `<span class="k-p ${p === 'play' && S.turn === q ? 'act' : ''}"><i>${Kit.esc(Kit.av(q))}</i><span>${q === me ? 'Вы' : Kit.esc(Kit.nm(q))}</span>${S.games ? `<em class="k-w">${S['w' + q] || 0}</em>` : ''}</span>`;
@@ -257,8 +270,8 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     const ov = p === 'over' && showOver ? `<div class="over"><div class="card" id="ovc"><div class="big2">${won ? '🚢🎉' : '💌'}</div><h2>${won ? 'Вы победили!' : 'Победил ' + Kit.esc(Kit.nm(other))}</h2><p class="hint" style="margin-top:6px">Весь флот потоплен за ${shotsN} ${pl3(shotsN)}</p><button class="again start" data-act="again">Играть ещё</button><a class="home" href="index.html">На главную</a></div></div>` : '';
     ui.innerHTML = `<div class="k-pl">${pl(me)}${pl(other)}</div>` + (st ? `<div class="k-pill ${myTurn && S.lb === me && S.lr !== 'm' ? 'ok' : ''}" style="min-height:44px;font-size:17px">${st}</div>` : '') +
       `<div class="lab">${Kit.esc(Kit.av(other))} Флот партнёра <em>осталось ${A.left} из 10</em></div>` +
-      board({ fleet: thF, shots: myShots, showShips: p === 'over', cls: 'big', clickable: myTurn, last: S.lb === me ? S.li : -1 }) +
-      `<div class="lab">Ваш флот</div>` + board({ fleet: myF, shots: thShots, showShips: true, cls: 'small', last: S.lb === other ? S.li : -1 }) + ov;
+      board({ fleet: thF, shots: myShots, showShips: p === 'over', cls: 'big', clickable: myTurn, last: S.lb === me && S.lr !== 'k' ? S.li : -1 }) +
+      `<div class="lab">Ваш флот</div>` + board({ fleet: myF, shots: thShots, showShips: true, cls: 'small', last: S.lb === other && S.lr !== 'k' ? S.li : -1 }) + ov;
     if (p === 'over' && !showOver) overT = setTimeout(() => { showOver = true; render(); }, 1400);
     if (won && showOver && wonKey !== S.games) { wonKey = S.games; const el = document.getElementById('ovc'); if (el) { const r = el.getBoundingClientRect(); setTimeout(() => Kit.burst(r.left + r.width / 2, r.top + r.height / 2, 40), 350); } }
   }

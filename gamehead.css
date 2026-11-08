@@ -16,3 +16,6 @@ header .fx-b,header #fx-btn{flex:none;width:44px;padding:0;font-size:20px}
 
 /* Единые боковые отступы во всех играх: ничего не прилипает к краям экрана */
 #view{padding-left:max(16px,env(safe-area-inset-left))!important;padding-right:max(16px,env(safe-area-inset-right))!important}
+
+/* Затемнение итогового окна до самого низа экрана (iPhone) */
+.over{bottom:auto!important;height:100vh;height:100lvh;min-height:100%}
