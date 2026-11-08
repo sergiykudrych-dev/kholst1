@@ -19,6 +19,8 @@ header .fx-b,header #fx-btn{flex:none;width:44px;padding:0;font-size:20px}
 
 /* Затемнение итогового окна до самого низа экрана (iPhone) */
 .over{bottom:auto!important;height:100vh;height:100lvh;min-height:100%}
+/* В приложении на iPhone экран бывает выше окна на высоту статус-бара — тянем затемнение ниже края */
+.over::after{content:"";position:absolute;left:0;right:0;top:100%;height:max(160px,calc(env(safe-area-inset-top) + env(safe-area-inset-bottom) + 80px));background:inherit;-webkit-backdrop-filter:inherit;backdrop-filter:inherit;pointer-events:none}
 
 /* Шапка всегда поверх игры (кнопки ← и 💗 нажимаются целиком) */
 header{position:relative;z-index:20}

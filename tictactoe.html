@@ -127,7 +127,7 @@ button.t{cursor:pointer}
 /* игра по центру (чуть ниже) */
 #ui{justify-content:center}#ui::before{content:"";flex:none;height:3vh}@media(max-height:760px){#ui::before{display:none}}
 </style>
-<link rel="stylesheet" href="gamehead.css?v=5">
+<link rel="stylesheet" href="gamehead.css?v=6">
 <style>header #inv.has{display:none}</style>
 <link rel="stylesheet" href="gamekit.css?v=7">
 </head>
@@ -210,7 +210,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     clearTimeout(overT); if (p !== 'over') showOver = false;
     const ov = p === 'over' && showOver ? `<div class="over"><div class="card" id="ovc"><div class="big2">${S.res === 'draw' ? '🤝' : won ? '🎉' : '💌'}</div><h2 class="k-h2">${S.res === 'draw' ? 'Ничья' : won ? 'Вы победили!' : 'Победил ' + esc(Kit.nm(other))}</h2><button class="again start" data-act="again">Играть ещё</button><a class="home" href="index.html">На главную</a></div></div>` : '';
     ui.innerHTML = `<div class="k-pl">${pl(1)}${pl(2)}</div><div class="ttt ${n === 3 ? '' : 'n13'}" style="${style}">${cells}<svg class="wl"></svg></div>` +
-      (p === 'over' ? '' : `<div class="k-pill" id="st">${status}</div>`) + ov;
+      `<div class="k-pill" id="st">${status}</div>` + ov;
     if (p === 'over' && !showOver) overT = setTimeout(() => { showOver = true; render(); }, S.res === 'draw' ? 500 : 1300);
     drawWin(line);
     if (won && showOver && wonKey !== S.games) { wonKey = S.games; const el = document.getElementById('ovc'); if (el) { const r = el.getBoundingClientRect(); setTimeout(() => Kit.burst(r.left + r.width / 2, r.top + r.height / 2, 40), 350); } }
