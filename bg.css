@@ -1,0 +1,10 @@
+/* Единый фон сайта: вертикальный градиент, привязанный к экрану.
+   Верхний край экрана — ровно #FFEAF1, нижний — ровно #F8A9C9;
+   полоса под экраном на iPhone (html) того же цвета, что и низ градиента. */
+html{background-color:#F8A9C9!important}
+body{background:none!important}
+html::before{content:"";position:fixed;left:0;right:0;top:-1px;bottom:-1px;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,#FFEAF1 0%,#FFEAF1 4%,#FFC9DC 55%,#F8A9C9 94%,#F8A9C9 100%)}
+/* Тёмная главная */
+html.dark{background-color:#E8548C!important}
+html.dark::before{background:linear-gradient(180deg,#2A0A46 0%,#2A0A46 4%,#5E1A66 34%,#C93D7C 76%,#E8548C 94%,#E8548C 100%)}
