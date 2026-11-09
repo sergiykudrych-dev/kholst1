@@ -25,3 +25,6 @@ details p{margin-top:8px;font-size:16px}
 .more a{padding:9px 14px;border-radius:999px;background:var(--card);font-weight:700;font-size:14px;text-decoration:none;color:var(--deep)}
 footer{margin-top:34px;text-align:center;font-size:13px;color:var(--mute)}
 footer a{color:var(--mute)}
+figure.shot{margin:22px auto 4px;max-width:280px;text-align:center}
+figure.shot img{display:block;width:100%;height:auto;border-radius:30px;border:6px solid #2a1630;box-shadow:0 22px 44px -18px rgba(74,18,54,.6);background:#FFEAF1}
+figure.shot figcaption{margin-top:10px;font-size:14px;color:var(--mute)}
