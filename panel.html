@@ -216,9 +216,13 @@ function adAdmin() {
     const [daily, total] = await Promise.all([db.ref('stats/daily').once('value'), db.ref('stats/total/users').once('value')]);
     render(daily.val() || {}, total.val() || 0);
     if (first) { first = false; adAdmin(); }
-    const t = new Date(); $('#sub').textContent = 'Обновлено в ' + String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+    const t = new Date(); $('#sub').textContent = 'Обновлено в ' + t.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
-  rf.onclick = () => { rf.disabled = true; rf.textContent = '↻ Обновляем…'; location.reload(); };
+  rf.onclick = async () => {
+    rf.disabled = true; rf.textContent = '↻ Обновляем…';
+    try { await load(); rf.textContent = '✓ Готово'; } catch (e) { rf.textContent = '⚠ Ошибка'; }
+    setTimeout(() => { rf.disabled = false; rf.textContent = '↻ Обновить'; }, 1200);
+  };
   try { await load(); rf.hidden = false; try { localStorage.setItem('kh_owner', '1'); } catch (e) {} } catch (e) { login('Нет доступа'); }
 })();
 </script>
