@@ -103,7 +103,7 @@
   'use strict';
   const MAP = [[/threads\./, 'th'], [/instagram\./, 'ig'], [/tiktok\./, 'tt'], [/google\.|googlequicksearch/, 'google'], [/facebook\.|fb\./, 'fb'], [/t\.me|telegram/, 'tg'], [/vk\.com/, 'vk'], [/bing\.|yandex\.|duckduckgo/, 'search']];
   function src() {
-    try { const f = new URLSearchParams(location.search).get('from'); if (/^(ig|th|tt)$/.test(f || '')) return f; } catch (e) {}
+    try { const f = new URLSearchParams(location.search).get('from'); if (/^(ig|th|tt|tg)$/.test(f || '')) return f; } catch (e) {}
     let r = ''; try { r = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
     if (!r || r === location.hostname) return 'direct';
     for (const [re, k] of MAP) if (re.test(r)) return k;
