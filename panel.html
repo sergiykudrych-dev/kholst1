@@ -92,7 +92,18 @@ function render(daily, total) {
   const gk = Object.keys(GAMES).map(g => ({ g, open: sum('open_' + g, d30), done: sum('done_' + g, d30) })).sort((a, b) => b.open - a.open);
   const max = Math.max(1, ...gk.map(x => x.open));
   const maxU = Math.max(1, ...d14.map(D('users')));
-  let h = `<h2>Сегодня</h2><div class="grid">
+  const SRC = [['ig', 'Instagram'], ['tt', 'TikTok'], ['th', 'Threads'], ['google', 'Google'], ['search', 'Другие поисковики'], ['tg', 'Telegram'], ['vk', 'ВКонтакте'], ['fb', 'Facebook'], ['other', 'Другие сайты'], ['direct', 'Напрямую']];
+  const srcRows = ds => { const r = SRC.map(([k, n]) => ({ n, v: sum('v_' + k, ds) })).filter(x => x.v).sort((a, b) => b.v - a.v); const m = Math.max(1, ...r.map(x => x.v));
+    return r.length ? r.map(x => `<div class="fr"><span>${x.n}</span><div class="bar"><i style="width:${x.v / m * 100}%"></i></div><b>${fmt(x.v)}</b></div>`).join('') : '<p class="pc">Пока нет данных.</p>'; };
+  let h = `<h2>Посетители сегодня</h2><div class="grid">
+<div class="k"><b>${fmt(D('p_all')(today))}</b><span>человек зашло</span></div>
+<div class="k"><b>${fmt(D('v_all')(today))}</b><span>посещений</span></div>
+<div class="k"><b>${fmt(D('p_all')(yest))}</b><span>человек вчера</span></div>
+<div class="k"><b>${fmt(sum('p_all', d7))}</b><span>за 7 дней</span></div></div>
+<h2>Откуда пришли</h2><div class="card"><p class="pc"><b>Сегодня</b></p><div class="fun">${srcRows([today])}</div>
+<p class="pc"><b>За 7 дней</b></p><div class="fun">${srcRows(d7)}</div>
+<p class="pc">Короткие ссылки для профилей: twosome.games/ig · /tt · /th — по ним видно, какая соцсеть приводит людей. Приложения Instagram и TikTok часто не сообщают, откуда пришёл человек, поэтому без коротких ссылок такие переходы попадают в «Напрямую».</p></div>
+<h2>Сегодня (кто принял статистику)</h2><div class="grid">
 <div class="k"><b>${fmt(D('users')(today))}</b><span>человек заходило</span></div>
 <div class="k"><b>${fmt(D('newusers')(today))}</b><span>из них новых</span></div>
 <div class="k"><b>${fmt(D('room_created')(today))}</b><span>комнат создано</span></div>

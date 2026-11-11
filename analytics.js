@@ -96,3 +96,32 @@
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
+
+/* Обезличенный счётчик посещений и источников для панели владельца — работает без согласия:
+   только числа по дням (сколько людей, откуда пришли), без имён, почт, кодов комнат и без передачи третьим лицам. */
+(function () {
+  'use strict';
+  const MAP = [[/threads\./, 'th'], [/instagram\./, 'ig'], [/tiktok\./, 'tt'], [/google\.|googlequicksearch/, 'google'], [/facebook\.|fb\./, 'fb'], [/t\.me|telegram/, 'tg'], [/vk\.com/, 'vk'], [/bing\.|yandex\.|duckduckgo/, 'search']];
+  function src() {
+    try { const f = new URLSearchParams(location.search).get('from'); if (/^(ig|th|tt)$/.test(f || '')) return f; } catch (e) {}
+    let r = ''; try { r = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
+    if (!r || r === location.hostname) return 'direct';
+    for (const [re, k] of MAP) if (re.test(r)) return k;
+    return 'other';
+  }
+  async function count() {
+    if (/panel\.html$/.test(location.pathname)) return;
+    let ss = null; try { ss = sessionStorage.getItem('kh_vis'); } catch (e) {}
+    if (ss) return;                                   /* одно посещение на сессию, не каждая страница */
+    try { sessionStorage.setItem('kh_vis', '1'); } catch (e) {}
+    if (!(window.Profile && Profile.init && window.firebase)) return;
+    const uid = await Profile.init(); if (!uid) return;
+    const db = firebase.database(), inc = firebase.database.ServerValue.increment(1), day = new Date().toISOString().slice(0, 10);
+    const add = k => db.ref('stats/daily/' + day + '/' + k).set(inc).catch(() => {});
+    add('v_all'); add('v_' + src());
+    let d = null; try { d = localStorage.getItem('kh_vday'); } catch (e) {}
+    if (d !== day) { try { localStorage.setItem('kh_vday', day); } catch (e) {} add('p_all'); }
+  }
+  const go = () => setTimeout(() => { count().catch(() => {}); }, 1200);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+})();
