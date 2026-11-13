@@ -61,6 +61,7 @@
     },
     "stats": {
       ".read": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "daily": {
         "$day": {
           "$key": {
@@ -155,6 +156,7 @@
     },
     "stats": {
       ".read": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "daily": {
         "$day": {
           "$key": {
