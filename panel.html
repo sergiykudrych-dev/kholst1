@@ -14,7 +14,7 @@
 <title>Панель — Во что сыграем?</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
 <style>[hidden]{display:none!important}html{background:#FFE9F0}
-:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#8A5570;--card:rgba(255,255,255,.88)}
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#7A4260;--card:rgba(255,255,255,.88)}
 *{box-sizing:border-box;margin:0}
 html,body{overflow-x:hidden}body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed}
 main{max-width:640px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom))}
@@ -29,7 +29,7 @@ h2{margin:22px 0 8px;font-size:15px;font-weight:800;color:var(--deep);text-trans
 .k span{font-size:13px;color:var(--mute)}
 .k.wide{grid-column:1/-1}
 .fun{display:grid;gap:10px}
-.fr{display:grid;grid-template-columns:130px 1fr 52px;gap:8px;align-items:center;font-size:14px}
+.fr{display:grid;grid-template-columns:124px 1fr 76px;gap:8px;align-items:center;font-size:14px}
 .bar{height:16px;border-radius:99px;background:#F7D3E0;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:var(--rose)}
 .fr b{text-align:right;font-weight:800}
 .pc{margin-top:8px;font-size:14px;color:var(--mute)}.pc b{color:var(--deep)}
@@ -39,6 +39,19 @@ h2{margin:22px 0 8px;font-size:15px;font-weight:800;color:var(--deep);text-trans
 .d u{margin-bottom:3px;text-decoration:none;font-weight:700;color:var(--deep);font-size:11px}
 .hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}.hd .sub{margin:0}.rf{flex:none;padding:9px 14px;border:0;border-radius:999px;background:#fff;color:var(--deep);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(142,15,69,.15)}.rf:disabled{opacity:.6}
 .note{margin-top:20px;font-size:12px;color:var(--mute)}
+.pane{display:flex;flex-direction:column;gap:14px}.pane .card{padding:20px;display:flex;flex-direction:column;gap:12px}.pane>.note{margin:0}
+.tabs{display:flex;gap:4px;padding:4px;margin-bottom:14px;border-radius:16px;background:var(--card)}.tabs button{flex:1;min-height:44px;border:0;border-radius:12px;background:transparent;color:var(--deep);font:700 15px Manrope,system-ui,sans-serif;cursor:pointer}.tabs button.on{background:var(--rose);color:#fff;font-weight:800}
+.ct{font-size:18px;font-weight:800;color:var(--deep)}.ch{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hero .lb{font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--mute)}.hero .big{display:flex;align-items:baseline;gap:8px}.hero .big b{font-size:56px;line-height:1;font-weight:800;color:var(--deep)}.hero .big span{font-size:20px;font-weight:700}.hero .sm{display:flex;gap:20px;font-size:15px}
+.ok{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#DDF3E4;color:#14532D;font-size:13px;font-weight:700}
+.sg{display:flex;gap:2px;padding:2px;border-radius:12px;background:#F7D3E0}.sg button{min-height:44px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--deep);font:700 13px Manrope,system-ui,sans-serif;cursor:pointer}.sg button.on{background:var(--rose);color:#fff;font-weight:800}
+.fr span{min-width:0;overflow-wrap:anywhere;font-weight:700}.fr small,.rw small{font-size:13px;font-weight:500;color:var(--mute)}
+.fr2{display:grid;gap:6px;font-size:15px}.rw{display:flex;justify-content:space-between;gap:8px}.rw span{font-weight:700}.rw b{font-weight:800}
+.say{margin:0;padding:12px 14px;border-radius:14px;background:#FFE3EE;font-size:14px;line-height:1.45}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}.chip{min-height:44px;padding:0 10px;border:1.5px solid var(--rose);border-radius:12px;background:#fff;color:var(--rose);font:700 13px Manrope,system-ui,sans-serif;cursor:pointer}
+.d i.now{background:var(--deep)}.d span.td{font-weight:800;color:var(--deep)}.d span{font-size:12px}.d u{font-size:12px}
+details.more{border-radius:22px;background:var(--card)}details.more summary{min-height:56px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;font-weight:800;color:var(--deep);cursor:pointer;list-style:none}details.more summary::-webkit-details-marker{display:none}details.more[open] summary svg{transform:rotate(180deg)}details.more .inner{padding:0 20px 20px}
+.pc{margin-top:0}
 .cl{padding:12px 0;border-top:1px solid #F0C9D8}.cl:first-of-type{border-top:0}
 .cl .u{display:flex;gap:8px;margin:6px 0}
 .card .cl .u input{flex:1;min-width:0;width:auto;margin:0;padding:10px;font:500 14px Manrope,system-ui,sans-serif;border:1.5px solid #E8B7CB;border-radius:12px;background:#fff;color:var(--ink)}
@@ -65,8 +78,10 @@ button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--r
 <a class="back" href="index.html">← На сайт</a>
 <h1>Панель владельца</h1>
 <div class="hd"><p class="sub" id="sub">Сколько людей играет и во что</p><button type="button" class="rf" id="rf" hidden>↻ Обновить</button></div>
-<div id="out"><div class="msg">Загружаем…</div></div>
-<div id="adm"></div>
+<div id="tabs" class="tabs" role="tablist" hidden><button type="button" role="tab" data-t="main" aria-selected="true" class="on">Главное</button><button type="button" role="tab" data-t="games" aria-selected="false">Игры</button><button type="button" role="tab" data-t="ads" aria-selected="false">Реклама</button></div>
+<div id="out" class="pane"><div class="msg">Загружаем…</div></div>
+<div id="p-games" class="pane" hidden></div>
+<div id="p-ads" class="pane" hidden><div id="links"></div><div id="adm"></div></div>
 <p class="note" id="ver"></p>
 </main>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -104,69 +119,108 @@ function resetCounters() {
   render(RAW, TOT);
 }
 
+let SRC_RANGE = 'week', SHOW_ALL = false, TAB = 'main';
+try { TAB = localStorage.getItem('kh_tab') || 'main'; } catch (e) {}
+function showTab(t) {
+  if (!['main', 'games', 'ads'].includes(t)) t = 'main';
+  TAB = t; try { localStorage.setItem('kh_tab', t); } catch (e) {}
+  document.querySelectorAll('#tabs button').forEach(b => { const on = b.dataset.t === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  $('#out').hidden = t !== 'main'; $('#p-games').hidden = t !== 'games'; $('#p-ads').hidden = t !== 'ads';
+}
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => showTab(b.dataset.t));
+
 function render(daily, total) {
   daily = adjust(daily);
   const D = k => d => ((daily[d] || {})[k]) || 0;
   const sum = (k, ds) => ds.reduce((a, d) => a + D(k)(d), 0);
-  const d30 = days(30), d14 = days(14), d7 = days(7), today = ymd(new Date()), yest = ymd(new Date(Date.now() - 864e5));
+  const d30 = days(30), d7 = days(7), today = ymd(new Date()), yest = ymd(new Date(Date.now() - 864e5));
   const rooms = sum('room_created', d30), joined = sum('partner_joined', d30), done = sum('game_complete', d30);
   const gk = Object.keys(GAMES).map(g => ({ g, open: sum('open_' + g, d30), done: sum('done_' + g, d30) })).sort((a, b) => b.open - a.open);
-  const max = Math.max(1, ...gk.map(x => x.open));
-  const maxU = Math.max(1, ...d14.map(D('users')));
+  const maxG = Math.max(1, ...gk.map(x => x.open));
   const seen = new Set(); for (const d in daily) for (const k in daily[d]) if (k.startsWith('v_c_') && daily[d][k] > 0 && /^[a-z0-9][a-z0-9_-]{1,23}$/.test(k.slice(4))) seen.add(k.slice(4));
-  const camp = [...new Set([...getLinks(), ...seen])];
+  const local = getLinks(), camp = [...new Set([...local, ...seen])];
   const SRC = [['ig', 'Instagram'], ['tt', 'TikTok'], ['th', 'Threads'], ['google', 'Google'], ['search', 'Другие поисковики'], ['tg', 'Telegram'], ['vk', 'ВКонтакте'], ['fb', 'Facebook'], ['other', 'Другие сайты'], ['direct', 'Напрямую']];
-  const srcRows = ds => { const r = SRC.map(([k, n]) => ({ n, v: sum('v_' + k, ds) })).concat(camp.map(c => ({ n: 'Реклама: ' + c, v: sum('v_c_' + c, ds) }))).filter(x => x.v).sort((a, b) => b.v - a.v); const m = Math.max(1, ...r.map(x => x.v));
-    return r.length ? r.map(x => `<div class="fr"><span>${x.n}</span><div class="bar"><i style="width:${x.v / m * 100}%"></i></div><b>${fmt(x.v)}</b></div>`).join('') : '<p class="pc">Пока нет данных.</p>'; };
+  const me = (() => { try { return localStorage.getItem('kh_me') === '1' || localStorage.getItem('kh_owner') === '1'; } catch (e) { return false; } })();
+
+  /* Главное */
+  const ds = SRC_RANGE === 'today' ? [today] : d7;
+  const rows = SRC.map(([k, n]) => ({ n, v: sum('v_' + k, ds) })).concat(camp.map(c => ({ n: 'Реклама: ' + c, v: sum('v_c_' + c, ds) }))).filter(x => x.v).sort((a, b) => b.v - a.v);
+  const tot = rows.reduce((a, x) => a + x.v, 0), mx = Math.max(1, ...rows.map(x => x.v));
+  const srcHtml = rows.length ? rows.map(x => `<div class="fr"><span>${x.n}</span><div class="bar"><i style="width:${x.v / mx * 100}%"></i></div><b>${fmt(x.v)} <small>${Math.round(x.v / tot * 100)}%</small></b></div>`).join('') : '<p class="pc">Пока нет данных.</p>';
+  const chips = [['ig', 'Instagram'], ['tt', 'TikTok'], ['th', 'Threads'], ['tg', 'Telegram']].map(([k, n]) => `<button type="button" class="chip" data-v="https://twosome.games/${k}" aria-label="Скопировать ссылку для ${n}">twosome.games/${k}</button>`).join('');
+  const d7p = d7.map(D('p_all')), maxP = Math.max(1, ...d7p), WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+  const bars = d7.map((d, i) => `<div class="d"><u>${d7p[i]}</u><i class="${d === today ? 'now' : ''}" style="height:${Math.max(d7p[i] / maxP * 80, 2)}%"></i><span${d === today ? ' class="td"' : ''}>${WD[new Date(d + 'T12:00:00Z').getUTCDay()]}</span></div>`).join('');
   const bt = +(() => { try { return localStorage.getItem('kh_base_t'); } catch (e) { return 0; } })() || 0;
-  const resetHtml = `<p class="pc">${bt ? 'Счётчик сброшен ' + new Date(bt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '. ' : ''}Сброс обнуляет цифры посетителей и источников в панели на этом устройстве, считать заново начнёт с нуля.</p><button type="button" class="rs" id="rs">Сбросить счётчик посетителей</button>`;
-  const local = getLinks();
-  const campHtml = `<h2>Рекламные ссылки</h2><div class="card"><p class="pc" style="margin:0 0 4px">Дайте такую ссылку рекламодателю или поставьте в пост: сколько человек перешло, видно здесь.</p>
-<div class="cn"><input id="cn" maxlength="40" placeholder="Название, например: канал Иры"><button type="button" id="cadd">Создать</button></div><p class="pc" id="cmsg"></p>` +
-    (camp.length ? camp.map(c => `<div class="cl"><b>${c}</b><div class="u"><input readonly value="https://twosome.games/?from=${c}" aria-label="Ссылка"><button type="button" data-copy>Копировать</button>${local.includes(c) && !seen.has(c) ? `<button type="button" class="del" data-del="${c}" aria-label="Убрать ссылку">✕</button>` : ''}</div><span class="pc" style="margin:0">Переходов: сегодня <b>${fmt(sum('v_c_' + c, [today]))}</b> · 7 дней <b>${fmt(sum('v_c_' + c, d7))}</b> · 30 дней <b>${fmt(sum('v_c_' + c, d30))}</b></span></div>`).join('') : '<p class="pc">Ссылок пока нет.</p>') +
-    `<p class="pc">Считается один переход на посещение. Свои заходы по ссылке не считаются (на устройстве, где вы открывали панель), проверяйте с другого телефона.</p></div>`;
-  let h = `<h2>Посетители сегодня</h2><div class="grid">
-<div class="k"><b>${fmt(D('p_all')(today))}</b><span>человек зашло</span></div>
-<div class="k"><b>${fmt(D('v_all')(today))}</b><span>посещений</span></div>
-<div class="k"><b>${fmt(D('p_all')(yest))}</b><span>человек вчера</span></div>
-<div class="k"><b>${fmt(sum('p_all', d7))}</b><span>за 7 дней</span></div></div>
-<h2>Откуда пришли</h2><div class="card"><p class="pc"><b>Сегодня</b></p><div class="fun">${srcRows([today])}</div>
-<p class="pc"><b>За 7 дней</b></p><div class="fun">${srcRows(d7)}</div>
-<p class="pc">Короткие ссылки для профилей: twosome.games/ig · /tt · /th · /tg — по ним видно, какая соцсеть приводит людей. Приложения Instagram и TikTok часто не сообщают, откуда пришёл человек, поэтому без коротких ссылок такие переходы попадают в «Напрямую».</p></div>
-${resetHtml}${campHtml}<h2>Сегодня (кто принял статистику)</h2><div class="grid">
+  const resetHtml = `<p class="pc" style="margin:0">${bt ? 'Счётчик сброшен ' + new Date(bt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '. ' : ''}Сброс обнуляет цифры посетителей и источников в панели на этом устройстве, считать заново начнёт с нуля.</p><button type="button" class="rs" id="rs">Сбросить счётчик посетителей</button>`;
+
+  $('#out').innerHTML = `<div class="card hero"><span class="lb">СЕГОДНЯ ЗАШЛО</span>
+<div class="big"><b>${fmt(D('p_all')(today))}</b><span>человек</span></div>
+<div class="sm"><span>Вчера: <b>${fmt(D('p_all')(yest))}</b></span><span>За 7 дней: <b>${fmt(sum('p_all', d7))}</b></span></div>
+<span class="pc" style="margin:0">Всего открытий сайта сегодня — ${fmt(D('v_all')(today))}. Один человек может зайти несколько раз.</span>
+${me ? '<div class="ok">✓ Ваши заходы с этого устройства не считаются</div>' : ''}</div>
+<div class="card"><div class="ch"><span class="ct">Откуда пришли</span><div class="sg"><button type="button" data-r="today" class="${SRC_RANGE === 'today' ? 'on' : ''}">Сегодня</button><button type="button" data-r="week" class="${SRC_RANGE === 'week' ? 'on' : ''}">7 дней</button></div></div>
+<div class="fun">${srcHtml}</div>
+<p class="pc" style="margin:0">«Напрямую» — ссылка открылась без пометки. Так часто выглядят переходы из приложений Instagram и TikTok. Чтобы видеть точнее, ставьте в профили короткие ссылки:</p>
+<div class="chips">${chips}</div></div>
+<div class="card"><span class="ct">Люди по дням</span><div class="days">${bars}</div><p class="pc" style="margin:0">В среднем в день за неделю: <b>${(sum('p_all', d7) / 7).toFixed(1)}</b>. Дни по времени UTC.</p></div>
+<details class="more"><summary>Ещё цифры: статистика Google, приглашения<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="inner">
+<p class="pc">Сегодня, только те, кто нажал «Принять» на баннере статистики:</p><div class="grid">
 <div class="k"><b>${fmt(D('users')(today))}</b><span>человек заходило</span></div>
 <div class="k"><b>${fmt(D('newusers')(today))}</b><span>из них новых</span></div>
 <div class="k"><b>${fmt(D('room_created')(today))}</b><span>комнат создано</span></div>
 <div class="k"><b>${fmt(D('game_complete')(today))}</b><span>партий доиграно</span></div>
-<div class="k wide"><b>${fmt(total)}</b><span>всего разных людей с начала подсчёта</span></div></div>`;
-  h += `<h2>За 30 дней: дошли ли до игры вдвоём</h2><div class="card"><div class="fun">
-<div class="fr"><span>Создали комнату</span><div class="bar"><i style="width:100%"></i></div><b>${fmt(rooms)}</b></div>
-<div class="fr"><span>Второй игрок зашёл</span><div class="bar"><i style="width:${rooms ? Math.min(100, joined / rooms * 100) : 0}%"></i></div><b>${fmt(joined)}</b></div>
-<div class="fr"><span>Партию доиграли</span><div class="bar"><i style="width:${rooms ? Math.min(100, done / rooms * 100) : 0}%"></i></div><b>${fmt(done)}</b></div></div>
-<p class="pc">До второго игрока доходит <b>${pct(joined, rooms)}</b> комнат. Партий доиграно: <b>${fmt(done)}</b> (в одной комнате можно сыграть несколько партий подряд). Если первая цифра низкая, значит, людям сложно позвать второго.</p></div>`;
-  h += `<h2>Самые популярные игры (30 дней)</h2><div class="card"><div class="fun">` + gk.map(x => `<div class="fr"><span>${GAMES[x.g]}</span><div class="bar"><i style="width:${x.open / max * 100}%"></i></div><b>${fmt(x.open)}</b></div>`).join('') + `</div><p class="pc">Число — сколько раз открывали игру. Доиграно партий: ${gk.filter(x => x.done).map(x => `${GAMES[x.g]} <b>${x.done}</b>`).join(', ') || 'пока нет'}.</p></div>`;
-  h += `<h2>Люди по дням (14 дней)</h2><div class="card"><div class="days">` + d14.map(d => `<div class="d"><u>${D('users')(d) || ''}</u><i style="height:${D('users')(d) / maxU * 80}%"></i><span>${d.slice(8)}</span></div>`).join('') + `</div><p class="pc">За вчера: <b>${fmt(D('users')(yest))}</b>. В среднем в день за неделю: <b>${(sum('users', d7) / 7).toFixed(1)}</b>.</p></div>`;
-  h += `<h2>Другое (30 дней)</h2><div class="grid">
+<div class="k wide"><b>${fmt(total)}</b><span>всего разных людей с начала подсчёта</span></div></div>
+<p class="pc">За 30 дней:</p><div class="grid">
 <div class="k"><b>${fmt(sum('invite_sent', d30))}</b><span>приглашений другу</span></div>
 <div class="k"><b>${fmt(sum('friend_added', d30))}</b><span>подружились</span></div>
 <div class="k"><b>${fmt(sum('profile_saved', d30))}</b><span>сохранили профиль</span></div>
 <div class="k"><b>${fmt(sum('views', d30))}</b><span>открытий страниц</span></div></div>
-<p class="note">Считаются только те, кто нажал «Принять» на баннере. Дни по времени UTC. Время на сайте, устройства и источники рекламы смотрите в Google Analytics.</p>`;
-  out.innerHTML = h;
+<p class="note">Время на сайте, устройства и источники рекламы смотрите в Google Analytics.</p></div></details>
+<div class="card">${resetHtml}</div>`;
+
+  /* Игры */
+  const shown = SHOW_ALL ? gk : gk.slice(0, 5);
+  const doneList = gk.filter(x => x.done).map(x => `${GAMES[x.g]} <b>${x.done}</b>`).join(', ') || 'пока нет';
+  $('#p-games').innerHTML = `<div class="card"><span class="ct">Дошли ли до игры вдвоём</span><span class="pc" style="margin:0">За 30 дней</span>
+<div class="fun">
+<div class="fr2"><div class="rw"><span>Создали комнату</span><b>${fmt(rooms)}</b></div><div class="bar"><i style="width:100%"></i></div></div>
+<div class="fr2"><div class="rw"><span>Второй игрок зашёл</span><b>${fmt(joined)} <small>${pct(joined, rooms)}</small></b></div><div class="bar"><i style="width:${rooms ? Math.min(100, joined / rooms * 100) : 0}%"></i></div></div>
+<div class="fr2"><div class="rw"><span>Партию доиграли</span><b>${fmt(done)} <small>${pct(done, rooms)}</small></b></div><div class="bar"><i style="width:${rooms ? Math.min(100, done / rooms * 100) : 0}%"></i></div></div></div>
+<p class="say">${rooms ? `Из ${fmt(rooms)} комнат до второго игрока дошли <b>${fmt(joined)}</b>. Если эта цифра маленькая, людям сложно позвать второго.` : 'Комнат за 30 дней пока не создавали.'}</p></div>
+<div class="card"><span class="ct">Что открывают чаще всего</span><span class="pc" style="margin:0">Сколько раз открывали игру за 30 дней</span>
+<div class="fun">${shown.map(x => `<div class="fr"><span>${GAMES[x.g]}</span><div class="bar"><i style="width:${x.open / maxG * 100}%"></i></div><b>${fmt(x.open)}</b></div>`).join('')}</div>
+<button type="button" class="rs" id="allg" style="margin-top:0">${SHOW_ALL ? 'Только лучшие 5' : 'Показать все ' + gk.length + ' игр'}</button>
+<p class="pc" style="margin:0">Доиграно партий: ${doneList}.</p></div>
+<p class="note">Здесь считаются только те, кто нажал «Принять» на баннере статистики.</p>`;
+
+  /* Реклама: ссылки */
+  $('#links').innerHTML = `<div class="card"><span class="ct">Рекламные ссылки</span><p class="pc" style="margin:0">Дайте такую ссылку рекламодателю или поставьте в пост: сколько человек перешло, видно здесь.</p>
+<div class="cn"><input id="cn" maxlength="40" placeholder="Название (канал Иры)"><button type="button" id="cadd">Создать</button></div><p class="pc" id="cmsg" style="margin:0"></p>` +
+    (camp.length ? camp.map(c => `<div class="cl"><b>${c}</b><div class="u"><input readonly value="https://twosome.games/?from=${c}" aria-label="Ссылка"><button type="button" data-copy>Копировать</button>${local.includes(c) && !seen.has(c) ? `<button type="button" class="del" data-del="${c}" aria-label="Убрать ссылку">✕</button>` : ''}</div><span class="pc" style="margin:0">Переходов: сегодня <b>${fmt(sum('v_c_' + c, [today]))}</b> · 7 дней <b>${fmt(sum('v_c_' + c, d7))}</b> · 30 дней <b>${fmt(sum('v_c_' + c, d30))}</b></span></div>`).join('') : '<p class="pc" style="margin:0">Ссылок пока нет.</p>') +
+    `<p class="pc" style="margin:0">Считается один переход на посещение. Свои заходы по ссылке не считаются (на устройстве, где вы открывали панель), проверяйте с другого телефона.</p></div>`;
+
+  /* действия */
   const rs = $('#rs'); if (rs) { let sure = false; rs.onclick = () => { if (!sure) { sure = true; rs.textContent = 'Точно сбросить? Нажмите ещё раз'; setTimeout(() => { sure = false; rs.textContent = 'Сбросить счётчик посетителей'; }, 4000); return; } resetCounters(); }; }
   const ca = $('#cadd'); if (ca) ca.onclick = () => {
     const s = mkSlug($('#cn').value); if (!s) { $('#cmsg').textContent = 'Введите название, не меньше двух букв или цифр.'; return; }
     const L = getLinks(); if (!L.includes(s)) { L.push(s); setLinks(L); } render(RAW, TOT);
   };
-  out.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => { const i = b.parentNode.querySelector('input'); try { await navigator.clipboard.writeText(i.value); b.textContent = 'Скопировано ✓'; } catch (e) { i.select(); b.textContent = 'Выделено'; } setTimeout(() => b.textContent = 'Копировать', 1800); });
-  out.querySelectorAll('.cl input').forEach(i => i.onclick = () => i.select());
-  out.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { setLinks(getLinks().filter(s => s !== b.dataset.del)); render(RAW, TOT); });
+  document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { SRC_RANGE = b.dataset.r; render(RAW, TOT); });
+  const ag = $('#allg'); if (ag) ag.onclick = () => { SHOW_ALL = !SHOW_ALL; render(RAW, TOT); };
+  document.querySelectorAll('[data-copy], .chip').forEach(b => b.onclick = async () => {
+    const i = b.parentNode.querySelector('input'), val = b.dataset.v || (i && i.value) || '', t0 = b.dataset.t0 || b.textContent; b.dataset.t0 = t0;
+    try { await navigator.clipboard.writeText(val); b.textContent = 'Скопировано ✓'; } catch (e) { if (i) i.select(); b.textContent = 'Выделено'; }
+    setTimeout(() => { b.textContent = t0; }, 1800);
+  });
+  document.querySelectorAll('.cl input').forEach(i => i.onclick = () => i.select());
+  document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { setLinks(getLinks().filter(s => s !== b.dataset.del)); render(RAW, TOT); });
+  showTab(TAB);
 }
 
 
 function adAdmin() {
   const db = firebase.database(), box = $('#adm'); let imgData = null, imgGame = null, lastGame = null;
-  box.innerHTML = `<h2>Реклама</h2><div class="card">
+  box.innerHTML = `<h2>Баннеры на сайте</h2><div class="card">
 <div class="seg"><label><input type="radio" name="t" value="image" checked> Только картинка</label><label><input type="radio" name="t" value="card"> Картинка + заголовок и описание</label></div>
 <label class="fl">Картинка <small id="ahint">(лучше 3:1, например 1200×400)</small><input type="file" id="af" accept="image/*"></label>
 <label class="fl" id="gwrap">Узкая версия для игр <small>(необязательно, 1200×220)</small><input type="file" id="afg" accept="image/*"></label>
@@ -261,7 +315,7 @@ function adAdmin() {
     try { await load(); rf.textContent = '✓ Готово'; } catch (e) { rf.textContent = '⚠ Ошибка'; }
     setTimeout(() => { rf.disabled = false; rf.textContent = '↻ Обновить'; }, 1200);
   };
-  try { await load(); rf.hidden = false; try { localStorage.setItem('kh_owner', '1'); } catch (e) {} } catch (e) { login('Нет доступа'); }
+  try { await load(); rf.hidden = false; $('#tabs').hidden = false; try { localStorage.setItem('kh_owner', '1'); } catch (e) {} } catch (e) { login('Нет доступа'); }
 })();
 </script>
 </body>
