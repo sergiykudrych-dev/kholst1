@@ -39,6 +39,13 @@ h2{margin:22px 0 8px;font-size:15px;font-weight:800;color:var(--deep);text-trans
 .d u{margin-bottom:3px;text-decoration:none;font-weight:700;color:var(--deep);font-size:11px}
 .hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}.hd .sub{margin:0}.rf{flex:none;padding:9px 14px;border:0;border-radius:999px;background:#fff;color:var(--deep);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(142,15,69,.15)}.rf:disabled{opacity:.6}
 .note{margin-top:20px;font-size:12px;color:var(--mute)}
+.cl{padding:12px 0;border-top:1px solid #F0C9D8}.cl:first-of-type{border-top:0}
+.cl .u{display:flex;gap:8px;margin:6px 0}
+.card .cl .u input{flex:1;min-width:0;width:auto;margin:0;padding:10px;font:500 14px Manrope,system-ui,sans-serif;border:1.5px solid #E8B7CB;border-radius:12px;background:#fff;color:var(--ink)}
+.cl .u button,.rs{flex:none;padding:0 14px;min-height:44px;border:1.5px solid var(--rose);border-radius:12px;background:#fff;color:var(--rose);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.cl .u button.del{border-color:#b00020;color:#b00020}
+.rs{width:100%;margin-top:10px}
+.cn{display:flex;gap:8px;margin-top:10px}.card .cn input{flex:1;min-width:0;width:auto;margin:0}.cn button{flex:none;padding:0 16px;min-height:46px;border:0;border-radius:12px;background:var(--rose);color:#fff;font:800 15px Manrope,system-ui,sans-serif;cursor:pointer}
 button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--rose);color:#fff;font:800 17px Manrope,system-ui,sans-serif;cursor:pointer;margin-top:10px}
 .seg{display:grid;gap:6px;margin-bottom:10px}.seg label,.chk label{display:flex;gap:8px;align-items:center;font-size:15px}
 .card input[type=text],.card input[type=url],.card input:not([type]),.card input[type=date]{width:100%;margin:6px 0;padding:11px 12px;border:1.5px solid #E8B7CB;border-radius:12px;font:500 16px Manrope,system-ui,sans-serif;color:var(--ink);background:#fff}
@@ -84,7 +91,21 @@ function login(msg) {
   };
 }
 
+let RAW = {}, TOT = 0;
+const getLinks = () => { try { return JSON.parse(localStorage.getItem('kh_links') || '[]').filter(s => /^[a-z0-9][a-z0-9_-]{1,23}$/.test(s)); } catch (e) { return []; } };
+const setLinks = L => { try { localStorage.setItem('kh_links', JSON.stringify(L)); } catch (e) {} };
+const TR = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya', і: 'i', ї: 'yi', є: 'ye', ґ: 'g' };
+const mkSlug = s => { let r = String(s || '').toLowerCase().split('').map(c => TR[c] !== undefined ? TR[c] : c).join('').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24).replace(/-+$/, ''); if (/^(ig|th|tt|tg)$/.test(r)) r += '-ad'; return r.length >= 2 ? r : ''; };
+const getBase = () => { try { return JSON.parse(localStorage.getItem('kh_base') || '{}'); } catch (e) { return {}; } };
+function adjust(daily) { const base = getBase(), r = {}; for (const d in daily) { r[d] = Object.assign({}, daily[d]); const b = base[d]; if (b) for (const k in b) if (r[d][k] != null) r[d][k] = Math.max(0, r[d][k] - b[k]); } return r; }
+function resetCounters() {
+  const base = {}; for (const d in RAW) for (const k in RAW[d]) if (k === 'p_all' || k.startsWith('v_')) (base[d] = base[d] || {})[k] = RAW[d][k];
+  try { localStorage.setItem('kh_base', JSON.stringify(base)); localStorage.setItem('kh_base_t', String(Date.now())); } catch (e) {}
+  render(RAW, TOT);
+}
+
 function render(daily, total) {
+  daily = adjust(daily);
   const D = k => d => ((daily[d] || {})[k]) || 0;
   const sum = (k, ds) => ds.reduce((a, d) => a + D(k)(d), 0);
   const d30 = days(30), d14 = days(14), d7 = days(7), today = ymd(new Date()), yest = ymd(new Date(Date.now() - 864e5));
@@ -92,9 +113,18 @@ function render(daily, total) {
   const gk = Object.keys(GAMES).map(g => ({ g, open: sum('open_' + g, d30), done: sum('done_' + g, d30) })).sort((a, b) => b.open - a.open);
   const max = Math.max(1, ...gk.map(x => x.open));
   const maxU = Math.max(1, ...d14.map(D('users')));
+  const seen = new Set(); for (const d in daily) for (const k in daily[d]) if (k.startsWith('v_c_') && daily[d][k] > 0 && /^[a-z0-9][a-z0-9_-]{1,23}$/.test(k.slice(4))) seen.add(k.slice(4));
+  const camp = [...new Set([...getLinks(), ...seen])];
   const SRC = [['ig', 'Instagram'], ['tt', 'TikTok'], ['th', 'Threads'], ['google', 'Google'], ['search', 'Другие поисковики'], ['tg', 'Telegram'], ['vk', 'ВКонтакте'], ['fb', 'Facebook'], ['other', 'Другие сайты'], ['direct', 'Напрямую']];
-  const srcRows = ds => { const r = SRC.map(([k, n]) => ({ n, v: sum('v_' + k, ds) })).filter(x => x.v).sort((a, b) => b.v - a.v); const m = Math.max(1, ...r.map(x => x.v));
+  const srcRows = ds => { const r = SRC.map(([k, n]) => ({ n, v: sum('v_' + k, ds) })).concat(camp.map(c => ({ n: 'Реклама: ' + c, v: sum('v_c_' + c, ds) }))).filter(x => x.v).sort((a, b) => b.v - a.v); const m = Math.max(1, ...r.map(x => x.v));
     return r.length ? r.map(x => `<div class="fr"><span>${x.n}</span><div class="bar"><i style="width:${x.v / m * 100}%"></i></div><b>${fmt(x.v)}</b></div>`).join('') : '<p class="pc">Пока нет данных.</p>'; };
+  const bt = +(() => { try { return localStorage.getItem('kh_base_t'); } catch (e) { return 0; } })() || 0;
+  const resetHtml = `<p class="pc">${bt ? 'Счётчик сброшен ' + new Date(bt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '. ' : ''}Сброс обнуляет цифры посетителей и источников в панели на этом устройстве, считать заново начнёт с нуля.</p><button type="button" class="rs" id="rs">Сбросить счётчик посетителей</button>`;
+  const local = getLinks();
+  const campHtml = `<h2>Рекламные ссылки</h2><div class="card"><p class="pc" style="margin:0 0 4px">Дайте такую ссылку рекламодателю или поставьте в пост: сколько человек перешло, видно здесь.</p>
+<div class="cn"><input id="cn" maxlength="40" placeholder="Название, например: канал Иры"><button type="button" id="cadd">Создать</button></div><p class="pc" id="cmsg"></p>` +
+    (camp.length ? camp.map(c => `<div class="cl"><b>${c}</b><div class="u"><input readonly value="https://twosome.games/?from=${c}" aria-label="Ссылка"><button type="button" data-copy>Копировать</button>${local.includes(c) && !seen.has(c) ? `<button type="button" class="del" data-del="${c}" aria-label="Убрать ссылку">✕</button>` : ''}</div><span class="pc" style="margin:0">Переходов: сегодня <b>${fmt(sum('v_c_' + c, [today]))}</b> · 7 дней <b>${fmt(sum('v_c_' + c, d7))}</b> · 30 дней <b>${fmt(sum('v_c_' + c, d30))}</b></span></div>`).join('') : '<p class="pc">Ссылок пока нет.</p>') +
+    `<p class="pc">Считается один переход на посещение. Свои заходы по ссылке не считаются (на устройстве, где вы открывали панель), проверяйте с другого телефона.</p></div>`;
   let h = `<h2>Посетители сегодня</h2><div class="grid">
 <div class="k"><b>${fmt(D('p_all')(today))}</b><span>человек зашло</span></div>
 <div class="k"><b>${fmt(D('v_all')(today))}</b><span>посещений</span></div>
@@ -103,7 +133,7 @@ function render(daily, total) {
 <h2>Откуда пришли</h2><div class="card"><p class="pc"><b>Сегодня</b></p><div class="fun">${srcRows([today])}</div>
 <p class="pc"><b>За 7 дней</b></p><div class="fun">${srcRows(d7)}</div>
 <p class="pc">Короткие ссылки для профилей: twosome.games/ig · /tt · /th · /tg — по ним видно, какая соцсеть приводит людей. Приложения Instagram и TikTok часто не сообщают, откуда пришёл человек, поэтому без коротких ссылок такие переходы попадают в «Напрямую».</p></div>
-<h2>Сегодня (кто принял статистику)</h2><div class="grid">
+${resetHtml}${campHtml}<h2>Сегодня (кто принял статистику)</h2><div class="grid">
 <div class="k"><b>${fmt(D('users')(today))}</b><span>человек заходило</span></div>
 <div class="k"><b>${fmt(D('newusers')(today))}</b><span>из них новых</span></div>
 <div class="k"><b>${fmt(D('room_created')(today))}</b><span>комнат создано</span></div>
@@ -123,6 +153,14 @@ function render(daily, total) {
 <div class="k"><b>${fmt(sum('views', d30))}</b><span>открытий страниц</span></div></div>
 <p class="note">Считаются только те, кто нажал «Принять» на баннере. Дни по времени UTC. Время на сайте, устройства и источники рекламы смотрите в Google Analytics.</p>`;
   out.innerHTML = h;
+  const rs = $('#rs'); if (rs) { let sure = false; rs.onclick = () => { if (!sure) { sure = true; rs.textContent = 'Точно сбросить? Нажмите ещё раз'; setTimeout(() => { sure = false; rs.textContent = 'Сбросить счётчик посетителей'; }, 4000); return; } resetCounters(); }; }
+  const ca = $('#cadd'); if (ca) ca.onclick = () => {
+    const s = mkSlug($('#cn').value); if (!s) { $('#cmsg').textContent = 'Введите название, не меньше двух букв или цифр.'; return; }
+    const L = getLinks(); if (!L.includes(s)) { L.push(s); setLinks(L); } render(RAW, TOT);
+  };
+  out.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => { const i = b.parentNode.querySelector('input'); try { await navigator.clipboard.writeText(i.value); b.textContent = 'Скопировано ✓'; } catch (e) { i.select(); b.textContent = 'Выделено'; } setTimeout(() => b.textContent = 'Копировать', 1800); });
+  out.querySelectorAll('.cl input').forEach(i => i.onclick = () => i.select());
+  out.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { setLinks(getLinks().filter(s => s !== b.dataset.del)); render(RAW, TOT); });
 }
 
 
@@ -214,7 +252,7 @@ function adAdmin() {
     const db = firebase.database();
     await firebase.auth().currentUser.getIdToken(true);
     const [daily, total] = await Promise.all([db.ref('stats/daily').once('value'), db.ref('stats/total/users').once('value')]);
-    render(daily.val() || {}, total.val() || 0);
+    RAW = daily.val() || {}; TOT = total.val() || 0; render(RAW, TOT);
     if (first) { first = false; adAdmin(); }
     const t = new Date(); $('#sub').textContent = 'Обновлено в ' + t.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }

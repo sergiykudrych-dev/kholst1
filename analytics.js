@@ -103,7 +103,11 @@
   'use strict';
   const MAP = [[/threads\./, 'th'], [/instagram\./, 'ig'], [/tiktok\./, 'tt'], [/google\.|googlequicksearch/, 'google'], [/facebook\.|fb\./, 'fb'], [/t\.me|telegram/, 'tg'], [/vk\.com/, 'vk'], [/bing\.|yandex\.|duckduckgo/, 'search']];
   function src() {
-    try { const f = new URLSearchParams(location.search).get('from'); if (/^(ig|th|tt|tg)$/.test(f || '')) return f; } catch (e) {}
+    try {
+      const f = new URLSearchParams(location.search).get('from');
+      if (/^(ig|th|tt|tg)$/.test(f || '')) return f;
+      if (/^[a-z0-9][a-z0-9_-]{1,23}$/.test(f || '')) return 'c_' + f;   /* рекламная ссылка из панели: ?from=название */
+    } catch (e) {}
     let r = ''; try { r = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
     if (!r || r === location.hostname) return 'direct';
     for (const [re, k] of MAP) if (re.test(r)) return k;
