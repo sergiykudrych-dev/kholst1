@@ -111,6 +111,12 @@
   }
   async function count() {
     if (/panel\.html$/.test(location.pathname)) return;
+    /* свои заходы не считаем: ?me=1 включает исключение на этом устройстве, ?me=0 выключает; где открывалась панель — тоже не считаем */
+    try {
+      const m = new URLSearchParams(location.search).get('me');
+      if (m === '1') localStorage.setItem('kh_me', '1'); else if (m === '0') localStorage.removeItem('kh_me');
+      if (localStorage.getItem('kh_me') === '1' || localStorage.getItem('kh_owner') === '1') return;
+    } catch (e) {}
     let ss = null; try { ss = sessionStorage.getItem('kh_vis'); } catch (e) {}
     if (ss) return;                                   /* одно посещение на сессию, не каждая страница */
     try { sessionStorage.setItem('kh_vis', '1'); } catch (e) {}
