@@ -161,7 +161,7 @@ function render(daily, total) {
   const d7p = d7.map(D('p_all')), maxP = Math.max(1, ...d7p), WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
   const bars = d7.map((d, i) => `<div class="d"><u>${d7p[i]}</u><i class="${d === today ? 'now' : ''}" style="height:${Math.max(d7p[i] / maxP * 80, 2)}%"></i><span${d === today ? ' class="td"' : ''}>${WD[new Date(d + 'T12:00:00Z').getUTCDay()]}</span></div>`).join('');
   const bt = +(() => { try { return localStorage.getItem('kh_base_t'); } catch (e) { return 0; } })() || 0;
-  const resetHtml = `<p class="pc" style="margin:0">${bt ? 'Счётчик сброшен ' + new Date(bt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '. ' : ''}Сброс обнуляет все цифры панели (посетители, источники, комнаты, игры, приглашения) на этом устройстве, считать заново начнёт с нуля.</p>${RMSG ? `<p class="say" style="margin:0">${RMSG}</p>` : ''}<button type="button" class="rs" id="rs">Сбросить все счётчики</button>`;
+  const resetHtml = `<p class="pc" style="margin:0">${bt ? 'Счётчик сброшен ' + new Date(bt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '. ' : ''}Сброс стирает все счётчики в базе (посетители, источники, комнаты, игры, приглашения), считать заново начнёт с нуля.</p>${RMSG ? `<p class="say" style="margin:0">${RMSG}</p>` : ''}<button type="button" class="rs" id="rs">Сбросить все счётчики</button>`;
 
   $('#out').innerHTML = `<div class="card hero"><span class="lb">СЕГОДНЯ ЗАШЛО</span>
 <div class="big"><b>${fmt(D('p_all')(today))}</b><span>человек</span></div>
