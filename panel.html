@@ -114,8 +114,8 @@ const mkSlug = s => { let r = String(s || '').toLowerCase().split('').map(c => T
 const getBase = () => { try { return JSON.parse(localStorage.getItem('kh_base') || '{}'); } catch (e) { return {}; } };
 function adjust(daily) { const base = getBase(), r = {}; for (const d in daily) { r[d] = Object.assign({}, daily[d]); const b = base[d]; if (b) for (const k in b) if (r[d][k] != null) r[d][k] = Math.max(0, r[d][k] - b[k]); } return r; }
 function resetCounters() {
-  const base = {}; for (const d in RAW) for (const k in RAW[d]) if (k === 'p_all' || k.startsWith('v_')) (base[d] = base[d] || {})[k] = RAW[d][k];
-  try { localStorage.setItem('kh_base', JSON.stringify(base)); localStorage.setItem('kh_base_t', String(Date.now())); } catch (e) {}
+  const base = {}; for (const d in RAW) for (const k in RAW[d]) if (typeof RAW[d][k] === 'number') (base[d] = base[d] || {})[k] = RAW[d][k];
+  try { localStorage.setItem('kh_base', JSON.stringify(base)); localStorage.setItem('kh_base_tot', String(TOT)); localStorage.setItem('kh_base_t', String(Date.now())); } catch (e) {}
   render(RAW, TOT);
 }
 
@@ -151,7 +151,7 @@ function render(daily, total) {
   const d7p = d7.map(D('p_all')), maxP = Math.max(1, ...d7p), WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
   const bars = d7.map((d, i) => `<div class="d"><u>${d7p[i]}</u><i class="${d === today ? 'now' : ''}" style="height:${Math.max(d7p[i] / maxP * 80, 2)}%"></i><span${d === today ? ' class="td"' : ''}>${WD[new Date(d + 'T12:00:00Z').getUTCDay()]}</span></div>`).join('');
   const bt = +(() => { try { return localStorage.getItem('kh_base_t'); } catch (e) { return 0; } })() || 0;
-  const resetHtml = `<p class="pc" style="margin:0">${bt ? 'Счётчик сброшен ' + new Date(bt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '. ' : ''}Сброс обнуляет цифры посетителей и источников в панели на этом устройстве, считать заново начнёт с нуля.</p><button type="button" class="rs" id="rs">Сбросить счётчик посетителей</button>`;
+  const resetHtml = `<p class="pc" style="margin:0">${bt ? 'Счётчик сброшен ' + new Date(bt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '. ' : ''}Сброс обнуляет все цифры панели (посетители, источники, комнаты, игры, приглашения) на этом устройстве, считать заново начнёт с нуля.</p><button type="button" class="rs" id="rs">Сбросить все счётчики</button>`;
 
   $('#out').innerHTML = `<div class="card hero"><span class="lb">СЕГОДНЯ ЗАШЛО</span>
 <div class="big"><b>${fmt(D('p_all')(today))}</b><span>человек</span></div>
@@ -169,7 +169,7 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
 <div class="k"><b>${fmt(D('newusers')(today))}</b><span>из них новых</span></div>
 <div class="k"><b>${fmt(D('room_created')(today))}</b><span>комнат создано</span></div>
 <div class="k"><b>${fmt(D('game_complete')(today))}</b><span>партий доиграно</span></div>
-<div class="k wide"><b>${fmt(total)}</b><span>всего разных людей с начала подсчёта</span></div></div>
+<div class="k wide"><b>${fmt(Math.max(0, total - (+(() => { try { return localStorage.getItem('kh_base_tot'); } catch (e) { return 0; } })() || 0)))}</b><span>всего разных людей с начала подсчёта</span></div></div>
 <p class="pc">За 30 дней:</p><div class="grid">
 <div class="k"><b>${fmt(sum('invite_sent', d30))}</b><span>приглашений другу</span></div>
 <div class="k"><b>${fmt(sum('friend_added', d30))}</b><span>подружились</span></div>
@@ -200,7 +200,7 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
     `<p class="pc" style="margin:0">Считается один переход на посещение. Свои заходы по ссылке не считаются (на устройстве, где вы открывали панель), проверяйте с другого телефона.</p></div>`;
 
   /* действия */
-  const rs = $('#rs'); if (rs) { let sure = false; rs.onclick = () => { if (!sure) { sure = true; rs.textContent = 'Точно сбросить? Нажмите ещё раз'; setTimeout(() => { sure = false; rs.textContent = 'Сбросить счётчик посетителей'; }, 4000); return; } resetCounters(); }; }
+  const rs = $('#rs'); if (rs) { let sure = false; rs.onclick = () => { if (!sure) { sure = true; rs.textContent = 'Точно сбросить? Нажмите ещё раз'; setTimeout(() => { sure = false; rs.textContent = 'Сбросить все счётчики'; }, 4000); return; } resetCounters(); }; }
   const ca = $('#cadd'); if (ca) ca.onclick = () => {
     const s = mkSlug($('#cn').value); if (!s) { $('#cmsg').textContent = 'Введите название, не меньше двух букв или цифр.'; return; }
     const L = getLinks(); if (!L.includes(s)) { L.push(s); setLinks(L); } render(RAW, TOT);
