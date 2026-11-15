@@ -15,3 +15,5 @@ window.FIREBASE_CONFIG = {
 window.PUSH_VAPID_KEY = 'BOosaja1j7i455dy9BvThNUjdfDIS5ppt54zxxhg0jOu3wJT8KafxA08458hM5P8V-aYHiSB4qjXU49Ki5MJcIc';
 // Адрес Cloudflare Worker для отправки уведомлений (этап 2). Пока пусто — уведомления друзьям не отправляются.
 window.PUSH_URL = 'https://twosome-push.sergiykudrych2001.workers.dev/';
+// Вход через Telegram (Worker бота). Нужны секреты FB_CLIENT_EMAIL и FB_PRIVATE_KEY в настройках Worker.
+window.TG_AUTH_URL = 'https://twosome-bot.sergiykudrych2001.workers.dev/auth';

@@ -85,6 +85,14 @@
   };
 
   /* Подключение к Firebase и анонимный вход (один раз). Возвращает Promise<uid|null>. */
+  /* Данные запуска из Telegram: в адресе (#tgWebAppData=…), запоминаем на время сеанса. */
+  function tgData() {
+    try {
+      const d = new URLSearchParams(location.hash.slice(1)).get('tgWebAppData');
+      if (d) { sessionStorage.setItem('kh_tg', d); return d; }
+      return sessionStorage.getItem('kh_tg') || '';
+    } catch (e) { return ''; }
+  }
   P.init = function () {
     if (P._init) return P._init;
     P._init = (async () => {
@@ -95,6 +103,19 @@
       const auth = firebase.auth();
       /* Сначала ждём сохранённого входа: иначе анонимный вход подменил бы аккаунт Google. */
       let u = await new Promise(res => { const off = auth.onAuthStateChanged(x => { off(); res(x); }); });
+      /* Мини-приложение Telegram: входим по аккаунту Telegram (uid = tg_<id>), Google там не работает. */
+      const td = tgData();
+      if (td && window.TG_AUTH_URL && !(u && !u.isAnonymous)) {
+        try {
+          const r = await fetch(window.TG_AUTH_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ initData: td }) });
+          const j = r.ok ? await r.json() : null;
+          if (j && j.token) {
+            u = (await auth.signInWithCustomToken(j.token)).user;
+            if (!P.name() && j.name) { store.set('kh_name', clean(j.name)); store.set('kh_skip', ''); }
+            ev('tg_login');
+          }
+        } catch (e) {}
+      }
       if (!u) { try { u = (await auth.signInAnonymously()).user; } catch (e) {} }
       P.uid = u ? u.uid : null;
       return P.uid;
@@ -104,6 +125,7 @@
 
   /* Сохранение профиля через Google: анонимный аккаунт превращается в постоянный (uid тот же). */
   const cu = () => (window.firebase && firebase.auth && firebase.apps.length) ? firebase.auth().currentUser : null;
+  P.isTg = () => { const u = cu(); return !!(u && /^tg_/.test(u.uid)); };
   P.isLinked = () => { const u = cu(); return !!(u && !u.isAnonymous); };
   P.email = () => { const u = cu(); return (u && u.email) || ''; };
   P.linkGoogle = async function () {

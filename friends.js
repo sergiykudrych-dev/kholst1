@@ -136,7 +136,7 @@
     const e = $('#facc'); if (!e) return;
     if (P.isLinked()) {
       e.className = 'facc ok';
-      e.innerHTML = `<b>✓ Профиль сохранён</b>${P.email() ? `<span class="em">${esc(P.email())}</span>` : ''}<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`;
+      e.innerHTML = `<b>✓ Профиль сохранён</b>${P.isTg() ? '<span class="em">через Telegram</span>' : (P.email() ? `<span class="em">${esc(P.email())}</span>` : '')}${P.isTg() ? '' : `<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`}`;
     } else {
       e.className = 'facc warn';
       e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта.<button class="btn" type="button" data-a="google">Сохранить через Google</button>`;
