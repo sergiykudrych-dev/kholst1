@@ -105,17 +105,21 @@
       let u = await new Promise(res => { const off = auth.onAuthStateChanged(x => { off(); res(x); }); });
       /* Мини-приложение Telegram: входим по аккаунту Telegram (uid = tg_<id>), Google там не работает. */
       const td = tgData();
+      if (td) P.tgDbg = 'Telegram: данные есть';
+      else if (/tgWebApp/.test(location.href + (window.name || ''))) P.tgDbg = 'Telegram: данные не прочитались';
       if (td && window.TG_AUTH_URL && !(u && !u.isAnonymous)) {
         try {
           const r = await fetch(window.TG_AUTH_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ initData: td }) });
           const j = r.ok ? await r.json() : null;
-          if (j && j.token) {
+          if (!j || !j.token) P.tgDbg = 'Worker ответил ' + r.status;
+          else {
             u = (await auth.signInWithCustomToken(j.token)).user;
+            P.tgDbg = 'вход ок';
             if (!P.name() && j.name) { store.set('kh_name', clean(j.name)); store.set('kh_skip', ''); }
             ev('tg_login');
           }
-        } catch (e) {}
-      }
+        } catch (e) { P.tgDbg = 'Ошибка: ' + ((e && (e.code || e.message)) || e); }
+      } else if (td && !window.TG_AUTH_URL) P.tgDbg = 'нет адреса входа (старый файл)';
       if (!u) { try { u = (await auth.signInAnonymously()).user; } catch (e) {} }
       P.uid = u ? u.uid : null;
       return P.uid;
