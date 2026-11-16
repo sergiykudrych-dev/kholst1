@@ -219,7 +219,17 @@
   F.target = () => target;
   F.clearTarget = () => { target = null; hideTarget(); };
   // Уведомление на телефон друга (через Cloudflare Worker, адрес в firebase-config.js → PUSH_URL)
-  F.notify = async (type, to, key) => {
+  // Друг из Telegram: дополнительно пишем ему от имени бота (Worker проверяет, что вы друзья)
+  const tgNotify = async (type, to, extra) => {
+    const base = window.TG_AUTH_URL; if (!base || !/^tg_\d+$/.test(to || '')) return;
+    try {
+      const u = firebase.auth().currentUser; if (!u) return;
+      const tok = await u.getIdToken();
+      await fetch(base.replace(/\/auth$/, '/notify'), { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: tok, type, to, ...extra }) });
+    } catch (e) {}
+  };
+  F.notify = async (type, to, key, extra) => {
+    tgNotify(type, to, extra);
     const url = window.PUSH_URL; if (!url || !to) return;
     try {
       const u = firebase.auth().currentUser; if (!u) return;
@@ -233,14 +243,14 @@
     const to = target.uid;
     const ref = db.ref('invites/' + to).push({ from: me, name: P.name() || null, avatar: P.avatar() || null, page: String(page).replace(/\.html$/, ''), room, t: Date.now() });
     // ждём отправку уведомления не дольше 1.5 с, чтобы не задерживать переход в игру
-    return Promise.resolve(ref).then(() => Promise.race([F.notify('invite', to, ref.key), new Promise(r => setTimeout(r, 2500))]));
+    return Promise.resolve(ref).then(() => Promise.race([F.notify('invite', to, ref.key, { page: String(page).replace(/\.html$/, ''), room }), new Promise(r => setTimeout(r, 2500))]));
   };
 
   F.open = async function () {
     if (!ready) F.init();
     await ready;
     if (F.off) return F.toast('Друзья пока недоступны: включите анонимный вход и обновите правила базы');
-    dialog(); render(); say(''); dlg.showModal(); try { document.activeElement.blur(); } catch (e) {}
+    dialog(); render(); say(''); dlg.showModal(); try { P.tgAskWrite(); } catch (e) {} try { document.activeElement.blur(); } catch (e) {}
   };
 
   F.init = function () {

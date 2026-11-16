@@ -2,6 +2,9 @@
    Секреты (BOT_TOKEN, SECRET) хранятся в настройках Worker, в коде их нет. */
 const GAME_URL = 'https://twosome.games/?from=telegram';
 const ORIGINS = ['https://twosome.games', 'https://www.twosome.games'];
+const FB_KEY = 'AIzaSyBCmWiGXM0DoryqSfLDYYW5Ou8rgTKUY3s';   // публичный ключ сайта (он же в firebase-config.js)
+const DB = 'https://kholst-1f465-default-rtdb.firebaseio.com';
+const GAMES = { tictactoe: 'Крестики-нолики', seabattle: 'Морской бой', truth: 'Правда или действие', number: 'Угадай число', questions: 'Вопросы друг другу', memory: 'Найди пару', monster: 'Создай монстра', chips: 'Чипсы-сюрприз', egg: 'Не урони яйцо', paint: 'Холст', word: 'Угадай слово' };
 const enc = new TextEncoder();
 const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const b64uStr = s => b64u(enc.encode(s));
@@ -64,6 +67,39 @@ export default {
         const token = await firebaseToken('tg_' + user.id, env);
         return new Response(JSON.stringify({ token, name: String(user.first_name || '').slice(0, 20) }), { headers: { ...cors, 'content-type': 'application/json' } });
       } catch (e) { return new Response(JSON.stringify({ error: 'key', why: String((e && e.message) || e).slice(0, 80) }), { status: 500, headers: cors }); }
+    }
+
+    /* Сообщение другу от бота. Вызывает сайт: idToken отправителя проверяется в Firebase,
+       отправлять можно только своим друзьям (проверка по базе от имени отправителя). */
+    if (url.pathname === '/notify') {
+      const origin = req.headers.get('origin') || '';
+      const cors = { 'access-control-allow-origin': ORIGINS.includes(origin) ? origin : ORIGINS[0], 'access-control-allow-headers': 'content-type', 'vary': 'origin' };
+      if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+      const out = (code, msg) => new Response(JSON.stringify({ ok: code === 200, error: msg || null }), { status: code, headers: cors });
+      if (req.method !== 'POST') return out(404, 'off');
+      let b = null; try { b = await req.json(); } catch (e) { return out(400, 'json'); }
+      const { idToken, type, to, page, room } = b || {};
+      if (!idToken || !/^tg_\d{1,15}$/.test(String(to || '')) || !['invite', 'friend', 'accepted'].includes(type)) return out(400, 'args');
+      let uid = null;
+      try {
+        const lk = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + FB_KEY, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken }) });
+        uid = lk.ok ? ((await lk.json()).users || [])[0].localId : null;
+      } catch (e) {}
+      if (!uid) return out(403, 'auth');
+      const get = p => fetch(DB + '/' + p + '.json?auth=' + encodeURIComponent(idToken)).then(r => r.ok ? r.json() : null).catch(() => null);
+      const st = await get('friends/' + uid + '/' + to + '/status');
+      if (type === 'friend' ? !st : st !== 'ok') return out(403, 'not friends');
+      const me = (await get('users/' + uid)) || {};
+      const name = String(me.name || 'Друг').replace(/[\u0000-\u001f<>]/g, '').slice(0, 20), who = ((me.avatar ? me.avatar + ' ' : '') + name).trim();
+      let text, btn, link = 'https://twosome.games/';
+      if (type === 'invite') {
+        if (!/^[a-z0-9-]{2,30}$/.test(String(page || '')) || !/^[\w-]{4,64}$/.test(String(room || ''))) return out(400, 'args');
+        text = who + ' зовёт вас сыграть: ' + (GAMES[page] || 'игра для двоих') + ' 💗\nНажмите «Играть», чтобы присоединиться.';
+        link += page + '.html?tgroom=' + room + '&from=tginvite'; btn = 'Играть';
+      } else if (type === 'friend') { text = who + ' хочет добавить вас в друзья 💗'; link += '?from=tginvite'; btn = 'Открыть'; }
+      else { text = who + ' принял(а) вашу заявку: теперь вы друзья ✓'; link += '?from=tginvite'; btn = 'Играть'; }
+      const r = await api('sendMessage', { chat_id: Number(to.slice(3)), text, reply_markup: { inline_keyboard: [[{ text: btn, web_app: { url: link } }]] } });
+      return out(r.ok ? 200 : 502, r.ok ? null : 'telegram ' + r.status);
     }
 
     if (url.pathname === '/hook' && req.method === 'POST') {

@@ -11,6 +11,20 @@
   const ev = (n, p) => { try { window.Track && Track.event(n, p); } catch (e) {} };
   const P = window.Profile = { AV, uid: null, me: 0, names: { 1: null, 2: null }, gotData: false, ready: Promise.resolve() };
 
+  /* Приглашение из бота: адрес вида ?tgroom=<комната>. Переносим комнату в #room=…, сохранив данные Telegram в хеше. */
+  try {
+    const q = new URLSearchParams(location.search).get('tgroom');
+    if (q && /^[\w-]{4,64}$/.test(q)) { tgData(); const old = location.hash.slice(1); history.replaceState(null, '', location.pathname + '#room=' + q + (old ? '&' + old : '')); }
+  } catch (e) {}
+  /* Внутри Telegram подключаем его скрипт, чтобы можно было попросить разрешение на сообщения от бота. */
+  try {
+    if (tgData() && !window.Telegram) { const s = document.createElement('script'); s.src = 'https://telegram.org/js/telegram-web-app.js'; document.head.appendChild(s); }
+  } catch (e) {}
+  P.tgAskWrite = function () {
+    if (!P.isTg() || store.get('kh_tgw') || !window.Telegram || !Telegram.WebApp || !Telegram.WebApp.requestWriteAccess) return;
+    store.set('kh_tgw', '1'); try { Telegram.WebApp.requestWriteAccess(); } catch (e) {}
+  };
+
   P.name = () => clean(store.get('kh_name'));
   P.avatar = () => { const a = store.get('kh_avatar'); return AV.includes(a) ? a : ''; };
   P.has = () => !!P.name();
