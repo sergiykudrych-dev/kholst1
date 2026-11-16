@@ -139,7 +139,7 @@
       e.innerHTML = `<b>✓ Профиль сохранён</b>${P.isTg() ? '<span class="em">через Telegram</span>' : (P.email() ? `<span class="em">${esc(P.email())}</span>` : '')}${P.isTg() ? '' : `<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`}`;
     } else {
       e.className = 'facc warn';
-      e.innerHTML = (P.tgDbg ? `<small style="display:block;opacity:.6;margin-bottom:6px">${esc(P.tgDbg)}</small>` : '') + `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта.<button class="btn" type="button" data-a="google">Сохранить через Google</button>`;
+      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта.<button class="btn" type="button" data-a="google">Сохранить через Google</button>`;
     }
   }
   function render() {
