@@ -25,6 +25,16 @@
     store.set('kh_tgw', '1'); try { Telegram.WebApp.requestWriteAccess(); } catch (e) {}
   };
 
+  /* Итог последней отправки пуша (после приглашения вас переносит в игру, поэтому показываем здесь). */
+  function pushRes() {
+    let r = null; try { r = JSON.parse(sessionStorage.getItem('kh_pushres') || 'null'); sessionStorage.removeItem('kh_pushres'); } catch (e) {}
+    if (!r || !r.m || Date.now() - r.t > 30000) return;
+    const el = document.createElement('div'); el.setAttribute('role', 'status');
+    el.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:70;padding:12px 16px;border-radius:16px;background:#4A1236;color:#fff;font:600 14px/1.35 Manrope,system-ui,sans-serif;text-align:center;box-shadow:0 10px 30px rgba(74,18,54,.5)';
+    el.textContent = r.m; document.body.appendChild(el); setTimeout(() => el.remove(), 7000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pushRes); else pushRes();
+
   P.name = () => clean(store.get('kh_name'));
   P.avatar = () => { const a = store.get('kh_avatar'); return AV.includes(a) ? a : ''; };
   P.has = () => !!P.name();
