@@ -150,11 +150,13 @@ function render(daily, total) {
   const seen = new Set(); for (const d in daily) for (const k in daily[d]) if (k.startsWith('v_c_') && daily[d][k] > 0 && /^[a-z0-9][a-z0-9_-]{1,23}$/.test(k.slice(4))) seen.add(k.slice(4));
   const local = getLinks(), camp = [...new Set([...local, ...seen])];
   const SRC = [['ig', 'Instagram'], ['tt', 'TikTok'], ['th', 'Threads'], ['google', 'Google'], ['search', 'Другие поисковики'], ['tg', 'Telegram'], ['vk', 'ВКонтакте'], ['fb', 'Facebook'], ['other', 'Другие сайты'], ['direct', 'Напрямую']];
+  /* Служебные метки: это не реклама, а заходы из приложения Telegram */
+  const SYS = { telegram: 'Telegram (приложение)', tginvite: 'Telegram: приглашение друга' };
   const me = (() => { try { return localStorage.getItem('kh_me') === '1' || localStorage.getItem('kh_owner') === '1'; } catch (e) { return false; } })();
 
   /* Главное */
   const ds = SRC_RANGE === 'today' ? [today] : d7;
-  const rows = SRC.map(([k, n]) => ({ n, v: sum('v_' + k, ds) })).concat(camp.map(c => ({ n: 'Реклама: ' + c, v: sum('v_c_' + c, ds) }))).filter(x => x.v).sort((a, b) => b.v - a.v);
+  const rows = SRC.map(([k, n]) => ({ n, v: sum('v_' + k, ds) })).concat(camp.map(c => ({ n: SYS[c] || 'Реклама: ' + c, v: sum('v_c_' + c, ds) }))).filter(x => x.v).sort((a, b) => b.v - a.v);
   const tot = rows.reduce((a, x) => a + x.v, 0), mx = Math.max(1, ...rows.map(x => x.v));
   const srcHtml = rows.length ? rows.map(x => `<div class="fr"><span>${x.n}</span><div class="bar"><i style="width:${x.v / mx * 100}%"></i></div><b>${fmt(x.v)} <small>${Math.round(x.v / tot * 100)}%</small></b></div>`).join('') : '<p class="pc">Пока нет данных.</p>';
   const chips = [['ig', 'Instagram'], ['tt', 'TikTok'], ['th', 'Threads'], ['tg', 'Telegram']].map(([k, n]) => `<button type="button" class="chip" data-v="https://twosome.games/${k}" aria-label="Скопировать ссылку для ${n}">twosome.games/${k}</button>`).join('');
@@ -206,7 +208,7 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
   /* Реклама: ссылки */
   $('#links').innerHTML = `<div class="card"><span class="ct">Рекламные ссылки</span><p class="pc" style="margin:0">Дайте такую ссылку рекламодателю или поставьте в пост: сколько человек перешло, видно здесь.</p>
 <div class="cn"><input id="cn" maxlength="40" placeholder="Название (канал Иры)"><button type="button" id="cadd">Создать</button></div><p class="pc" id="cmsg" style="margin:0"></p>` +
-    (camp.length ? camp.map(c => `<div class="cl"><b>${c}</b><div class="u"><input readonly value="https://twosome.games/?from=${c}" aria-label="Ссылка"><button type="button" data-copy>Копировать</button>${local.includes(c) && !seen.has(c) ? `<button type="button" class="del" data-del="${c}" aria-label="Убрать ссылку">✕</button>` : ''}</div><span class="pc" style="margin:0">Переходов: сегодня <b>${fmt(sum('v_c_' + c, [today]))}</b> · 7 дней <b>${fmt(sum('v_c_' + c, d7))}</b> · 30 дней <b>${fmt(sum('v_c_' + c, d30))}</b></span></div>`).join('') : '<p class="pc" style="margin:0">Ссылок пока нет.</p>') +
+    (camp.filter(c => !SYS[c]).length ? camp.filter(c => !SYS[c]).map(c => `<div class="cl"><b>${c}</b><div class="u"><input readonly value="https://twosome.games/?from=${c}" aria-label="Ссылка"><button type="button" data-copy>Копировать</button>${local.includes(c) && !seen.has(c) ? `<button type="button" class="del" data-del="${c}" aria-label="Убрать ссылку">✕</button>` : ''}</div><span class="pc" style="margin:0">Переходов: сегодня <b>${fmt(sum('v_c_' + c, [today]))}</b> · 7 дней <b>${fmt(sum('v_c_' + c, d7))}</b> · 30 дней <b>${fmt(sum('v_c_' + c, d30))}</b></span></div>`).join('') : '<p class="pc" style="margin:0">Ссылок пока нет.</p>') +
     `<p class="pc" style="margin:0">Считается один переход на посещение. Свои заходы по ссылке не считаются (на устройстве, где вы открывали панель), проверяйте с другого телефона.</p></div>`;
 
   /* действия */
