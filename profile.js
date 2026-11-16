@@ -111,7 +111,7 @@
         try {
           const r = await fetch(window.TG_AUTH_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ initData: td }) });
           const j = r.ok ? await r.json() : null;
-          if (!j || !j.token) P.tgDbg = 'Worker ответил ' + r.status;
+          if (!j || !j.token) { let w = ''; try { w = (await r.clone().text()).slice(0, 90); } catch (x) {} P.tgDbg = 'Worker ответил ' + r.status + ' ' + w; }
           else {
             u = (await auth.signInWithCustomToken(j.token)).user;
             P.tgDbg = 'вход ок';

@@ -22,7 +22,8 @@ async function checkInitData(initData, botToken) {
 
 /* Custom token для Firebase: JWT, подписанный ключом сервисного аккаунта. */
 async function firebaseToken(uid, env) {
-  const pem = env.FB_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
+  const raw = String(env.FB_PRIVATE_KEY || ''), m = raw.match(/-----BEGIN[^-]*-----([\s\S]*?)-----END/);
+  const pem = (m ? m[1] : raw).replace(/\\n/g, '').replace(/[^A-Za-z0-9+/=]/g, '');
   const der = Uint8Array.from(atob(pem), c => c.charCodeAt(0));
   const key = await crypto.subtle.importKey('pkcs8', der, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
   const now = Math.floor(Date.now() / 1000);
@@ -62,7 +63,7 @@ export default {
       try {
         const token = await firebaseToken('tg_' + user.id, env);
         return new Response(JSON.stringify({ token, name: String(user.first_name || '').slice(0, 20) }), { headers: { ...cors, 'content-type': 'application/json' } });
-      } catch (e) { return new Response('{"error":"key"}', { status: 500, headers: cors }); }
+      } catch (e) { return new Response(JSON.stringify({ error: 'key', why: String((e && e.message) || e).slice(0, 80) }), { status: 500, headers: cors }); }
     }
 
     if (url.pathname === '/hook' && req.method === 'POST') {
