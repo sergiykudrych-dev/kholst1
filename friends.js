@@ -235,7 +235,14 @@
       const u = firebase.auth().currentUser; if (!u) return;
       const tok = await u.getIdToken();
       // keepalive: запрос дойдёт, даже если страница сразу переходит в игру
-      await fetch(url, { method: 'POST', keepalive: true, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: JSON.stringify({ type, to, key }) });
+      const r = await fetch(url, { method: 'POST', keepalive: true, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: JSON.stringify({ type, to, key }) });
+      // подсказка тому, кто зовёт: ушёл ли пуш (на экране друга в этот момент плашка в приложении видна всегда)
+      const j = await r.json().catch(() => null);
+      if (type === 'invite' && F.toast) {
+        if (!r.ok) F.toast('Пуш не отправлен: ' + ((j && j.error) || r.status));
+        else if (j && j.ok && j.sent === 0 && !j.dup) F.toast('Другу нечего будить: у него не включены уведомления');
+        else if (j && j.sent > 0) F.toast('Пуш отправлен на ' + j.sent + ' устройств');
+      }
     } catch (e) {}
   };
   F.sendInvite = (page, room) => {
