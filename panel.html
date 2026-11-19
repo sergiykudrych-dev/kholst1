@@ -41,7 +41,7 @@ h2{margin:22px 0 8px;font-size:15px;font-weight:800;color:var(--deep);text-trans
 .note{margin-top:20px;font-size:12px;color:var(--mute)}
 .pane{display:flex;flex-direction:column;gap:14px}.pane .card{padding:20px;display:flex;flex-direction:column;gap:12px}.pane>.note{margin:0}
 .tabs{display:flex;gap:4px;padding:4px;margin-bottom:14px;border-radius:16px;background:var(--card)}.tabs button{flex:1;min-height:44px;border:0;border-radius:12px;background:transparent;color:var(--deep);font:700 15px Manrope,system-ui,sans-serif;cursor:pointer}.tabs button.on{background:var(--rose);color:#fff;font-weight:800}
-.ct{font-size:18px;font-weight:800;color:var(--deep)}.ch{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ct{font-size:18px;font-weight:800;color:var(--deep)}.ch{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
 .hero .lb{font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--mute)}.hero .big{display:flex;align-items:baseline;gap:8px}.hero .big b{font-size:56px;line-height:1;font-weight:800;color:var(--deep)}.hero .big span{font-size:20px;font-weight:700}.hero .sm{display:flex;gap:20px;font-size:15px}
 .ok{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#DDF3E4;color:#14532D;font-size:13px;font-weight:700}
 .sg{display:flex;gap:2px;padding:2px;border-radius:12px;background:#F7D3E0}.sg button{min-height:44px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--deep);font:700 13px Manrope,system-ui,sans-serif;cursor:pointer}.sg button.on{background:var(--rose);color:#fff;font-weight:800}
@@ -129,7 +129,7 @@ async function resetCounters() {
   render(RAW, TOT);
 }
 
-let SRC_RANGE = 'week', SHOW_ALL = false, TAB = 'main';
+let SRC_RANGE = 'week', GAME_RANGE = 'month', SHOW_ALL = false, TAB = 'main';
 try { TAB = localStorage.getItem('kh_tab') || 'main'; } catch (e) {}
 function showTab(t) {
   if (!['main', 'games', 'ads'].includes(t)) t = 'main';
@@ -144,8 +144,9 @@ function render(daily, total) {
   const D = k => d => ((daily[d] || {})[k]) || 0;
   const sum = (k, ds) => ds.reduce((a, d) => a + D(k)(d), 0);
   const d30 = days(30), d7 = days(7), today = ymd(new Date()), yest = ymd(new Date(Date.now() - 864e5));
-  const rooms = sum('room_created', d30), joined = sum('partner_joined', d30), done = sum('game_complete', d30);
-  const gk = Object.keys(GAMES).map(g => ({ g, open: sum('open_' + g, d30), done: sum('done_' + g, d30) })).sort((a, b) => b.open - a.open);
+  const gd = GAME_RANGE === 'today' ? [today] : GAME_RANGE === 'week' ? d7 : d30, GL = { today: 'Сегодня', week: 'За 7 дней', month: 'За 30 дней' }[GAME_RANGE], GLw = { today: 'сегодня', week: 'за 7 дней', month: 'за 30 дней' }[GAME_RANGE];
+  const rooms = sum('room_created', gd), joined = sum('partner_joined', gd), done = sum('game_complete', gd);
+  const gk = Object.keys(GAMES).map(g => ({ g, open: sum('open_' + g, gd), done: sum('done_' + g, gd) })).sort((a, b) => b.open - a.open);
   const maxG = Math.max(1, ...gk.map(x => x.open));
   const seen = new Set(); for (const d in daily) for (const k in daily[d]) if (k.startsWith('v_c_') && daily[d][k] > 0 && /^[a-z0-9][a-z0-9_-]{1,23}$/.test(k.slice(4))) seen.add(k.slice(4));
   const local = getLinks(), camp = [...new Set([...local, ...seen])];
@@ -193,13 +194,13 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
   /* Игры */
   const shown = SHOW_ALL ? gk : gk.slice(0, 5);
   const doneList = gk.filter(x => x.done).map(x => `${GAMES[x.g]} <b>${x.done}</b>`).join(', ') || 'пока нет';
-  $('#p-games').innerHTML = `<div class="card"><span class="ct">Дошли ли до игры вдвоём</span><span class="pc" style="margin:0">За 30 дней</span>
+  $('#p-games').innerHTML = `<div class="card"><div class="ch"><span class="ct">Дошли ли до игры вдвоём</span><div class="sg"><button type="button" data-g="today" class="${GAME_RANGE === 'today' ? 'on' : ''}">Сегодня</button><button type="button" data-g="week" class="${GAME_RANGE === 'week' ? 'on' : ''}">7 дней</button><button type="button" data-g="month" class="${GAME_RANGE === 'month' ? 'on' : ''}">30 дней</button></div></div><span class="pc" style="margin:0">${GL}</span>
 <div class="fun">
 <div class="fr2"><div class="rw"><span>Создали комнату</span><b>${fmt(rooms)}</b></div><div class="bar"><i style="width:100%"></i></div></div>
 <div class="fr2"><div class="rw"><span>Второй игрок зашёл</span><b>${fmt(joined)} <small>${pct(joined, rooms)}</small></b></div><div class="bar"><i style="width:${rooms ? Math.min(100, joined / rooms * 100) : 0}%"></i></div></div>
 <div class="fr2"><div class="rw"><span>Партию доиграли</span><b>${fmt(done)} <small>${pct(done, rooms)}</small></b></div><div class="bar"><i style="width:${rooms ? Math.min(100, done / rooms * 100) : 0}%"></i></div></div></div>
-<p class="say">${rooms ? `Из ${fmt(rooms)} комнат до второго игрока дошли <b>${fmt(joined)}</b>. Если эта цифра маленькая, людям сложно позвать второго.` : 'Комнат за 30 дней пока не создавали.'}</p></div>
-<div class="card"><span class="ct">Что открывают чаще всего</span><span class="pc" style="margin:0">Сколько раз открывали игру за 30 дней</span>
+<p class="say">${rooms ? `Из ${fmt(rooms)} комнат до второго игрока дошли <b>${fmt(joined)}</b>. Если эта цифра маленькая, людям сложно позвать второго.` : 'Комнат ' + GLw + ' пока не создавали.'}</p></div>
+<div class="card"><span class="ct">Что открывают чаще всего</span><span class="pc" style="margin:0">Сколько раз открывали игру ${GLw}</span>
 <div class="fun">${shown.map(x => `<div class="fr"><span>${GAMES[x.g]}</span><div class="bar"><i style="width:${x.open / maxG * 100}%"></i></div><b>${fmt(x.open)}</b></div>`).join('')}</div>
 <button type="button" class="rs" id="allg" style="margin-top:0">${SHOW_ALL ? 'Только лучшие 5' : 'Показать все ' + gk.length + ' игр'}</button>
 <p class="pc" style="margin:0">Доиграно партий: ${doneList}.</p></div>
@@ -218,6 +219,7 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
     const L = getLinks(); if (!L.includes(s)) { L.push(s); setLinks(L); } render(RAW, TOT);
   };
   document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { SRC_RANGE = b.dataset.r; render(RAW, TOT); });
+  document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { GAME_RANGE = b.dataset.g; render(RAW, TOT); });
   const ag = $('#allg'); if (ag) ag.onclick = () => { SHOW_ALL = !SHOW_ALL; render(RAW, TOT); };
   document.querySelectorAll('[data-copy], .chip').forEach(b => b.onclick = async () => {
     const i = b.parentNode.querySelector('input'), val = b.dataset.v || (i && i.value) || '', t0 = b.dataset.t0 || b.textContent; b.dataset.t0 = t0;
