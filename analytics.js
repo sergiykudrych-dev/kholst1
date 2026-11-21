@@ -26,6 +26,7 @@
   async function own(name, params) {
     try {
       const f = OWN[name], keys = f && f(params || {}); if (!keys) return;
+      if (/^promo_/.test(name)) { try { if (localStorage.getItem('kh_me') === '1' || localStorage.getItem('kh_owner') === '1') return; } catch (e) {} }   /* свои нажатия на рекламу не считаем */
       if (!(window.Profile && window.firebase && firebase.database && Profile.init)) return;
       const uid = await Profile.init(); if (!uid) return;
       const db = firebase.database(), inc = firebase.database.ServerValue.increment(1), day = new Date().toISOString().slice(0, 10);

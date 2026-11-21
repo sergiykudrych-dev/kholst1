@@ -81,7 +81,7 @@ button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--r
 <div id="tabs" class="tabs" role="tablist" hidden><button type="button" role="tab" data-t="main" aria-selected="true" class="on">Главное</button><button type="button" role="tab" data-t="games" aria-selected="false">Игры</button><button type="button" role="tab" data-t="ads" aria-selected="false">Реклама</button></div>
 <div id="out" class="pane"><div class="msg">Загружаем…</div></div>
 <div id="p-games" class="pane" hidden></div>
-<div id="p-ads" class="pane" hidden><div id="links"></div><div id="adm"></div></div>
+<div id="p-ads" class="pane" hidden><div id="partner"></div><div id="links"></div><div id="adm"></div></div>
 <p class="note" id="ver"></p>
 </main>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -129,7 +129,7 @@ async function resetCounters() {
   render(RAW, TOT);
 }
 
-let SRC_RANGE = 'week', GAME_RANGE = 'month', SHOW_ALL = false, TAB = 'main';
+let SRC_RANGE = 'week', GAME_RANGE = 'month', PR_RANGE = 'week', SHOW_ALL = false, TAB = 'main';
 try { TAB = localStorage.getItem('kh_tab') || 'main'; } catch (e) {}
 function showTab(t) {
   if (!['main', 'games', 'ads'].includes(t)) t = 'main';
@@ -193,6 +193,15 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
 
   /* Игры */
   const shown = SHOW_ALL ? gk : gk.slice(0, 5);
+  /* Бот-партнёр (реклама на сайте): нажатия на карточку на главной и на блок в окне конца партии */
+  const pd = PR_RANGE === 'today' ? [today] : PR_RANGE === 'week' ? d7 : d30, PL = { today: 'Сегодня', week: 'За 7 дней', month: 'За 30 дней' }[PR_RANGE];
+  const prV = sum('promo_view', pd), prH = sum('promo_click_home', pd), prE = sum('promo_click_end', pd), prAll = prH + prE;
+  $('#partner').innerHTML = `<div class="card"><div class="ch"><span class="ct">Бот-партнёр @${String(window.PARTNER_BOT || '—').replace(/[^A-Za-z0-9_—]/g, '')}</span><div class="sg">${['today', 'week', 'month'].map((r, i) => `<button type="button" data-pr="${r}" class="${PR_RANGE === r ? 'on' : ''}">${['Сегодня', '7 дней', '30 дней'][i]}</button>`).join('')}</div></div><span class="pc" style="margin:0">${PL}</span>
+<div class="fun">
+<div class="fr2"><div class="rw"><span>Перешли в бота всего</span><b>${fmt(prAll)}</b></div></div>
+<div class="fr2"><div class="rw"><span>С карточки на главной</span><b>${fmt(prH)}</b></div><div class="bar"><i style="width:${prAll ? prH / prAll * 100 : 0}%"></i></div></div>
+<div class="fr2"><div class="rw"><span>Из окна конца партии</span><b>${fmt(prE)} <small>из ${fmt(prV)} показов${prV ? ' · ' + pct(prE, prV) : ''}</small></b></div><div class="bar"><i style="width:${prAll ? prE / prAll * 100 : 0}%"></i></div></div></div>
+<p class="say">Считаются нажатия посетителей сайта (ваши заходы не считаются). Сколько из них начали пользоваться ботом, видно в статистике бота по меткам <b>twosome_home</b> и <b>twosome_end</b>.</p></div>`;
   const doneList = gk.filter(x => x.done).map(x => `${GAMES[x.g]} <b>${x.done}</b>`).join(', ') || 'пока нет';
   $('#p-games').innerHTML = `<div class="card"><div class="ch"><span class="ct">Дошли ли до игры вдвоём</span><div class="sg"><button type="button" data-g="today" class="${GAME_RANGE === 'today' ? 'on' : ''}">Сегодня</button><button type="button" data-g="week" class="${GAME_RANGE === 'week' ? 'on' : ''}">7 дней</button><button type="button" data-g="month" class="${GAME_RANGE === 'month' ? 'on' : ''}">30 дней</button></div></div><span class="pc" style="margin:0">${GL}</span>
 <div class="fun">
@@ -220,6 +229,7 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
   };
   document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { SRC_RANGE = b.dataset.r; render(RAW, TOT); });
   document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { GAME_RANGE = b.dataset.g; render(RAW, TOT); });
+  document.querySelectorAll('[data-pr]').forEach(b => b.onclick = () => { PR_RANGE = b.dataset.pr; render(RAW, TOT); });
   const ag = $('#allg'); if (ag) ag.onclick = () => { SHOW_ALL = !SHOW_ALL; render(RAW, TOT); };
   document.querySelectorAll('[data-copy], .chip').forEach(b => b.onclick = async () => {
     const i = b.parentNode.querySelector('input'), val = b.dataset.v || (i && i.value) || '', t0 = b.dataset.t0 || b.textContent; b.dataset.t0 = t0;
