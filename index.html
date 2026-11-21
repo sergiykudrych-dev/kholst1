@@ -224,7 +224,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 <script src="stats.js"></script>
 <script src="push.js"></script>
 <script src="friends.js"></script>
-<script src="fx.js?v=3"></script>
+<script src="fx.js?v=4"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), dlg = $('#dlg'), link = $('#link');
@@ -275,8 +275,17 @@ $('#td').onclick = () => open('truth.html');
   const a = $('#sketch'), bot = String(window.PARTNER_BOT || '').replace(/^@/, '');
   if (!a || !/^[A-Za-z0-9_]{5,32}$/.test(bot)) return;
   a.href = 'https://t.me/' + bot + '?start=twosome_home'; a.hidden = false;
-  a.onclick = e => { try { window.Track && Track.event('promo_click', { where: 'home' }); } catch (x) {}
-    try { if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink && Telegram.WebApp.initData) { e.preventDefault(); Telegram.WebApp.openTelegramLink(a.href); } } catch (x) {} };
+  const tgOpen = (e, url) => {   /* t.me → Telegram: в мини-приложении через Telegram, на экране «Домой» через tg:// */
+    try { if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink && Telegram.WebApp.initData) { e.preventDefault(); Telegram.WebApp.openTelegramLink(url); return; } } catch (x) {}
+    const standalone = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+    if (!standalone) return;
+    const m = url.match(/t\.me\/([A-Za-z0-9_]+)(?:\?start=([\w-]+))?/); if (!m) return;
+    e.preventDefault();
+    let gone = false; const off = () => { gone = true; }; document.addEventListener('visibilitychange', off, { once: true });
+    location.href = 'tg://resolve?domain=' + m[1] + (m[2] ? '&start=' + m[2] : '');
+    setTimeout(() => { if (!gone && !document.hidden) location.href = url; }, 1500);
+  };
+  a.onclick = e => { try { window.Track && Track.event('promo_click', { where: 'home' }); } catch (x) {} tgOpen(e, a.href); };
 })();
 $('#mons').onclick = () => open('monster.html');
 const paintWho = () => { $('#who').textContent = Profile.has() ? (Profile.avatar() + ' ' + Profile.name()).trim() : 'Как вас зовут? ✎'; };

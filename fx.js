@@ -126,6 +126,16 @@
     }).catch(() => {});
   }
 
+  const tgOpen = (e, url) => {   /* t.me → Telegram: в мини-приложении через Telegram, на экране «Домой» через tg:// */
+    try { if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink && Telegram.WebApp.initData) { e.preventDefault(); Telegram.WebApp.openTelegramLink(url); return; } } catch (x) {}
+    const standalone = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+    if (!standalone) return;
+    const m = url.match(/t\.me\/([A-Za-z0-9_]+)(?:\?start=([\w-]+))?/); if (!m) return;
+    e.preventDefault();
+    let gone = false; const off = () => { gone = true; }; document.addEventListener('visibilitychange', off, { once: true });
+    location.href = 'tg://resolve?domain=' + m[1] + (m[2] ? '&start=' + m[2] : '');
+    setTimeout(() => { if (!gone && !document.hidden) location.href = url; }, 1500);
+  };
   /* Бот-партнёр Sketch Heart в окне конца партии */
   function partner(card) {
     const bot = String(window.PARTNER_BOT || '').replace(/^@/, '');
@@ -135,7 +145,7 @@
     a.innerHTML = '<img src="sketch-heart.jpg" alt="" width="56" height="56"><span><b>Сохраните этот вечер ❤️</b>Превратите ваше фото в рисунок «Love is…»</span><i>→</i>';
     a.onclick = e => {
       try { window.Track && Track.event('promo_click', { where: 'end' }); } catch (x) {}
-      try { if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink && Telegram.WebApp.initData) { e.preventDefault(); Telegram.WebApp.openTelegramLink(url); } } catch (x) {}
+      tgOpen(e, url);
     };
     card.appendChild(a);
     try { window.Track && Track.event('promo_view'); } catch (x) {}
