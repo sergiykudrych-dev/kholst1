@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
+<script src="i18n.js?v=1"></script>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
@@ -105,7 +106,10 @@ const $ = s => document.querySelector(s), view = $('#view');
 const room = (location.hash.match(/room=([\w-]+)/) || [])[1];
 if (!room) location.replace('index.html');
 const me = /host=1/.test(location.hash) ? 1 : 2;
-const ROWS = ['йцукенгшщзхъ', 'фывапролджэ', 'ячсмитьбю'];
+/* Клавиатуры по языкам. Загадывающий пишет на своей, угадывающему показываем алфавит загаданного слова. */
+const ABC = { ru: ['йцукенгшщзхъ', 'фывапролджэ', 'ячсмитьбю'], uk: ['йцукенгшщзхї', 'фівапролджє', 'ячсмитьбюґ'], en: ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'] };
+const MYABC = ABC[window.LANG] ? window.LANG : 'ru';
+let ROWS = ABC[MYABC];
 const HEART = 'M12 21C5 15.7 2 12.4 2 8.9 2 6.2 4.1 4.2 6.7 4.2c1.9 0 3.7 1 5.3 3.1 1.6-2.1 3.4-3.1 5.3-3.1C19.9 4.2 22 6.2 22 8.9c0 3.5-3 6.8-10 12.1z';
 const heart = on => `<svg viewBox="0 0 24 24" class="${on ? '' : 'off'}"><path d="${HEART}"/></svg>`;
 $('#me').textContent = 'Вы — Игрок ' + me;
@@ -127,12 +131,13 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   const ref = firebase.database().ref('rooms/' + room + '/word');
   let S = { phase: 'pick' }, draft = '', lives = 7, prev = '';
 
-  const cells = (arr, empty) => `<div class="blanks" style="--n:${Math.max(arr.length, 1)}">` +
+  const cells = (arr, empty) => `<div class="blanks" data-noi18n style="--n:${Math.max(arr.length, 1)}">` +
     arr.map(c => `<span class="cell ${c.g ? 'ghost' : ''}">${c.l}</span>`).join('') + '</div>' + (empty ? '<p class="hint">Нажимайте буквы на клавиатуре</p>' : '');
 
   function kb(mode) {
     const g = S.guessed || [], can = mode === 'guess' && S.phase === 'guess' && me !== S.setter;
-    return '<div class="kb">' + ROWS.map((r, i) => '<div class="row">' + [...r].map(l => {
+    ROWS = ABC[mode === 'write' ? MYABC : (ABC[S.abc] ? S.abc : 'ru')];
+    return '<div class="kb" data-noi18n>' + ROWS.map((r, i) => '<div class="row">' + [...r].map(l => {
       let c = 'key', d = '';
       if (mode === 'guess') { if (g.includes(l)) { c += S.word.includes(l) ? ' ok' : ' bad'; d = 'disabled'; } else if (!can) d = 'disabled'; }
       return `<button class="${c}" data-k="${l}" ${d}>${l}</button>`;
@@ -158,7 +163,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       view.innerHTML = `<div class="hearts">${Array.from({ length: S.maxLives }, (_, i) => heart(i < S.lives)).join('')}</div>
         <div class="mid"><p class="who">${isSetter ? `${pn(3 - S.setter)} угадывает` : 'Угадайте слово'}</p>${cells(arr)}</div>${kb('guess')}` +
         (over ? `<div class="over"><div class="card"><h2>${p === 'won' ? 'Поздравляем!' : 'Не угадали'}</h2>
-          <p class="hint">${p === 'won' ? 'Слово угадано' : 'Сердечки закончились. Слово было'}</p><div class="big">${S.word}</div>
+          <p class="hint">${p === 'won' ? 'Слово угадано' : 'Сердечки закончились. Слово было'}</p><div class="big" data-noi18n>${S.word}</div>
           <button class="again" data-act="again">Играть ещё</button><a class="home" href="index.html">На главную</a></div></div>` : '');
     }
   }
@@ -176,7 +181,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
       });
     }
   }
-  const start = () => draft.length >= 2 && ref.set({ phase: 'guess', setter: me, word: draft, lives, maxLives: lives });
+  const start = () => draft.length >= 2 && ref.set({ phase: 'guess', setter: me, word: draft, abc: MYABC, lives, maxLives: lives });
   view.onclick = e => {
     const b = e.target.closest('button'); if (!b || b.disabled) return;
     if (b.dataset.k) return press(b.dataset.k);
@@ -192,7 +197,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === 'Backspace' && S.phase === 'write' && S.setter === me) { draft = draft.slice(0, -1); render(); }
     else if (e.key === 'Enter' && S.phase === 'write' && S.setter === me) start();
-    else { const l = e.key.toLowerCase().replace('ё', 'е'); if (/^[а-я]$/.test(l)) press(l); }
+    else { const l = (e.key || '').toLowerCase().replace('ё', 'е'); if (l.length === 1 && ROWS.join('').includes(l)) press(l); }
   });
 }
 </script>

@@ -2,6 +2,7 @@
 <html lang="ru" class="dark">
 <head>
 <meta charset="utf-8">
+<script src="i18n.js?v=1"></script>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
@@ -110,7 +111,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 #mons .tile{background:linear-gradient(145deg,#8C7DFF,#4B3BB5)}
 #sb .tile{background:linear-gradient(145deg,#5FA8FF,#1F5FC4)}
 #td .tile{background:linear-gradient(145deg,#FF8A65,#D81B60)}
-#sketch .tile{background:#fff;overflow:hidden}#sketch .tile img{width:100%;height:100%;object-fit:cover;display:block}a.game{text-decoration:none}
+#sketch .tile{background:#fff;overflow:hidden}.langs{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:18px 0 4px}.langs button{padding:7px 14px;border-radius:99px;background:rgba(255,255,255,.16);color:#fff;font:700 14px Manrope,system-ui,sans-serif}.langs button.on{background:#fff;color:#8E0F45}#sketch .tile img{width:100%;height:100%;object-fit:cover;display:block}a.game{text-decoration:none}
 .about{color:rgba(255,255,255,.82)}.about h2{color:#fff}.about a{color:#FFD3E6}
 .sharesite{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.7);color:#fff}
 .foot a,.foot span{color:rgba(255,255,255,.8)}
@@ -199,6 +200,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
   </section>
   <button class="instbtn" id="inst" type="button" hidden>📲 Установить как приложение</button>
   <button class="sharesite" id="sharesite">💌 Рассказать друзьям</button>
+  <p class="langs" data-noi18n><button type="button" data-l="ru">Русский</button><button type="button" data-l="uk">Українська</button><button type="button" data-l="en">English</button></p>
   <p class="foot"><a href="privacy.html">Конфиденциальность</a><br><span id="ver"></span></p>
 </main>
 
@@ -270,6 +272,8 @@ $('#memo').onclick = () => open('memory.html');
 $('#qs').onclick = () => open('questions.html');
 $('#sb').onclick = () => open('seabattle.html');
 $('#td').onclick = () => open('truth.html');
+/* Языки: RU / UA / EN */
+document.querySelectorAll('.langs button').forEach(b => { if (b.dataset.l === (window.LANG || 'ru')) b.classList.add('on'); b.onclick = () => window.setLang && setLang(b.dataset.l); });
 /* Бот-партнёр Sketch Heart: ссылка с меткой, внутри Telegram открываем через Telegram */
 (function () {
   const a = $('#sketch'), bot = String(window.PARTNER_BOT || '').replace(/^@/, '');
