@@ -98,8 +98,8 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 .hero{padding:16px 18px 16px 16px;gap:16px;border-radius:32px}
 .hero .tile{width:76px;height:76px;border-radius:24px}
 .hero .tile svg{transform:scale(1.1)}
-.hero b{font-size:21px;letter-spacing:-.5px;color:var(--deep);line-height:1.15}
-.hero small{margin-top:4px;font-size:14px}
+.hero b{font-size:19px;letter-spacing:-.4px;color:var(--deep);line-height:1.15}
+.hero small{margin-top:4px;font-size:13px}
 .hero .go{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:linear-gradient(145deg,#E8548C,#C2185B);color:#fff;font-size:20px;font-weight:800;margin-left:auto}
 .new{display:inline-block;margin-left:8px;padding:3px 9px;border-radius:99px;background:#6E52C9;color:#fff;font-size:11px;font-style:normal;font-weight:800;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
 #paint .tile,#qs .tile,#ttt .tile{background:linear-gradient(145deg,#FF7FA8,#C2185B)}
@@ -111,7 +111,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 #mons .tile{background:linear-gradient(145deg,#8C7DFF,#4B3BB5)}
 #sb .tile{background:linear-gradient(145deg,#5FA8FF,#1F5FC4)}
 #td .tile{background:linear-gradient(145deg,#FF8A65,#D81B60)}
-#sketch .tile{background:#fff;overflow:hidden}.langs{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:18px 0 4px}.langs button{padding:7px 14px;border-radius:99px;background:rgba(255,255,255,.16);color:#fff;font:700 14px Manrope,system-ui,sans-serif}.langs button.on{background:#fff;color:#8E0F45}#sketch .tile img{width:100%;height:100%;object-fit:cover;display:block}a.game{text-decoration:none}
+#sketch .tile{background:#fff;overflow:hidden}.langw{position:absolute;top:max(14px,env(safe-area-inset-top));right:70px;z-index:6}.langbtn{display:flex;align-items:center;gap:5px;height:38px;padding:0 12px;border:0;border-radius:99px;background:#fff;color:#8E0F45;font:800 14px Manrope,system-ui,sans-serif;box-shadow:0 10px 20px -10px rgba(20,0,30,.7);cursor:pointer}.langm{position:absolute;right:0;top:44px;min-width:150px;padding:6px;border-radius:18px;background:#fff;box-shadow:0 18px 40px -12px rgba(20,0,30,.6)}.langm button{display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-radius:12px;background:none;color:#4A1236;font:700 15px Manrope,system-ui,sans-serif;cursor:pointer}.langm button.on{background:#FFE4EF;color:#8E0F45}#sketch .tile img{width:100%;height:100%;object-fit:cover;display:block}a.game{text-decoration:none}
 .about{color:rgba(255,255,255,.82)}.about h2{color:#fff}.about a{color:#FFD3E6}
 .sharesite{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.7);color:#fff}
 .foot a,.foot span{color:rgba(255,255,255,.8)}
@@ -127,6 +127,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 <main>
   <button class="notibtn" id="bell" type="button" hidden></button>
   <button class="statbtn" id="st" type="button" aria-label="Статистика" title="Статистика">📊</button>
+  <div class="langw" data-noi18n><button class="langbtn" id="langb" type="button" aria-haspopup="true" aria-label="Мова / Language">🌐 <b></b></button><div class="langm" id="langm" hidden><button type="button" data-l="ru">Русский</button><button type="button" data-l="uk">Українська</button><button type="button" data-l="en">English</button></div></div>
   <h1>Во что сыграем?<span class="h1s">Игры для двоих онлайн</span></h1>
   <p class="lead">Выберите игру <b>→</b> отправьте ссылку <b>→</b> играйте</p>
   <div class="toprow"><button class="who" id="who" type="button"></button><button class="who ic fr" id="fr" type="button" aria-label="Друзья" title="Друзья">👥 Друзья</button></div>
@@ -200,7 +201,6 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
   </section>
   <button class="instbtn" id="inst" type="button" hidden>📲 Установить как приложение</button>
   <button class="sharesite" id="sharesite">💌 Рассказать друзьям</button>
-  <p class="langs" data-noi18n><button type="button" data-l="ru">Русский</button><button type="button" data-l="uk">Українська</button><button type="button" data-l="en">English</button></p>
   <p class="foot"><a href="privacy.html">Конфиденциальность</a><br><span id="ver"></span></p>
 </main>
 
@@ -273,7 +273,13 @@ $('#qs').onclick = () => open('questions.html');
 $('#sb').onclick = () => open('seabattle.html');
 $('#td').onclick = () => open('truth.html');
 /* Языки: RU / UA / EN */
-document.querySelectorAll('.langs button').forEach(b => { if (b.dataset.l === (window.LANG || 'ru')) b.classList.add('on'); b.onclick = () => window.setLang && setLang(b.dataset.l); });
+(function () {
+  const cur = window.LANG || 'ru', lb = $('#langb'), lm = $('#langm');
+  lb.querySelector('b').textContent = { ru: 'RU', uk: 'UA', en: 'EN' }[cur];
+  lm.querySelectorAll('button').forEach(b => { if (b.dataset.l === cur) b.classList.add('on'); b.onclick = () => { if (b.dataset.l !== cur && window.setLang) setLang(b.dataset.l); else lm.hidden = true; }; });
+  lb.onclick = e => { e.stopPropagation(); lm.hidden = !lm.hidden; };
+  document.addEventListener('click', e => { if (!lm.hidden && !lm.contains(e.target)) lm.hidden = true; });
+})();
 /* Бот-партнёр Sketch Heart: ссылка с меткой, внутри Telegram открываем через Telegram */
 (function () {
   const a = $('#sketch'), bot = String(window.PARTNER_BOT || '').replace(/^@/, '');
