@@ -17,3 +17,5 @@ window.PUSH_VAPID_KEY = 'BOosaja1j7i455dy9BvThNUjdfDIS5ppt54zxxhg0jOu3wJT8KafxA0
 window.PUSH_URL = 'https://twosome-push.sergiykudrych2001.workers.dev/';
 // Вход через Telegram (Worker бота). Нужны секреты FB_CLIENT_EMAIL и FB_PRIVATE_KEY в настройках Worker.
 window.TG_AUTH_URL = 'https://twosome-bot.sergiykudrych2001.workers.dev/auth';
+// Реклама бота-партнёра Sketch Heart (рисунок «Love is…» по фото). Пусто — реклама не показывается.
+window.PARTNER_BOT = 'LoveIsPhoto_bot';

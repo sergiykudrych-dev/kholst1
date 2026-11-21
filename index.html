@@ -110,6 +110,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 #mons .tile{background:linear-gradient(145deg,#8C7DFF,#4B3BB5)}
 #sb .tile{background:linear-gradient(145deg,#5FA8FF,#1F5FC4)}
 #td .tile{background:linear-gradient(145deg,#FF8A65,#D81B60)}
+#sketch .tile{background:#fff;overflow:hidden}#sketch .tile img{width:100%;height:100%;object-fit:cover;display:block}a.game{text-decoration:none}
 .about{color:rgba(255,255,255,.82)}.about h2{color:#fff}.about a{color:#FFD3E6}
 .sharesite{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.7);color:#fff}
 .foot a,.foot span{color:rgba(255,255,255,.8)}
@@ -134,6 +135,11 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
     <span><b>Вопросы друг другу</b><small>Выбирайте и узнайте, насколько вы похожи</small></span>
     <span class="go">→</span>
   </button>
+  <a class="game hero" id="sketch" href="#" target="_blank" rel="noopener" hidden>
+    <span class="tile"><img src="sketch-heart.jpg" alt="" width="76" height="76"></span>
+    <span><b>Рисунок «Love is…»</b><small>Ваше фото в рисунок с сердечками</small></span>
+    <span class="go">→</span>
+  </a>
   <button class="game hero" id="td">
     <span class="tile"><svg width="44" height="34" viewBox="0 0 44 34"><rect x="3" y="4" width="18" height="26" rx="4" fill="#fff" transform="rotate(-8 12 17)"/><rect x="23" y="4" width="18" height="26" rx="4" fill="#FFE08A" transform="rotate(8 32 17)"/><path d="M9 14a3 3 0 1 1 4 3v2" stroke="#C2185B" stroke-width="2.4" fill="none" stroke-linecap="round" transform="rotate(-8 12 17)"/><path d="M34 9l-5 9h4l-2 7 6-10h-4z" fill="#C2185B"/></svg></span>
     <span><b>Правда или действие<em class="new">Новая</em></b><small>Честные вопросы и задания для двоих</small></span>
@@ -218,7 +224,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 <script src="stats.js"></script>
 <script src="push.js"></script>
 <script src="friends.js"></script>
-<script src="fx.js?v=2"></script>
+<script src="fx.js?v=3"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
 const $ = s => document.querySelector(s), dlg = $('#dlg'), link = $('#link');
@@ -264,6 +270,14 @@ $('#memo').onclick = () => open('memory.html');
 $('#qs').onclick = () => open('questions.html');
 $('#sb').onclick = () => open('seabattle.html');
 $('#td').onclick = () => open('truth.html');
+/* Бот-партнёр Sketch Heart: ссылка с меткой, внутри Telegram открываем через Telegram */
+(function () {
+  const a = $('#sketch'), bot = String(window.PARTNER_BOT || '').replace(/^@/, '');
+  if (!a || !/^[A-Za-z0-9_]{5,32}$/.test(bot)) return;
+  a.href = 'https://t.me/' + bot + '?start=twosome_home'; a.hidden = false;
+  a.onclick = e => { try { window.Track && Track.event('promo_click', { where: 'home' }); } catch (x) {}
+    try { if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink && Telegram.WebApp.initData) { e.preventDefault(); Telegram.WebApp.openTelegramLink(a.href); } } catch (x) {} };
+})();
 $('#mons').onclick = () => open('monster.html');
 const paintWho = () => { $('#who').textContent = Profile.has() ? (Profile.avatar() + ' ' + Profile.name()).trim() : 'Как вас зовут? ✎'; };
 $('#who').onclick = () => Profile.ask().then(paintWho); paintWho();

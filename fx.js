@@ -75,6 +75,7 @@
 .fx-fly{position:fixed;z-index:80;bottom:90px;font-size:44px;pointer-events:none;animation:fxup 2.2s ease-out forwards}
 .fx-fly small{display:block;text-align:center;font:700 11px Manrope,system-ui,sans-serif;color:#8E0F45;background:rgba(255,255,255,.85);border-radius:8px;padding:1px 6px;margin-top:2px}
 @keyframes fxup{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-30px) scale(1.15)}100%{transform:translateY(-320px) scale(1);opacity:0}}
+.over .card a.fx-pt,.fx-pt{display:flex!important;flex-direction:row!important;align-items:center;width:auto!important;gap:12px;margin-top:12px;padding:10px 12px;border-radius:16px;background:#FFF1F6;color:#4A1236;text-decoration:none;text-align:left;font:13.5px/1.35 Manrope,system-ui,sans-serif}.fx-pt img{flex:none;width:56px!important;height:56px!important;margin:0!important;border-radius:12px;object-fit:cover}.fx-pt span{display:block;flex:1;min-width:0}.fx-pt b{display:block;font-size:15px}.fx-pt i{margin-left:auto;font-style:normal;font-weight:800;color:#C2185B;font-size:20px}
 .fx-share{display:block;width:100%;margin-top:12px;padding:11px;border:1.5px solid #C2185B;border-radius:14px;background:none;color:#C2185B;font:700 14px Manrope,system-ui,sans-serif;cursor:pointer}
 @media(prefers-reduced-motion:reduce){.fx-fly{animation-duration:.01s}}`;
     document.head.appendChild(s);
@@ -125,6 +126,20 @@
     }).catch(() => {});
   }
 
+  /* Бот-партнёр Sketch Heart в окне конца партии */
+  function partner(card) {
+    const bot = String(window.PARTNER_BOT || '').replace(/^@/, '');
+    if (!/^[A-Za-z0-9_]{5,32}$/.test(bot) || card.querySelector('.fx-pt')) return;
+    const url = 'https://t.me/' + bot + '?start=twosome_end';
+    const a = document.createElement('a'); a.className = 'fx-pt'; a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    a.innerHTML = '<img src="sketch-heart.jpg" alt="" width="56" height="56"><span><b>Сохраните этот вечер ❤️</b>Превратите ваше фото в рисунок «Love is…»</span><i>→</i>';
+    a.onclick = e => {
+      try { window.Track && Track.event('promo_click', { where: 'end' }); } catch (x) {}
+      try { if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink && Telegram.WebApp.initData) { e.preventDefault(); Telegram.WebApp.openTelegramLink(url); } } catch (x) {}
+    };
+    card.appendChild(a);
+    try { window.Track && Track.event('promo_view'); } catch (x) {}
+  }
   /* ——— «Поделиться» в конце партии ——— */
   F.shareSite = async function (btn) {
     const data = { title: 'Во что сыграем?', text: 'Игры для двоих онлайн: без регистрации, прямо в браузере', url: SITE };
@@ -137,6 +152,7 @@
       if (card && !card.querySelector('.fx-share')) {
         css(); const b = document.createElement('button'); b.type = 'button'; b.className = 'fx-share'; b.textContent = 'Понравилось? Отправьте другу ♥';
         b.onclick = () => F.shareSite(b); card.appendChild(b);
+        partner(card);
       }
     });
     mo.observe(document.body, { childList: true, subtree: true });
