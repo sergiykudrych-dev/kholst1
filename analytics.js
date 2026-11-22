@@ -19,7 +19,7 @@
     page_view: () => 'views',
     game_open: p => p.game && 'open_' + p.game,
     game_complete: p => p.host && p.game && ['game_complete', 'done_' + p.game],   /* считает только хозяин комнаты, чтобы не удваивать */
-    room_created: () => 'room_created', partner_joined: () => 'partner_joined', invite_sent: () => 'invite_sent',
+    room_created: () => 'room_created', partner_joined: () => 'partner_joined', invite_sent: () => 'invite_sent', lobby_invite: () => 'lobby_invite',
     friend_added: () => 'friend_added', profile_saved: () => 'profile_saved', name_set: () => 'name_set',
     promo_view: () => 'promo_view', promo_click: p => ['promo_click', 'promo_click_' + (p.where === 'end' ? 'end' : 'home')]
   };
