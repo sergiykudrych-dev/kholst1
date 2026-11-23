@@ -37,7 +37,7 @@
   if (L === 'ru') return;
 
   /* словарь грузим синхронно, пока страница ещё разбирается */
-  document.write('<script src="i18n-' + L + '.js?v=3"><\/script>');
+  document.write('<script src="i18n-' + L + '.js?v=4"><\/script>');
 
   const CYR = /[А-Яа-яЁё]/;
   const SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, NOSCRIPT: 1 };

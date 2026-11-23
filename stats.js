@@ -9,7 +9,7 @@
   let hist = [], dlg = null;
 
   const css = document.createElement('style');
-  css.textContent = `#sdlg{max-height:88dvh;overflow:auto}
+  css.textContent = `#sdlg{max-height:calc(100svh - 32px);overflow:auto}
 .stop{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 4px}
 .stop div{padding:10px 4px;border-radius:16px;background:#fff;text-align:center}
 .stop b{display:block;font:700 24px/1.1 Manrope,system-ui,sans-serif;color:#8E0F45}

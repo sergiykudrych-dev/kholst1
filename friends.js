@@ -11,7 +11,7 @@
   let db, me = null, myCode = '', list = {}, U = {}, target = null, dlg = null, ready = null, bar = null, tt;
 
   const css = document.createElement('style');
-  css.textContent = `#fdlg{max-height:88dvh;overflow:auto;padding:22px 18px 18px}
+  css.textContent = `#fdlg{max-height:calc(100svh - 32px);overflow:auto;padding:22px 18px 18px}
 #fdlg h2{font-size:34px;margin:0 0 12px}
 #fdlg .x{top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:#F7E1EA;font-size:15px;line-height:36px;padding:0;color:#8E0F45}
 #fdlg button:focus{outline:none}#fdlg button:focus-visible{outline:2px solid #C2185B;outline-offset:2px}

@@ -83,7 +83,9 @@ body.ch-open #view,body.ch-open .adx-game{opacity:.35;filter:saturate(.7);transi
   function bubble(m) {
     let b = document.querySelector('.ch-bub');
     if (!b) { b = document.createElement('div'); b.className = 'ch-bub'; b.onclick = () => toggle(true); document.body.appendChild(b); }
-    const tx = mask(m.t);
+    const T = window.T || (x => x);
+    /* код игрока и «теперь друзья» показываем словами, а не кодом */
+    const tx = m.code ? '👥 ' + T('хочет добавить вас в друзья') + ' — ' + T('откройте чат') : m.sys === 'fr' ? '💗 ' + T('Теперь вы друзья!') : mask(m.t);
     b.innerHTML = `<small>${esc(av(m.f))} ${esc(nm(m.f))}</small>${esc(tx.length > 90 ? tx.slice(0, 90) + '…' : tx)}`;
     b.classList.add('on'); clearTimeout(bubbleT); bubbleT = setTimeout(() => b.classList.remove('on'), 3500);
   }
