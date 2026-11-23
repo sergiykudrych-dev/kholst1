@@ -63,8 +63,8 @@
     css() {
       if (document.getElementById('kl-css')) return;
       const s = document.createElement('style'); s.id = 'kl-css';
-      s.textContent = '#kl{position:fixed;left:0;right:0;bottom:0;top:calc(max(10px,env(safe-area-inset-top)) + 54px);z-index:45;display:grid;place-items:center;padding:20px 20px 60px;background:rgba(74,18,54,.28);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);pointer-events:none;animation:klf .25s ease}' +
-        '.kl-card{pointer-events:auto;width:100%;max-width:380px;padding:26px 22px 16px;border-radius:30px;background:#fff;text-align:center;box-shadow:0 24px 60px -12px rgba(74,18,54,.45);font-family:Manrope,system-ui,sans-serif;color:#4A1236;animation:klu .35s cubic-bezier(.2,.8,.3,1.2)}' +
+      s.textContent = '#kl{position:fixed;left:0;right:0;bottom:0;top:calc(max(10px,env(safe-area-inset-top)) + 54px);z-index:45;display:grid;place-items:center;padding:20px 20px 60px;background:none;pointer-events:none;animation:klf .25s ease}' +
+        '.kl-card{pointer-events:auto;width:100%;max-width:380px;padding:26px 22px 16px;border-radius:30px;background:#fff;text-align:center;box-shadow:0 0 0 1px rgba(194,24,91,.08),0 18px 50px -6px rgba(74,18,54,.45);font-family:Manrope,system-ui,sans-serif;color:#4A1236;animation:klu .35s cubic-bezier(.2,.8,.3,1.2)}' +
         '.kl-ic{font-size:46px;line-height:1;margin-bottom:10px}.kl-card h2{margin:0 0 8px;font-size:22px;line-height:1.2;font-weight:800}.kl-card p{margin:0 0 18px;font-size:15px;line-height:1.4;color:#7A4260}' +
         '.kl-go{display:block;width:100%;border:0;border-radius:18px;padding:16px;background:#C2185B;color:#fff;font:800 17px Manrope,system-ui,sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px rgba(194,24,91,.7)}' +
         '.kl-skip{margin-top:8px;border:0;background:none;padding:10px;color:#9B6A84;font:600 14px Manrope,system-ui,sans-serif;cursor:pointer}' +
