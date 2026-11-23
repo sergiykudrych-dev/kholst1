@@ -30,14 +30,16 @@
       /* ждём, пока подгрузится список игроков, чтобы карточка не мигала у пары, которая уже вместе */
       K._lt = setTimeout(() => {
         K._lt = 0;
+        if (P().pubReady && P().pub === undefined) { K._lt = 1; P().pubReady.then(() => { K._lt = 0; K.lobby(); }); return; }
         if (document.getElementById('kl') || !P().me || K.here(3 - P().me)) return;
         try { if (sessionStorage.getItem(skipKey) === '1') return; } catch (e) {}
         K.css();
         const rec0 = rec(3 - P().me), wasHere = !!(rec0 && rec0.left);
+        const pub = !wasHere && P().me === 1 && P().pub && Date.now() - (P().pub.t || 0) < (P().openTTL || 9e5);
         const c = document.createElement('div'); c.id = 'kl';
         c.innerHTML = '<div class="kl-card" role="dialog" aria-live="polite">' +
-          '<div class="kl-ic">💌</div>' +
-          (wasHere
+          '<div class="kl-ic">' + (pub ? '🌍' : '💌') + '</div>' +
+          (pub ? '<h2>Комната открыта — ждём игрока</h2><p>Её видно в «Открытых комнатах» 15 минут. Зайдёт любой желающий, а можно позвать и своего:</p>' : wasHere
             ? '<h2><span data-noi18n>' + esc((rec0.avatar ? rec0.avatar + ' ' : '') + (rec0.name || '')) + '</span> <span>вышел(а) из игры</span></h2><p>Отправьте приглашение ещё раз, чтобы продолжить</p>'
             : '<h2>В комнате пока только вы 💗</h2><p>Отправьте ссылку партнёру — игра начнётся, как только он её откроет</p>') +
           '<button class="kl-go" type="button">Отправить приглашение</button>' +

@@ -7,6 +7,11 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const onlyEmoji = s => /^(\p{Extended_Pictographic}|\p{Emoji_Component}|‍|️|\s){1,8}$/u.test(s) && !/[\w\dа-яё]/i.test(s);
   let ref = null, me = 0, msgs = [], unread = 0, open = false, last = 0, btn, sheet, list, inp, bubbleT, seenKey;
+  /* дружба с партнёром: '' — нет, 'out' — я поделился кодом, 'in' — партнёр поделился, 'ok' — друзья */
+  let fst = '', puid = '', fref = null, myCode = '';
+  const URL_RE = /(https?:\/\/|www\.)\S+|\b[\w-]+\.(com|ru|ua|net|org|me|io|app|link|xyz|site|online|shop|info|top|cc|gg|tk)\b\S*|t\.me\/\S+|@[A-Za-z0-9_]{4,}/gi;
+  const isPub = () => !!(window.Profile && Profile.pub);
+  const mask = t => isPub() ? t.replace(URL_RE, '🔗×') : t;
 
   const css = document.createElement('style');
   css.textContent = `.ch-b{position:relative;flex:none;width:44px!important;height:44px;padding:0!important;display:grid;place-items:center;font-size:20px;line-height:1;margin-left:auto}
@@ -38,7 +43,18 @@ body.ch-open #view,body.ch-open .adx-game{opacity:.35;filter:saturate(.7);transi
 .ch-in input{flex:1;min-width:0;height:46px;border-radius:99px;background:#fff;border:2px solid #F3B6CC;padding:0 16px;font:600 16px Manrope,system-ui,sans-serif;color:#4A1236;outline:none;-webkit-user-select:text;user-select:text}
 .ch-in input:focus{border-color:#E8548C}
 .ch-in button{flex:none;width:46px;height:46px;border:0;border-radius:50%;background:linear-gradient(135deg,#E8548C,#C2185B);color:#fff;font-size:20px;cursor:pointer}
-.ch-in button:disabled{opacity:.45}`;
+.ch-in button:disabled{opacity:.45}
+.ch-sys{align-self:center;text-align:center;max-width:92%;padding:10px 14px;border-radius:16px;background:#FFF6D6;color:#6B4E00;font:700 13px/1.35 Manrope,system-ui,sans-serif}
+.ch-sys.fr{background:#E6F6EE;color:#1E6B45}
+.ch-cd{width:82%;padding:12px 14px;border-radius:18px;background:#FFF0F5;color:#4A1236;font-family:Manrope,system-ui,sans-serif}
+.ch-cd.l{align-self:flex-start;border-bottom-left-radius:6px}.ch-cd.r{align-self:flex-end;border-bottom-right-radius:6px;background:#FCE4EE}
+.ch-cd small{display:block;font:700 12px Manrope,system-ui,sans-serif;color:#8A5570}
+.ch-cd b{display:block;font:800 24px/1.2 Manrope,system-ui,sans-serif;letter-spacing:4px;color:#8E0F45;margin:4px 0 8px;-webkit-user-select:all;user-select:all}
+.ch-cd button{width:100%;padding:10px;border:0;border-radius:12px;background:#C2185B;color:#fff;font:800 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.ch-cd button:disabled{opacity:.6}
+.ch-cd .ok{display:block;text-align:center;font:700 13px Manrope,system-ui,sans-serif;color:#1E6B45;background:#E6F6EE;border-radius:12px;padding:9px}
+.ch-q button.cd{background:#4A1236;color:#fff}
+.ch-hd .ch-rep{width:auto;padding:0 12px;border-radius:99px;font:800 12px Manrope,system-ui,sans-serif;margin-left:auto;margin-right:8px}`;
   document.head.appendChild(css);
 
   const other = () => 3 - me;
@@ -49,14 +65,26 @@ body.ch-open #view,body.ch-open .adx-game{opacity:.35;filter:saturate(.7);transi
 
   function draw() {
     if (!list) return;
-    if (!msgs.length) { list.innerHTML = `<div class="ch-none">Напишите что-нибудь партнёру 💬<br><small>Чат общий для всех игр в этой комнате</small></div>`; return; }
-    list.innerHTML = msgs.map(m => `<div class="ch-m ${m.f === me ? 'r' : 'l'} ${onlyEmoji(m.t) ? 'big' : ''}">${esc(m.t)}</div>`).join('');
-    list.scrollTop = list.scrollHeight;
+    const pn = esc((av(other()) + ' ' + nm(other())).trim());
+    const note = isPub() && fst !== 'ok' ? `<div class="ch-sys">🌍 <span data-noi18n>${pn}</span> <span>из открытой комнаты.</span><br><span>Вы пока не друзья — поделитесь кодом, если захотите играть снова.</span></div>` : '';
+    if (!msgs.length) { list.innerHTML = note + `<div class="ch-none">Напишите что-нибудь партнёру 💬<br><small>Чат общий для всех игр в этой комнате</small></div>`; syncQuick(); return; }
+    list.innerHTML = note + msgs.map(m => {
+      const mine = m.f === me;
+      if (m.sys === 'fr') return `<div class="ch-sys fr">💗 <span>Теперь вы друзья!</span></div>`;
+      if (m.code) {
+        const st = mine ? (fst === 'ok' ? `<span class="ok">✓ Вы друзья</span>` : `<span class="ok"><span data-noi18n>${pn}</span> <span>может добавить вас в друзья</span></span>`)
+          : (fst === 'ok' ? `<span class="ok">✓ Вы друзья</span>` : `<button type="button" data-add="${esc(m.code)}">👥 Добавить в друзья</button>`);
+        return `<div class="ch-cd ${mine ? 'r' : 'l'}"><small>${mine ? 'Вы поделились кодом игрока' : `<span data-noi18n>${esc(av(m.f) + ' ' + nm(m.f))}</span> <span>поделился(ась) кодом игрока</span>`}</small><b data-noi18n>${esc(m.code)}</b>${st}</div>`;
+      }
+      return `<div class="ch-m ${mine ? 'r' : 'l'} ${onlyEmoji(m.t) ? 'big' : ''}">${esc(mask(m.t))}</div>`;
+    }).join('');
+    list.scrollTop = list.scrollHeight; syncQuick();
   }
   function bubble(m) {
     let b = document.querySelector('.ch-bub');
     if (!b) { b = document.createElement('div'); b.className = 'ch-bub'; b.onclick = () => toggle(true); document.body.appendChild(b); }
-    b.innerHTML = `<small>${esc(av(m.f))} ${esc(nm(m.f))}</small>${esc(m.t.length > 90 ? m.t.slice(0, 90) + '…' : m.t)}`;
+    const tx = mask(m.t);
+    b.innerHTML = `<small>${esc(av(m.f))} ${esc(nm(m.f))}</small>${esc(tx.length > 90 ? tx.slice(0, 90) + '…' : tx)}`;
     b.classList.add('on'); clearTimeout(bubbleT); bubbleT = setTimeout(() => b.classList.remove('on'), 3500);
   }
   function fitKeyboard() {
@@ -72,7 +100,7 @@ body.ch-open #view,body.ch-open .adx-game{opacity:.35;filter:saturate(.7);transi
     else { try { inp.blur(); } catch (e) {} sheet.classList.remove('kb'); }
   }
   function send(t) {
-    t = String(t || '').replace(/\s+/g, ' ').trim().slice(0, MAX);
+    t = mask(String(t || '').replace(/\s+/g, ' ').trim()).slice(0, MAX);
     if (!t || !ref || Date.now() - last < 900) return;
     last = Date.now();
     ref.push({ f: me, t, ts: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
@@ -83,17 +111,100 @@ body.ch-open #view,body.ch-open .adx-game{opacity:.35;filter:saturate(.7);transi
     if (sheet) return;
     const dim = document.createElement('div'); dim.className = 'ch-dim'; dim.onclick = () => toggle(false); document.body.appendChild(dim);
     sheet = document.createElement('div'); sheet.className = 'ch-sh';
-    sheet.innerHTML = `<div class="ch-gr"></div><div class="ch-hd"><span>💬 ${esc(av(other()))} ${esc(nm(other()))}</span><button type="button" aria-label="Закрыть">✕</button></div><div class="ch-ls"></div>
-<div class="ch-q">${QUICK.map(q => `<button type="button">${esc(q)}</button>`).join('')}</div>
+    sheet.innerHTML = `<div class="ch-gr"></div><div class="ch-hd"><span>💬 ${esc(av(other()))} ${esc(nm(other()))}</span><button type="button" class="ch-rep" hidden>⚑ Пожаловаться</button><button type="button" class="ch-x" aria-label="Закрыть">✕</button></div><div class="ch-ls"></div>
+<div class="ch-q"><button type="button" class="cd" hidden>🪪 Мой код</button>${QUICK.map(q => `<button type="button">${esc(q)}</button>`).join('')}</div>
 <form class="ch-in"><input maxlength="${MAX}" placeholder="Сообщение…" autocomplete="off" enterkeyhint="send" aria-label="Сообщение"><button type="submit" aria-label="Отправить">↑</button></form>`;
     document.body.appendChild(sheet);
     list = sheet.querySelector('.ch-ls'); inp = sheet.querySelector('input');
-    sheet.querySelector('.ch-hd button').onclick = () => toggle(false);
-    sheet.querySelector('.ch-q').onclick = e => { const b = e.target.closest('button'); if (b) send(b.textContent); };
+    sheet.querySelector('.ch-x').onclick = () => toggle(false);
+    sheet.querySelector('.ch-rep').onclick = report;
+    sheet.querySelector('.ch-q').onclick = e => { const b = e.target.closest('button'); if (!b) return; if (b.classList.contains('cd')) shareCode(b); else send(b.textContent); };
+    list.onclick = e => { const b = e.target.closest('button[data-add]'); if (b) addFriend(b); };
     sheet.querySelector('form').onsubmit = e => { e.preventDefault(); send(inp.value); inp.value = ''; };
     // смахнуть шторку вниз
     if (window.visualViewport) { visualViewport.addEventListener('resize', fitKeyboard); visualViewport.addEventListener('scroll', fitKeyboard); }
     draw();
+  }
+  /* —— дружба через чат: «Мой код» и «Добавить в друзья» —— */
+  const db = () => firebase.database();
+  const myUid = () => window.Profile && Profile.uid;
+  function watchFriend() {
+    const n = window.Profile && Profile.names && Profile.names[other()], u = n && n.uid;
+    if (!u || !myUid() || u === puid) return;
+    puid = u; if (fref) fref.off();
+    fref = db().ref('friends/' + myUid() + '/' + u + '/status');
+    fref.on('value', s => { fst = s.val() || ''; syncQuick(); if (open) draw(); }, () => {});
+  }
+  function syncQuick() {
+    if (!sheet) return;
+    const c = sheet.querySelector('.ch-q .cd'); if (c) c.hidden = !(puid && myUid() && fst !== 'ok' && fst !== 'out' && !msgs.some(m => m.code && m.f === me));
+    const r = sheet.querySelector('.ch-rep'); if (r) r.hidden = !isPub();
+  }
+  async function ensureCode() {
+    if (myCode) return myCode;
+    const u = (await db().ref('users/' + myUid()).once('value')).val() || {};
+    if (u.code) return (myCode = u.code);
+    const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    for (let i = 0; i < 8; i++) {
+      const c = Array.from({ length: 6 }, () => A[Math.floor(Math.random() * A.length)]).join('');
+      const r = await db().ref('codes/' + c).transaction(x => x === null ? myUid() : undefined);
+      if (r.committed) { await db().ref('users/' + myUid()).update({ code: c, name: Profile.name() || null, avatar: Profile.avatar() || null }); return (myCode = c); }
+    }
+    throw new Error('code');
+  }
+  const meRec = () => ({ name: Profile.name() || null, avatar: Profile.avatar() || null, t: Date.now() });
+  const pRec = () => { const n = Profile.names[other()] || {}; return { name: n.name || null, avatar: n.avatar || null, t: Date.now() }; };
+  async function shareCode(b) {
+    if (!puid || !ref) return; b.disabled = true;
+    try {
+      const code = await ensureCode(), up = {};
+      const was = fst;
+      if (was === 'in') {   /* партнёр уже поделился своим кодом — просто становимся друзьями */
+        up['friends/' + myUid() + '/' + puid + '/status'] = 'ok'; up['friends/' + puid + '/' + myUid() + '/status'] = 'ok';
+        await db().ref().update(up); notify('accepted'); ref.push({ f: me, t: '💗', sys: 'fr', ts: firebase.database.ServerValue.TIMESTAMP }); return;
+      }
+      /* делимся кодом = предлагаем дружбу: партнёру остаётся нажать «Добавить» */
+      up['friends/' + myUid() + '/' + puid] = Object.assign({ status: 'out' }, pRec());
+      up['friends/' + puid + '/' + myUid()] = Object.assign({ status: 'in' }, meRec());
+      await db().ref().update(up);
+      await ref.push({ f: me, t: '🪪 ' + code, code, ts: firebase.database.ServerValue.TIMESTAMP });
+      try { window.Track && Track.event('code_shared'); } catch (e) {}
+    } catch (e) { toast('Не получилось, попробуйте ещё раз'); }
+    finally { b.disabled = false; syncQuick(); }
+  }
+  async function addFriend(b) {
+    if (!puid) return; b.disabled = true; b.textContent = '…';
+    try {
+      const was = fst;
+      if (was !== 'ok') {
+        const up = {};
+        if (was === 'in') { up['friends/' + myUid() + '/' + puid + '/status'] = 'ok'; up['friends/' + puid + '/' + myUid() + '/status'] = 'ok'; }
+        else { up['friends/' + myUid() + '/' + puid] = Object.assign({ status: 'out' }, pRec()); up['friends/' + puid + '/' + myUid()] = Object.assign({ status: 'in' }, meRec()); }
+        await db().ref().update(up);
+        if (was === 'in') { notify('accepted'); ref.push({ f: me, t: '💗', sys: 'fr', ts: firebase.database.ServerValue.TIMESTAMP }); try { window.Track && Track.event('friend_added'); } catch (e) {} }
+        else toast('Запрос отправлен');
+      }
+    } catch (e) { b.disabled = false; b.textContent = '👥 Добавить в друзья'; toast('Не получилось, попробуйте ещё раз'); }
+  }
+  async function notify(type) {
+    const to = puid; if (!to) return;
+    try {
+      const u = firebase.auth().currentUser; if (!u) return; const tok = await u.getIdToken();
+      if (window.PUSH_URL) fetch(window.PUSH_URL, { method: 'POST', keepalive: true, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: JSON.stringify({ type, to }) }).catch(() => {});
+      if (window.TG_AUTH_URL && /^tg_\d+$/.test(to)) fetch(window.TG_AUTH_URL.replace(/\/auth$/, '/notify'), { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: tok, type, to }) }).catch(() => {});
+    } catch (e) {}
+  }
+  function toast(t) {
+    let e = document.querySelector('.ch-bub'); if (!e) { e = document.createElement('div'); e.className = 'ch-bub'; document.body.appendChild(e); }
+    e.textContent = t; e.classList.add('on'); clearTimeout(bubbleT); bubbleT = setTimeout(() => e.classList.remove('on'), 2500);
+  }
+  function report() {
+    if (!confirm('Пожаловаться на игрока и выйти из комнаты?')) return;
+    const n = Profile.names[other()] || {};
+    const job = db().ref('rooms/_reports').push({ room: Profile.room, by: myUid() || null, who: n.uid || null, name: n.name || null, t: Date.now(), chat: msgs.slice(-20).map(m => (m.f === me ? '> ' : '< ') + m.t) }).catch(() => {});
+    try { window.Track && Track.event('report_sent'); } catch (e) {}
+    const go = () => { location.href = 'index.html'; };
+    Promise.race([job, new Promise(r => setTimeout(r, 1500))]).then(() => db().ref('rooms/' + Profile.room + '/players/p' + me).update({ left: firebase.database.ServerValue.TIMESTAMP }).then(go, go));
   }
   function mountBtn() {
     const hd = document.querySelector('header'); if (!hd || document.getElementById('ch-btn')) return;
@@ -112,9 +223,11 @@ body.ch-open #view,body.ch-open .adx-game{opacity:.35;filter:saturate(.7);transi
       let seen = ''; try { seen = sessionStorage.getItem(seenKey) || ''; } catch (e) {}
       const q = ref.limitToLast ? ref.limitToLast(KEEP) : ref;
       let initial = true; setTimeout(() => { initial = false; }, 1500);
+      watchFriend(); setInterval(watchFriend, 3000);
+      if (Profile.pubReady) Profile.pubReady.then(() => { if (open) draw(); syncQuick(); });
       q.on('child_added', s => {
         const v = s.val() || {}; if (typeof v.t !== 'string') return;
-        const m = { k: s.key, f: v.f, t: v.t.slice(0, MAX) };
+        const m = { k: s.key, f: v.f, t: v.t.slice(0, MAX), code: /^[A-Z0-9]{4,10}$/.test(v.code || '') ? v.code : '', sys: v.sys === 'fr' ? 'fr' : '' };
         msgs.push(m); if (msgs.length > KEEP) msgs.shift();
         if (open) { draw(); if (m.f !== me && !initial) play(); return; }
         if (m.f !== me && (!initial || (seen && m.k > seen))) { unread++; setBadge(); if (!initial) { bubble(m); play(); } }

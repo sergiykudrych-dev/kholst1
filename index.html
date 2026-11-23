@@ -2,7 +2,7 @@
 <html lang="ru" class="dark">
 <head>
 <meta charset="utf-8">
-<script src="i18n.js?v=2"></script>
+<script src="i18n.js?v=3"></script>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
@@ -64,7 +64,36 @@ dialog::backdrop{background:rgba(74,18,54,.45);backdrop-filter:blur(3px)}
 .rfr .r b{flex:1;min-width:0;font:700 15px Manrope,sans-serif;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rfr .r button{flex:none;padding:8px 14px;border:0;border-radius:99px;background:linear-gradient(90deg,#E8548C,#C2185B);color:#fff;font:800 13px Manrope,sans-serif;cursor:pointer}
 .rfr .r button:disabled{opacity:.6}
-.rfr .or{font:700 13px Manrope,sans-serif;color:var(--mute);text-align:center;margin:12px 0 0}
+.rfr .or{font:700 12px Manrope,sans-serif;color:var(--mute);text-align:center;margin:10px 0 0}
+.rfr .fl{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:none}.rfr .fl::-webkit-scrollbar{display:none}
+.rfr .fl.c{justify-content:center}
+.rfr .f{flex:none;width:68px;border:0;background:none;padding:0;cursor:pointer;font-family:Manrope,sans-serif}
+.rfr .f i{position:relative;font-style:normal;display:grid;place-items:center;width:52px;height:52px;margin:0 auto;border-radius:50%;background:#FFE3EE;font-size:26px}
+.rfr .f i u{position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:#C2185B;color:#fff;font:800 13px/20px Manrope,sans-serif;text-decoration:none;text-align:center;border:2px solid #FFF8FA}
+.rfr .f span{display:block;margin-top:5px;font:700 12px Manrope,sans-serif;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rfr .f:disabled{opacity:.55}
+.vis{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:12px 0 10px;border-radius:16px;background:#F7E3EC}
+.vis button{border:0;border-radius:12px;padding:10px 6px;background:none;font:800 14px Manrope,sans-serif;color:#8A5570;cursor:pointer}
+.vis button[aria-checked="true"]{background:#fff;color:#8E0F45;box-shadow:0 4px 12px -6px rgba(74,18,54,.45)}
+.vnote{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:10px 12px;margin:0 0 14px;border-radius:14px;font:600 13px/1.35 Manrope,sans-serif}
+.vnote[hidden]{display:none}.vnote.pub{background:#E6F6EE;color:#1E6B45}.vnote.pri{background:#F4EEF8;color:#5B3D73}.vnote i{font-style:normal;font-size:18px;line-height:1}
+.openr{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:1.5px solid rgba(255,255,255,.55);border-radius:24px;background:rgba(255,255,255,.16);color:#fff;text-align:left;font:inherit;cursor:pointer}
+.openr i{font-style:normal;flex:none;width:44px;height:44px;border-radius:14px;background:#fff;display:grid;place-items:center;font-size:24px}
+.openr .t{flex:1;min-width:0}.openr b{display:block;font:800 16px/1.2 Manrope,sans-serif}.openr small{display:flex;align-items:center;gap:6px;font:700 13px Manrope,sans-serif;opacity:.85;margin-top:2px}
+.openr small.on:before{content:'';flex:none;width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 3px rgba(74,222,128,.25)}
+.openr .go2{flex:none;width:34px;height:34px;border-radius:50%;background:#fff;color:#C2185B;display:grid;place-items:center;font:800 17px Manrope,sans-serif}
+#odlg{max-height:92dvh;overflow:auto}
+.or2{display:flex;align-items:center;gap:10px;padding:10px;border-radius:18px;background:#fff;margin-top:8px;text-align:left}
+.or2>i{font-style:normal;flex:none;width:44px;height:44px;border-radius:50%;background:#FFE3EE;display:grid;place-items:center;font-size:24px}
+.or2 .t{flex:1;min-width:0}.or2 b{display:block;font:800 15px Manrope,sans-serif;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.or2 small{display:flex;align-items:center;gap:6px;margin-top:3px;font:600 12px Manrope,sans-serif;color:var(--mute);white-space:nowrap;overflow:hidden}
+.or2 small em{font-style:normal;flex:none;font-size:13px}
+.or2 small.w{display:block;margin-top:1px;font-size:11px;opacity:.8}
+.or2 button{flex:none;padding:9px 14px;border:0;border-radius:99px;background:linear-gradient(90deg,#E8548C,#C2185B);color:#fff;font:800 13px Manrope,sans-serif;cursor:pointer}
+.or2 button:disabled{opacity:.6}
+.onone{padding:18px 10px;text-align:center;color:var(--mute);font:700 14px/1.4 Manrope,sans-serif}
+.orfoot{margin-top:14px;padding-top:12px;border-top:1px dashed #F0C4D6;text-align:center}.orfoot p{margin:0 0 10px!important;font-size:13px!important}
+.safe{margin:10px 0 0!important;font:600 12px/1.35 Manrope,sans-serif!important}
 .back2{display:flex;align-items:center;gap:12px;width:100%;padding:12px 12px 12px 14px;border:0;border-radius:24px;background:linear-gradient(90deg,#FFE08A,#FFC94D);color:#4A1236;text-align:left;cursor:pointer;box-shadow:0 14px 28px -16px rgba(20,0,30,.7);font:inherit}
 .back2[hidden]{display:none}
 .back2 i{font-style:normal;flex:none;width:44px;height:44px;border-radius:14px;background:#fff;display:grid;place-items:center;font-size:24px}
@@ -132,6 +161,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
   <p class="lead">Выберите игру <b>→</b> отправьте ссылку <b>→</b> играйте</p>
   <div class="toprow"><button class="who" id="who" type="button"></button><button class="who ic fr" id="fr" type="button" aria-label="Друзья" title="Друзья">👥 Друзья</button></div>
   <button class="back2" id="back2" type="button" hidden></button>
+  <button class="openr" id="openr" type="button"><i>🚪</i><span class="t"><b>Открытые комнаты</b><small id="openn">Смотрим, кто ждёт игру…</small></span><span class="go2">→</span></button>
   <button class="game hero" id="qs">
     <span class="tile"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M6 4h22a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H16l-7 6v-6H6a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="#fff"/><path d="M14 11a4 4 0 1 1 5 4v2" stroke="#C2185B" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="19" cy="21" r="1.8" fill="#C2185B"/></svg></span>
     <span><b>Вопросы друг другу</b><small>Выбирайте и узнайте, насколько вы похожи</small></span>
@@ -207,7 +237,9 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 <dialog id="dlg">
   <button class="x" id="x" aria-label="Закрыть">✕</button>
   <h2>Комната для двоих</h2>
-  <p>Отправьте ссылку тому, с кем хотите играть, и нажмите «Играть».</p>
+  <div class="vis" id="vis" role="radiogroup" aria-label="Кто может зайти"><button type="button" data-v="pri" role="radio">🔒 Приватная</button><button type="button" data-v="pub" role="radio">🌍 Открытая</button></div>
+  <div class="vnote pri" id="vpri"><i>🔒</i><span>Зайдёт только тот, кому вы отправите ссылку или кого позовёте.</span></div>
+  <div class="vnote pub" id="vpub" hidden><i>🌍</i><span>Присоединиться может любой человек. Комната появится в списке «Открытые комнаты», пока вы не начнёте играть вдвоём.</span></div>
   <div class="rfr" id="rfr" hidden></div>
   <input class="link" id="link" readonly aria-label="Ссылка на комнату">
   <div class="two"><button class="btn" id="share">Поделиться</button><button class="btn" id="copy">Копировать</button></div>
@@ -215,13 +247,22 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
   <p class="hint" id="hint" hidden>Ссылка заработает, когда сайт будет опубликован в интернете.</p>
 </dialog>
 
+<dialog id="odlg">
+  <button class="x" id="ox" aria-label="Закрыть">✕</button>
+  <h2>Открытые комнаты</h2>
+  <p>В каждой ждёт один человек. Нажмите «Играть» — и вы вдвоём.</p>
+  <div id="olist"></div>
+  <div class="orfoot"><p id="oq">Нет подходящей игры?</p><button class="play" id="omake" type="button">🌍 Создать открытую комнату</button></div>
+  <p class="safe">Будьте вежливы. В чате открытой комнаты можно пожаловаться и выйти в любой момент.</p>
+</dialog>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="version.js"></script><script src="version-check.js"></script>
-<script src="analytics.js?v=2"></script>
-<script src="profile.js"></script>
+<script src="analytics.js?v=3"></script>
+<script src="profile.js?v=2"></script>
 <script src="ads.js" data-mode="home"></script>
 <script src="stats.js"></script>
 <script src="push.js"></script>
@@ -242,11 +283,12 @@ const paintFriends = () => {
   const fr = (window.Friends && Friends.friends) ? Friends.friends() : [];
   box.hidden = !fr.length;
   if (!fr.length) { box.innerHTML = ''; return; }
-  box.innerHTML = '<h3>Позвать друга</h3>' + fr.map(f => `<div class="r"><i>${Kit0(f.av)}</i><b>${Kit0(f.nm)}</b><button type="button" data-u="${Kit0(f.uid)}">Позвать</button></div>`).join('') + '<p class="or">или отправьте ссылку</p>';
+  box.innerHTML = '<h3>Позвать друга</h3><div class="fl' + (fr.length <= 4 ? ' c' : '') + '">' + fr.map(f => `<button class="f" type="button" data-u="${Kit0(f.uid)}" aria-label="Позвать"><i>${Kit0(f.av)}<u>+</u></i><span data-noi18n>${Kit0(f.nm)}</span></button>`).join('') + '</div><p class="or">или отправьте ссылку</p>';
 };
 const Kit0 = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const showRoom = (page, code) => {
   roomPage = page; roomCode = code; paintFriends();
+  setVis(window.__wantPub && __wantPub() ? 'pub' : 'pri');
   link.value = new URL(page + '#room=' + code, location.href).href;
   $('#hint').hidden = location.protocol !== 'file:';
   dlg.showModal(); try { document.activeElement.blur(); } catch (e) {}
@@ -307,10 +349,10 @@ Friends.init();
 Friends.onList = () => { if (dlg.open) paintFriends(); };
 $('#rfr').onclick = e => {
   const b = e.target.closest('button[data-u]'); if (!b) return;
-  b.disabled = true; b.textContent = 'Зовём…';
+  b.disabled = true; const u0 = b.querySelector('u'); if (u0) u0.textContent = '…';
   Friends.inviteTo(b.dataset.u, roomPage, roomCode).then(
-    () => { location.href = new URL(roomPage + '#room=' + roomCode + '&host=1', location.href).href; },
-    () => { b.disabled = false; b.textContent = 'Позвать'; Friends.toast('Не удалось отправить, попробуйте ссылкой'); });
+    () => markPub().then(() => { location.href = new URL(roomPage + '#room=' + roomCode + '&host=1', location.href).href; }),
+    () => { b.disabled = false; if (u0) u0.textContent = '+'; Friends.toast('Не удалось отправить, попробуйте ссылкой'); });
 };
 Push.installButton($('#inst'));
 Push.bellButton($('#bell'));
@@ -343,7 +385,73 @@ $('#share').onclick = async () => {
   if (!navigator.share) return copy();
   try { await navigator.share({ title: 'Холст', text: 'Рисуем вместе', url: link.value }); } catch (_) {}
 };
-$('#play').onclick = () => { location.href = link.value + '&host=1'; };
+$('#play').onclick = () => { markPub().then(() => { location.href = link.value + '&host=1'; }); };
+
+/* Приватная / открытая комната */
+let vis = 'pri', wantPub = false;
+const setVis = v => {
+  vis = v;
+  $('#vis').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === v)));
+  $('#vpri').hidden = v !== 'pri'; $('#vpub').hidden = v !== 'pub';
+  $('#play').textContent = v === 'pub' ? 'Открыть комнату и ждать' : 'Играть';
+};
+$('#vis').onclick = e => { const b = e.target.closest('button[data-v]'); if (b) setVis(b.dataset.v); };
+setVis('pri');
+/* метку «открытая» ставим перед переходом в игру; дальше комнату показывает в списке сама игра (profile.js) */
+function markPub() {
+  if (vis !== 'pub' || !roomCode) return Promise.resolve();
+  try { window.Track && Track.event('open_created', { game: roomPage.replace(/\.html$/, '') }); } catch (e) {}
+  const job = Profile.init().then(uid => uid && firebase.database().ref('rooms/' + roomCode + '/pub').set({ t: Date.now(), h: uid })).catch(() => {});
+  return Promise.race([job, new Promise(r => setTimeout(r, 2500))]);
+}
+
+/* Список открытых комнат */
+(function () {
+  const NM = { paint: ['🎨', 'Холст'], word: ['🔤', 'Угадай слово'], number: ['🔢', 'Угадай число'], egg: ['🥚', 'Не урони яйцо'], chips: ['🎁', 'Фишки'], tictactoe: ['❌', 'Крестики-нолики'], memory: ['🧩', 'Найди пару'], questions: ['❓', 'Вопросы друг другу'], monster: ['👾', 'Создай монстра'], seabattle: ['🚢', 'Морской бой'], truth: ['🤔', 'Правда или действие'] };
+  const TTL = 15 * 60e3, odlg = $('#odlg'), btn = $('#openr'), cnt = $('#openn');
+  let rooms = [], me = null, live = false;
+  const plural = n => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? 'человек ждёт игру' : (a >= 2 && a <= 4 && (b < 12 || b > 14)) ? 'человека ждут игру' : 'человек ждут игру'; };
+  function paint() {
+    const now = Date.now();
+    const list = rooms.filter(r => NM[r.g] && !r.j && r.h !== me && now - (r.t || 0) < TTL).sort((a, b) => b.t - a.t);
+    cnt.classList.toggle('on', !!list.length);
+    cnt.textContent = list.length ? list.length + ' ' + plural(list.length) : 'Пока никто не ждёт — откройте свою';
+    if (!odlg.open) return;
+    const box = $('#olist');
+    if (!list.length) { box.innerHTML = '<div class="onone">Сейчас открытых комнат нет 🌙<br>Создайте свою — её увидят все, кто зайдёт на сайт.</div>'; $('#oq').hidden = true; return; }
+    $('#oq').hidden = false;
+    box.innerHTML = list.map(r => { const m = Math.max(1, Math.round((now - r.t) / 60000)); return `<div class="or2"><i>${Kit0(r.a || '🙂')}</i><span class="t"><b data-noi18n>${Kit0(r.n || 'Без имени')}</b><small><em>${NM[r.g][0]}</em><span>${NM[r.g][1]}</span></small><small class="w">ждёт ${m} мин</small></span><button type="button" data-r="${Kit0(r.k)}">Играть</button></div>`; }).join('');
+  }
+  function listen() {
+    if (live) return; live = true;
+    Profile.init().then(uid => {
+      if (!uid) return; me = uid;
+      firebase.database().ref('rooms/_open').on('value', s => {
+        const v = s.val() || {}; rooms = Object.keys(v).filter(k => /^[a-z0-9]{6,20}$/.test(k)).map(k => Object.assign({ k }, v[k])); paint();
+      }, () => { cnt.textContent = 'Список пока недоступен'; });
+    }).catch(() => {});
+    setInterval(paint, 30000);
+  }
+  listen();
+  btn.onclick = () => { odlg.showModal(); paint(); try { document.activeElement.blur(); } catch (e) {} };
+  $('#ox').onclick = () => odlg.close();
+  odlg.onclick = e => {
+    const r = odlg.getBoundingClientRect(); if (e.target === odlg && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) return odlg.close();
+    const b = e.target.closest('button[data-r]'); if (!b) return;
+    const k = b.dataset.r, room = rooms.find(x => x.k === k); if (!room) return;
+    b.disabled = true; b.textContent = '…';
+    /* занимаем комнату: кто первый нажал, тот и заходит */
+    firebase.database().ref('rooms/_open/' + k).transaction(x => { if (!x) return x; if (x.j) return; x.j = me; return x; }).then(res => {
+      const v = res.snapshot.val();
+      if (res.committed && v && v.j === me) {
+        try { window.Track && Track.event('open_joined', { game: room.g }); } catch (e) {}
+        location.href = new URL(room.g + '.html#room=' + k, location.href).href;
+      } else { b.textContent = 'Занято'; Friends.toast('Эту комнату уже заняли — выберите другую'); }
+    }).catch(() => { b.disabled = false; b.textContent = 'Играть'; Friends.toast('Не получилось, проверьте интернет'); });
+  };
+  $('#omake').onclick = () => { odlg.close(); wantPub = true; Friends.toast('Выберите игру — комната будет открытой 🌍'); };
+  window.__wantPub = () => { const w = wantPub; wantPub = false; return w; };
+})();
 </script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b768ba0e7ece4c259e179c15b129aa55"}'></script><!-- End Cloudflare Web Analytics -->
 </body>

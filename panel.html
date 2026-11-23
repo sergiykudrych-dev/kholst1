@@ -89,7 +89,7 @@ button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--r
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="version.js"></script><script src="version-check.js"></script>
-<script src="profile.js"></script>
+<script src="profile.js?v=2"></script>
 <script src="ads.js"></script>
 <script>
 const $ = s => document.querySelector(s), out = $('#out');
@@ -187,7 +187,11 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
 <div class="k"><b>${fmt(sum('invite_sent', d30))}</b><span>приглашений другу</span></div>
 <div class="k"><b>${fmt(sum('friend_added', d30))}</b><span>подружились</span></div>
 <div class="k"><b>${fmt(sum('profile_saved', d30))}</b><span>сохранили профиль</span></div>
-<div class="k"><b>${fmt(sum('views', d30))}</b><span>открытий страниц</span></div></div>
+<div class="k"><b>${fmt(sum('views', d30))}</b><span>открытий страниц</span></div>
+<div class="k"><b>${fmt(sum('open_created', d30))}</b><span>открытых комнат создано</span></div>
+<div class="k"><b>${fmt(sum('open_joined', d30))}</b><span>зашли в открытую комнату</span></div>
+<div class="k"><b>${fmt(sum('lobby_invite', d30))}</b><span>нажали «Отправить приглашение»</span></div>
+<div class="k"><b>${fmt(sum('report_sent', d30))}</b><span>жалоб в открытых комнатах</span></div></div>
 <p class="note">Время на сайте, устройства и источники рекламы смотрите в Google Analytics.</p></div></details>
 <div class="card">${resetHtml}</div>`;
 

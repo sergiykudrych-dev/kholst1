@@ -192,7 +192,10 @@
         leftNote(v['p' + (3 - me)]);
         try { window.Fx && Fx.players(v['p' + (3 - me)]); } catch (e) {}
         if (me === 1 && v.p1 && v.p2 && !P._pj) { P._pj = 1; ev('partner_joined'); }
+        openSync(v);
       }, P.denied);
+      /* открытая комната: метка rooms/<room>/pub ставится на главной при создании */
+      P.pubReady = db.ref('rooms/' + room + '/pub').once('value').then(s => { P.pub = s.val() || null; openSync(P.names && { p1: P.names[1], p2: P.names[2] }); return P.pub; }).catch(() => null);
       return P.publish();
     });
     P.ready.then(() => { if (!P.has() && !P.skipped()) P.ask().then(ok => ok && P.publish()); });
@@ -200,6 +203,25 @@
     P.notify();
     return P.ready;
   };
+
+  /* Открытые комнаты: пока хозяин один в открытой комнате, она видна в списке rooms/_open (до 15 минут).
+     Зашёл второй игрок или хозяин закрыл страницу — запись удаляется. */
+  const OPEN_TTL = 15 * 60e3;
+  function openSync(v) {
+    if (P.me !== 1 || !P.pub || !v) return;
+    const ref = firebase.database().ref('rooms/_open/' + P.room);
+    const t0 = P.pub.t || 0, joined = !!(v.p2 && v.p2.uid);
+    if (joined || Date.now() - t0 > OPEN_TTL) {
+      if (P._open !== 'off') { P._open = 'off'; ref.onDisconnect().cancel().catch(() => {}); ref.remove().catch(() => {}); }
+      return;
+    }
+    if (P._open === 'on') return; P._open = 'on';
+    const page = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
+    ref.onDisconnect().remove().catch(() => {});
+    ref.set({ g: page, n: P.name() || null, a: P.avatar() || null, t: t0, h: P.uid || null }).catch(() => {});
+    clearTimeout(P._openT); P._openT = setTimeout(() => openSync(P.names && { p1: P.names[1], p2: P.names[2] }), Math.max(1000, t0 + OPEN_TTL - Date.now() + 500));
+  }
+  P.openTTL = OPEN_TTL;
 
   /* Партнёр вышел из игры: при нажатии «← Игры» ставим метку left, второму показываем плашку сверху. */
   function leftNote(o) {
