@@ -5,6 +5,8 @@
   const P = () => window.Profile || { me: 0, names: {}, has: () => false, name: () => '', avatar: () => '' };
   const rec = p => (P().names || {})[p];
   const K = window.Kit = {
+    /* число из базы: всё, что не конечное число, считаем нулём (защита от подмены значений в базе) */
+    num: v => (typeof v === 'number' && isFinite(v)) ? Math.round(v * 100) / 100 : 0,
     esc,
     nm(p) { const r = rec(p); if (p === P().me && P().has()) return P().name(); return (r && r.name) || 'Игрок ' + p; },
     av(p) { const r = rec(p), a = p === P().me ? P().avatar() : (r && r.avatar); return a || (p === 1 ? '🙂' : '😊'); },

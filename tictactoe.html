@@ -146,10 +146,10 @@ button.t{cursor:pointer}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="analytics.js?v=3"></script>
-<script src="profile.js?v=2"></script>
+<script src="profile.js?v=3"></script>
 <script src="fx.js?v=4"></script>
 <script src="chat.js?v=4"></script>
-<script src="gamekit.js?v=5"></script>
+<script src="gamekit.js?v=6"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -189,7 +189,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     return null;
   }
   function render() {
-    const p = S.phase, sc = `Счёт: ${pn(1)} — ${S.w1 || 0}, ${pn(2)} — ${S.w2 || 0}`;
+    const p = S.phase, sc = `Счёт: ${pn(1)} — ${Kit.num(S.w1)}, ${pn(2)} — ${Kit.num(S.w2)}`;
     if (p === 'mode') {
       const X = (x, y, c) => `<path d="M${x - 7} ${y - 7}l14 14M${x + 7} ${y - 7}l-14 14" stroke="${c || '#C2185B'}" stroke-width="5" stroke-linecap="round"/>`, O = (x, y) => `<circle cx="${x}" cy="${y}" r="8" fill="none" stroke="#1DA597" stroke-width="5"/>`;
       const m3 = `<svg viewBox="0 0 120 120"><path d="M40 8v104M80 8v104M8 40h104M8 80h104" stroke="#fff" stroke-width="5" stroke-linecap="round"/>${X(20, 20)}${O(60, 20)}${O(20, 60)}${X(60, 60)}${X(100, 100)}${O(100, 20)}<path d="M12 12L108 108" stroke="#8E0F45" stroke-width="4" stroke-linecap="round" opacity=".55"/></svg>`;

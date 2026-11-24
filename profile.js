@@ -262,9 +262,19 @@
   };
 
   /* Подписка на состояние игры — только после входа и записи имени в комнату. */
-  P.on = (ref, cb) => P.ready.then(() => ref.on('value', s => {
+  /* Состояние игры приходит из базы, а её может переписать любой участник комнаты.
+     Поэтому в строках меняем символы разметки на похожие безопасные (< → ‹, " → ”, ' → ’) — подставить в страницу чужой код не получится. */
+  const SAFE = { '<': '‹', '>': '›', '"': '”', "'": '’', '`': '‘' };
+  const cleanState = v => typeof v === 'string' ? v.replace(/[<>"'`]/g, c => SAFE[c])
+    : Array.isArray(v) ? v.map(cleanState)
+    : v && typeof v === 'object' ? Object.keys(v).reduce((o, k) => { if (k !== '__proto__' && k !== 'constructor' && k !== 'prototype') o[cleanState(k)] = cleanState(v[k]); return o; }, {})
+    : v;
+  P.cleanState = cleanState;
+  P.on = (ref, cb) => P.ready.then(() => ref.on('value', s0 => {
+    const v = cleanState(s0.val());
+    const s = { val: () => v, exists: () => v !== null && v !== undefined, key: s0.key, ref: s0.ref };
     P.gotData = true; cb(s);
-    const v = s.val(); let r = null;
+    let r = null;
     if (v && P.tracker) { try { r = P.tracker.calc(v); } catch (e) {} }
     try { window.Fx && Fx.state(v, r); } catch (e) {}
     if (v && P.tracker) { if (r) { ev('game_complete', { game: P.tracker.game, result: r, host: P.me === 1 }); P.record(P.tracker.game, v, r); } }

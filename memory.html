@@ -161,10 +161,10 @@ button.cell:not(:disabled):active .c{transform:scale(.88)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="analytics.js?v=3"></script>
-<script src="profile.js?v=2"></script>
+<script src="profile.js?v=3"></script>
 <script src="fx.js?v=4"></script>
 <script src="chat.js?v=4"></script>
-<script src="gamekit.js?v=5"></script>
+<script src="gamekit.js?v=6"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -199,11 +199,11 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     const cards = S.deck.map((e, i) => {
       const mo = m['c' + i], was = prevFace ? prevFace[i] : face[i];
       const cls = ['mc', face[i] ? 'flip' : '', mo ? 'own' + mo : '', face[i] && !was ? 'anim' : '', !face[i] && was ? 'anim2' : '', mo && !was && !up.length ? 'pop' : ''].join(' ');
-      return `<button class="${cls}" data-act="pick" data-i="${i}" ${myTurn && !face[i] ? '' : 'disabled'} aria-label="Карточка ${i + 1}"><span class="in"><span class="bk">♥&#xFE0E;</span><span class="fr">${face[i] || was ? e : ''}</span></span></button>`;
+      return `<button class="${cls}" data-act="pick" data-i="${i}" ${myTurn && !face[i] ? '' : 'disabled'} aria-label="Карточка ${i + 1}"><span class="in"><span class="bk">♥&#xFE0E;</span><span class="fr">${face[i] || was ? Kit.esc(e) : ''}</span></span></button>`;
     }).join('');
     prevFace = face;
     const st = over ? 'Все пары найдены!' : S.turn === me ? (up.length === 2 ? 'Не совпало…' : 'Ваш ход') : (up.length === 2 ? 'Не совпало…' : 'Ход партнёра…');
-    const chip = p => `<div class="sc ${!over && S.turn === p ? 'act' : ''}"><i>${Kit.esc(Kit.av(p))}</i><span class="nm">${p === me ? 'Вы' : Kit.esc(Kit.nm(p))}</span><b>${S['s' + p] || 0}</b></div>`;
+    const chip = p => `<div class="sc ${!over && S.turn === p ? 'act' : ''}"><i>${Kit.esc(Kit.av(p))}</i><span class="nm">${p === me ? 'Вы' : Kit.esc(Kit.nm(p))}</span><b>${Kit.num(S['s' + p])}</b></div>`;
     let ov = '';
     if (over) {
       const a = S.s1 || 0, b = S.s2 || 0, w = a === b ? 0 : a > b ? 1 : 2;

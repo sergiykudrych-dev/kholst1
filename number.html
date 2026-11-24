@@ -103,10 +103,10 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="analytics.js?v=3"></script>
-<script src="profile.js?v=2"></script>
+<script src="profile.js?v=3"></script>
 <script src="fx.js?v=4"></script>
 <script src="chat.js?v=4"></script>
-<script src="gamekit.js?v=5"></script>
+<script src="gamekit.js?v=6"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -157,7 +157,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
         const w = S.winner, cnt = w === 0 ? (S.t1 || []).length : (S['t' + w] || []).length;
         const title = w === 0 ? 'Ничья!' : w === me ? 'Победа!' : 'Не в этот раз';
         const sub = w === 0 ? `Оба угадали за ${cnt} ${pl(cnt)}` : w === me ? `Вы угадали за ${cnt} ${pl(cnt)}` : `${typeof Kit !== 'undefined' ? Kit.esc(Kit.nm(other)) : pn(other)} угадал(а) за ${cnt} ${pl(cnt)}`;
-        const nb = q => `<div class="nb"><span>${typeof Kit !== 'undefined' ? Kit.esc(Kit.av(q)) : ''}</span><em>${typeof Kit !== 'undefined' ? Kit.esc(Kit.nm(q)) : pn(q)}${q === me ? ' (вы)' : ''}</em><b>${S['n' + q]}</b></div>`;
+        const nb = q => `<div class="nb"><span>${typeof Kit !== 'undefined' ? Kit.esc(Kit.av(q)) : ''}</span><em>${typeof Kit !== 'undefined' ? Kit.esc(Kit.nm(q)) : pn(q)}${q === me ? ' (вы)' : ''}</em><b>${Kit.num(S['n' + q])}</b></div>`;
         over = `<div class="over"><div class="card"><h2>${title}</h2><p class="hint">${sub}</p>
           <div class="nbs">${nb(1)}${nb(2)}</div><button class="again" data-act="again">Играть ещё</button><a class="home" href="index.html">На главную</a></div></div>`;
       }

@@ -120,10 +120,10 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="analytics.js?v=3"></script>
-<script src="profile.js?v=2"></script>
+<script src="profile.js?v=3"></script>
 <script src="fx.js?v=4"></script>
 <script src="chat.js?v=4"></script>
-<script src="gamekit.js?v=5"></script>
+<script src="gamekit.js?v=6"></script>
 <script src="ads.js" data-mode="game"></script>
 <script>
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -187,7 +187,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
   function render() {
     if (!S) return;
     if (S.phase === 'over') {
-      const m = S.m || 0, r = m / N;
+      const m = Kit.num(S.m), r = m / N;
       const txt = r >= .75 ? 'Вы почти читаете мысли друг друга ♥' : r >= .5 ? 'Вы очень похожи — и это здорово' : r >= .3 ? 'Вы разные, и в этом интерес' : 'Противоположности притягиваются!';
       view.innerHTML = `<div class="mid"><div class="k-bigheart">♥&#xFE0E;</div><h1 class="k-ttl">Готово</h1></div>
         <div class="over"><div class="card"><div class="k-bigheart">♥&#xFE0E;</div><h2 class="k-h2">Вы совпали в ${m} из ${N}</h2><p class="hint" style="margin-top:8px">${txt}</p><button class="again start" data-act="again">Играть ещё</button><a class="home" href="index.html">На главную</a></div></div>`;
@@ -206,7 +206,7 @@ if (!window.firebase || !/^https:\/\//.test(cfg.databaseURL || '')) {
     if (!mine) status = `<div class="k-pill sm">${theirs ? esc(Kit.nm(other)) + ' уже выбрал(а)' : 'Ответы откроются, когда выберете оба'}</div>`;
     else if (!both) status = `<div class="k-pill"><span>Ждём ${esc(Kit.nm(other))}<span class="k-d3"><span>.</span><span>.</span><span>.</span></span></span></div>`;
     else status = `<div class="k-pill ${same ? 'ok' : 'no'} k-pop" id="res">${same ? 'Совпали! 💗' : 'Мнения разошлись 😅'}</div><p class="hint">${same ? 'Расскажите друг другу, почему' : 'Расскажите друг другу, почему вы так выбрали'}</p>`;
-    view.innerHTML = `<div class="k-top"><div class="k-dots">${dots}</div><div class="k-pill sm">Вопрос ${S.i + 1} из ${N} · совпали: ${S.m || 0} 💗</div></div>
+    view.innerHTML = `<div class="k-top"><div class="k-dots">${dots}</div><div class="k-pill sm">Вопрос ${S.i + 1} из ${N} · совпали: ${Kit.num(S.m)} 💗</div></div>
       <div class="mid k-mid"><p class="k-q">Что вам ближе?</p><div class="k-opts">${opt(0)}${opt(1)}</div><div class="k-st">${status}</div></div>` +
       `<button class="start${both ? '' : ' ghost'}" data-act="next"${both ? '' : ' tabindex="-1" aria-hidden="true" disabled'}>${last ? 'Результат' : 'Дальше'}</button>`;
     if (same && burstKey !== S.i) { burstKey = S.i; const el = document.getElementById('res'); if (el) { const r = el.getBoundingClientRect(); Kit.burst(r.left + r.width / 2, r.top + r.height / 2); } }
