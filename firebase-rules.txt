@@ -12,14 +12,20 @@
 (Authentication → Sign-in method → Anonymous).
 
 
-ВАРИАНТ 1 (рекомендую) — «только со входом»
+ВАРИАНТ 1 (рекомендую) — «только со входом» (обновлено 24.11.2026: защита комнат, чата, жалоб и счётчиков)
 --------------------------------------------
 {
   "rules": {
     "users": {
       "$uid": {
         ".read": "auth != null",
-        ".write": "auth != null && auth.uid === $uid"
+        ".write": "auth != null && auth.uid === $uid",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "avatar": {
+          ".validate": "newData.isString() && newData.val().length <= 16"
+        }
       }
     },
     "codes": {
@@ -32,7 +38,13 @@
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$fid": {
-          ".write": "auth != null && (auth.uid === $uid || (auth.uid === $fid && (!newData.exists() || newData.child('status').val() === 'in' || (newData.child('status').val() === 'ok' && data.child('status').val() === 'out'))))"
+          ".write": "auth != null && (auth.uid === $uid || (auth.uid === $fid && (!newData.exists() || (newData.child('status').val() === 'in' && (!data.exists() || data.child('status').val() === 'in')) || (newData.child('status').val() === 'ok' && data.child('status').val() === 'out'))))",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "avatar": {
+            ".validate": "newData.isString() && newData.val().length <= 16"
+          }
         }
       }
     },
@@ -65,8 +77,9 @@
       "daily": {
         "$day": {
           "$key": {
-            ".write": "auth != null && newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
-          }
+            ".write": "auth != null && $key.matches(/^[a-z0-9_-]{1,40}$/) && newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+          },
+          ".validate": "$day.matches(/^20[0-9][0-9]-[01][0-9]-[0-3][0-9]$/)"
         }
       },
       "total": {
@@ -99,9 +112,51 @@
       ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true"
     },
     "rooms": {
+      "_open": {
+        ".read": "auth != null",
+        "$k": {
+          ".write": "auth != null && (newData.exists() ? newData.child('h').val() === (data.exists() ? data.child('h').val() : auth.uid) && (!data.child('j').exists() || newData.child('j').val() === data.child('j').val()) : (data.child('h').val() === auth.uid || data.child('j').exists()))",
+          ".validate": "$k.matches(/^[a-z0-9]{6,20}$/) && newData.child('g').isString() && newData.child('g').val().length <= 20 && newData.child('t').isNumber()",
+          "n": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "a": {
+            ".validate": "newData.isString() && newData.val().length <= 16"
+          },
+          "j": {
+            ".validate": "newData.val() === auth.uid || newData.val() === data.val()"
+          }
+        }
+      },
+      "_reports": {
+        ".read": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
+        "$id": {
+          ".write": "auth != null && !data.exists() && newData.child('by').val() === auth.uid"
+        }
+      },
       "$room": {
         ".read": "auth != null",
-        ".write": "auth != null"
+        ".write": "auth != null",
+        ".validate": "$room.matches(/^[A-Za-z0-9_-]{4,64}$/)",
+        "players": {
+          "$p": {
+            ".validate": "$p === 'p1' || $p === 'p2'",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "avatar": {
+              ".validate": "newData.isString() && newData.val().length <= 16"
+            }
+          }
+        },
+        "chat": {
+          "$id": {
+            ".validate": "newData.hasChildren(['f', 't']) && (newData.child('f').val() === 1 || newData.child('f').val() === 2) && newData.child('t').isString() && newData.child('t').val().length <= 300",
+            "code": {
+              ".validate": "newData.isString() && newData.val().length <= 10"
+            }
+          }
+        }
       }
     }
   }

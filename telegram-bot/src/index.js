@@ -23,21 +23,51 @@ async function checkInitData(initData, botToken) {
   try { const u = JSON.parse(p.get('user')); return u && u.id ? u : null; } catch (e) { return null; }
 }
 
-/* Custom token для Firebase: JWT, подписанный ключом сервисного аккаунта. */
-async function firebaseToken(uid, env) {
+/* Подпись JWT ключом сервисного аккаунта (RS256). */
+async function signJwt(payload, env) {
   const raw = String(env.FB_PRIVATE_KEY || ''), m = raw.match(/-----BEGIN[^-]*-----([\s\S]*?)-----END/);
   const pem = (m ? m[1] : raw).replace(/\\n/g, '').replace(/[^A-Za-z0-9+/=]/g, '');
   const der = Uint8Array.from(atob(pem), c => c.charCodeAt(0));
   const key = await crypto.subtle.importKey('pkcs8', der, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
-  const now = Math.floor(Date.now() / 1000);
-  const head = b64uStr(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-  const body = b64uStr(JSON.stringify({
-    iss: env.FB_CLIENT_EMAIL, sub: env.FB_CLIENT_EMAIL, aud: 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
-    iat: now, exp: now + 3600, uid, claims: { tg: true }
-  }));
+  const head = b64uStr(JSON.stringify({ alg: 'RS256', typ: 'JWT' })), body = b64uStr(JSON.stringify(payload));
   const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, enc.encode(head + '.' + body));
   return head + '.' + body + '.' + b64u(sig);
 }
+
+/* Custom token для Firebase: вход на сайт под uid tg_<id>. */
+async function firebaseToken(uid, env) {
+  const now = Math.floor(Date.now() / 1000);
+  return signJwt({
+    iss: env.FB_CLIENT_EMAIL, sub: env.FB_CLIENT_EMAIL, aud: 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+    iat: now, exp: now + 3600, uid, claims: { tg: true }
+  }, env);
+}
+
+/* Служебный доступ к базе (от имени сервисного аккаунта): чтобы проверить дружбу со стороны получателя
+   и вести счётчик сообщений — пользователи эти данные подделать не могут. */
+let adminCache = null;
+async function adminToken(env) {
+  if (adminCache && adminCache.exp > Date.now() + 60e3) return adminCache.token;
+  const now = Math.floor(Date.now() / 1000);
+  const assertion = await signJwt({
+    iss: env.FB_CLIENT_EMAIL, aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600,
+    scope: 'https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email'
+  }, env);
+  const r = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=' + encodeURIComponent('urn:ietf:params:oauth:grant-type:jwt-bearer') + '&assertion=' + assertion });
+  const j = r.ok ? await r.json() : null;
+  if (!j || !j.access_token) throw new Error('admin token ' + r.status);
+  adminCache = { token: j.access_token, exp: Date.now() + (j.expires_in || 3600) * 1000 };
+  return adminCache.token;
+}
+const adminDb = async (env, path, method = 'GET', body) => {
+  const t = await adminToken(env);
+  const r = await fetch(DB + '/' + path + '.json?access_token=' + encodeURIComponent(t), method === 'GET' ? {} : { method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error('db ' + r.status);
+  return r.json();
+};
+/* Сколько ждать между сообщениями одной паре и сколько всего можно отправить за час */
+const GAP = { invite: 20e3, friend: 864e5, accepted: 864e5 }, PER_HOUR = 20;
 
 const WELCOME = 'Привет! Здесь игры для двоих онлайн 💗\nПравда или действие, Морской бой, Холст, Тест на совпадение и другие.\nНажмите «Играть» и отправьте код партнёру.';
 
@@ -86,11 +116,25 @@ export default {
         uid = lk.ok ? ((await lk.json()).users || [])[0].localId : null;
       } catch (e) {}
       if (!uid) return out(403, 'auth');
-      const get = p => fetch(DB + '/' + p + '.json?auth=' + encodeURIComponent(idToken)).then(r => r.ok ? r.json() : null).catch(() => null);
-      const st = await get('friends/' + uid + '/' + to + '/status');
-      if (type === 'friend' ? !st : st !== 'ok') return out(403, 'not friends');
-      const me = (await get('users/' + uid)) || {};
-      const name = String(me.name || 'Друг').replace(/[\u0000-\u001f<>]/g, '').slice(0, 20), who = ((me.avatar ? me.avatar + ' ' : '') + name).trim();
+      if (uid === to) return out(400, 'self');
+      let me = {};
+      try {
+        /* дружбу проверяем по списку ПОЛУЧАТЕЛЯ: его может менять только он сам (или запрос «хочу дружить») */
+        const st = await adminDb(env, 'friends/' + to + '/' + uid + '/status');
+        if (type === 'friend' ? st !== 'in' : st !== 'ok') return out(403, 'not friends');
+        /* не чаще одного сообщения паре за GAP и не больше PER_HOUR сообщений от одного человека в час */
+        const log = (await adminDb(env, 'tgnotify/' + uid)) || {}, now = Date.now(), hour = Math.floor(now / 3600e3);
+        const last = (log.pairs || {})[to + '_' + type] || 0;
+        if (now - last < GAP[type]) return out(429, 'too often');
+        const n = log.h === hour ? (log.n || 0) : 0;
+        if (n >= PER_HOUR) return out(429, 'too many');
+        await adminDb(env, 'tgnotify/' + uid, 'PATCH', { h: hour, n: n + 1, ['pairs/' + to + '_' + type]: now });
+        me = (await adminDb(env, 'users/' + uid)) || {};
+      } catch (e) { return out(503, 'check'); }
+      const name = String(me.name || 'Друг').replace(/[\u0000-\u001f<>]/g, '').slice(0, 20);
+      const av0 = String(me.avatar || '').replace(/[\u0000-\u001f<>\s]/g, '');
+      const av = av0.length <= 16 && !/[\p{L}\p{N}]/u.test(av0) ? av0 : '';   /* аватарка — это эмодзи; буквы и длинный текст не пропускаем */
+      const who = ((av ? av + ' ' : '') + name).trim();
       let text, btn, link = 'https://twosome.games/';
       if (type === 'invite') {
         if (!/^[a-z0-9-]{2,30}$/.test(String(page || '')) || !/^[\w-]{4,64}$/.test(String(room || ''))) return out(400, 'args');
