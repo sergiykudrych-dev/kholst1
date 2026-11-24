@@ -71,14 +71,10 @@ button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--r
 .msg{padding:18px;border-radius:20px;background:var(--card);text-align:center}
 .msg p{margin-top:6px;color:var(--mute);font-size:14px}
 
-/* Полоса под часами на iPhone (только когда сайт открыт с иконки «Домой»): скрывает текст, уезжающий под строку состояния */
-.sbar{display:none}
-@media(display-mode:standalone){html{background-color:#FFEAF1!important}.sbar{display:block;position:fixed;top:0;left:0;right:0;height:56px;z-index:40;background:#FFEAF1;pointer-events:none}main{padding-top:max(20px,64px)!important}}
 </style>
-<link rel="stylesheet" href="bg.css?v=3">
+<link rel="stylesheet" href="bg.css?v=4">
 </head>
 <body>
-<div class="sbar" aria-hidden="true"></div>
 <main>
 <a class="back" href="index.html">← На сайт</a>
 <h1>Панель владельца</h1>
