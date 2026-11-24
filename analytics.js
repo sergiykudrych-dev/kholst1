@@ -41,6 +41,27 @@
     } catch (e) {}
   }
 
+  /* Журнал действий для владельца: ник, время, что сделал. Ведётся для всех посетителей, включая Telegram (раскрыто в политике конфиденциальности); свои действия владельца не пишутся. */
+  const ACT = new Set(['page_view', 'game_open', 'room_created', 'partner_joined', 'invite_sent', 'lobby_invite', 'open_created', 'open_joined', 'code_shared', 'report_sent', 'friend_request', 'friend_added', 'profile_saved', 'name_set', 'chat_sent', 'game_complete', 'promo_click']);
+  let actN = 0, actLast = '', actAt = 0;
+  async function act(name, params) {
+    try {
+      if (!ACT.has(name) || actN >= 150) return;
+      try { if (localStorage.getItem('kh_me') === '1' || localStorage.getItem('kh_owner') === '1') return; } catch (e) {}   /* свои действия не пишем */
+      const p = params || {}, g = String(p.game || (name === 'page_view' ? pageName() : '') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 20);
+      const key = name + '|' + g, now = Date.now();
+      if (key === actLast && now - actAt < 2000) return;   /* не дублируем одно и то же подряд */
+      actLast = key; actAt = now;
+      if (!(window.Profile && window.firebase && firebase.database && Profile.init)) return;
+      const uid = await Profile.init(); if (!uid) return;
+      let n = ''; try { n = String((Profile.name && Profile.name()) || ''); } catch (e) {}
+      const rec = { u: uid, n: (n || 'без имени').slice(0, 40), a: name, t: firebase.database.ServerValue.TIMESTAMP };
+      if (g) rec.g = g;
+      actN++;
+      firebase.database().ref('activity/' + new Date().toISOString().slice(0, 10)).push(rec).catch(() => {});
+    } catch (e) {}
+  }
+
   function load() {
     if (loaded || !ID || status() !== 'granted') return;
     loaded = true;
@@ -60,6 +81,7 @@
     enabled: !!ID,
     status,
     event(name, params) {
+      act(name, Object.assign({ screen: pageName() }, params || {}));   /* журнал владельца ведётся всегда, независимо от согласия на Google Analytics */
       if (!ID || status() === 'denied') return;
       const p = Object.assign({ screen: pageName() }, params || {});
       if (loaded) { gtag('event', name, p); own(name, p); } else if (queue.length < 50) queue.push([name, p]);
@@ -83,12 +105,13 @@
 #kh-consent button.y{background:#C2185B;color:#fff}`;
     document.head.appendChild(css);
     const d = document.createElement('div'); d.id = 'kh-consent';
-    d.innerHTML = `<div class="kc" role="dialog" aria-label="Согласие на статистику"><p>Мы считаем анонимную статистику посещений (Google Analytics), чтобы улучшать игры. Имена, почты и коды комнат не передаются. <a href="privacy.html">Подробнее</a></p><div class="kb"><button type="button" data-v="denied">Отказаться</button><button type="button" class="y" data-v="granted">Принять</button></div></div>`;
+    d.innerHTML = `<div class="kc" role="dialog" aria-label="Согласие на статистику"><p>Мы считаем анонимную статистику посещений (Google Analytics), чтобы улучшать игры. Имена, почты и коды комнат в Google не передаются. Отдельно владелец сайта ведёт закрытый журнал действий (ник, время, что сделано) — он ведётся всегда, см. <a href="privacy.html">политику</a>.</p><div class="kb"><button type="button" data-v="denied">Отказаться</button><button type="button" class="y" data-v="granted">Принять</button></div></div>`;
     d.onclick = e => { const b = e.target.closest('button'); if (b) T.set(b.dataset.v); };
     document.body.appendChild(d);
   }
 
   const start = () => {
+    setTimeout(() => { if (!GAMES.includes(pageName())) act('page_view'); }, 1500);   /* заход на страницу — в журнал владельца всегда (ник к этому моменту уже известен) */
     if (!ID) return;
     if (status() === 'granted') load(); else if (status() === null && pageName() !== 'privacy') {
       const show = () => { if (document.querySelector('.pf-ov')) return setTimeout(show, 700); banner(); };   /* не поверх окна «Как вас зовут?» */

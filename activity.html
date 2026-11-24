@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFEAF1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<title>Журнал действий — Во что сыграем?</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>[hidden]{display:none!important}html{background:#FFE9F0}
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#7A4260;--card:rgba(255,255,255,.88)}
+*{box-sizing:border-box;margin:0}
+html,body{overflow-x:hidden}body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed}
+main{max-width:760px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom))}
+a.back{display:inline-block;margin-bottom:8px;color:var(--deep);font-weight:700;text-decoration:none;font-size:14px}
+h1{font-size:28px;font-weight:800;color:var(--deep);margin-bottom:2px}
+.sub{color:var(--mute);font-size:14px}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#14532D}
+.live i{width:9px;height:9px;border-radius:50%;background:#22a45d;box-shadow:0 0 0 0 rgba(34,164,93,.6);animation:p 1.8s infinite}
+@keyframes p{70%{box-shadow:0 0 0 8px rgba(34,164,93,0)}100%{box-shadow:0 0 0 0 rgba(34,164,93,0)}}
+.bar{display:grid;gap:8px;margin-bottom:12px}
+.sg{display:flex;gap:2px;padding:2px;border-radius:12px;background:#F7D3E0}
+.sg button{flex:1;min-height:44px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:var(--deep);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.sg button.on{background:var(--rose);color:#fff;font-weight:800}
+.srch{width:100%;min-height:46px;padding:0 14px;border:1.5px solid #E8B7CB;border-radius:12px;background:#fff;color:var(--ink);font:500 16px Manrope,system-ui,sans-serif}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:36px;padding:0 12px;border:1.5px solid var(--rose);border-radius:999px;background:#fff;color:var(--rose);font:700 13px Manrope,system-ui,sans-serif;cursor:pointer}
+.chip.on{background:var(--rose);color:#fff}
+.cnt{margin:6px 2px 8px;font-size:13px;color:var(--mute)}
+.log{display:grid;gap:6px}
+.dayh{margin:12px 2px 2px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--deep)}
+.row{display:grid;grid-template-columns:64px minmax(0,1fr);gap:4px 10px;align-items:baseline;padding:10px 14px;border-radius:14px;background:var(--card)}
+.row .tm{font-size:13px;font-weight:800;color:var(--deep);font-variant-numeric:tabular-nums}
+.row .tx{min-width:0;overflow-wrap:anywhere}
+.row .nk{font-weight:800}
+.row .ac{color:var(--ink)}
+.row .gm{color:var(--mute);font-size:14px}
+.row.new{animation:f 2.4s ease-out}
+@keyframes f{0%{background:#FFD0E1}100%{background:var(--card)}}
+.msg{padding:18px;border-radius:20px;background:var(--card);text-align:center}
+.msg p{margin-top:6px;color:var(--mute);font-size:14px}
+button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--rose);color:#fff;font:800 17px Manrope,system-ui,sans-serif;cursor:pointer;margin-top:10px}
+.more,.clr{width:100%;min-height:46px;margin-top:12px;border:1.5px solid var(--rose);border-radius:12px;background:#fff;color:var(--rose);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.clr{border-color:#b00020;color:#b00020}
+.note{margin-top:18px;font-size:12px;color:var(--mute)}
+@media(min-width:560px){.row{grid-template-columns:72px minmax(0,1fr)}}
+</style>
+<link rel="stylesheet" href="bg.css?v=1">
+</head>
+<body>
+<main>
+<a class="back" href="panel.html">← В панель</a>
+<h1>Журнал действий</h1>
+<div class="hd"><p class="sub" id="sub">Кто что делает на сайте</p><span class="live" id="live" hidden><i></i>в реальном времени</span></div>
+<div id="out"><div class="msg">Загружаем…</div></div>
+<p class="note" id="note" hidden>Записываются все игроки (и в Telegram), независимо от согласия на статистику. Ваши собственные действия на устройствах, где открывалась панель, не пишутся. Журнал показывает ключевые действия (заход, открытие игры, создание комнаты, приглашения, друзья, чат, жалобы), а не каждый ход в игре.</p>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="profile.js?v=3"></script>
+<script>
+const $ = s => document.querySelector(s), out = $('#out');
+const GAMES = { paint: 'Холст', word: 'Угадай слово', number: 'Угадай число', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', tictactoe: 'Крестики-нолики', memory: 'Найди пару', questions: 'Вопросы друг другу', monster: 'Создай монстра', seabattle: 'Морской бой', truth: 'Правда или действие', index: 'главную', privacy: 'политику', panel: 'панель' };
+const gname = g => GAMES[g] || g || '';
+const ACTS = {
+  page_view: ['зашёл(ла) на сайт', 'visit'],
+  game_open: ['открыл(а) игру', 'game'],
+  room_created: ['создал(а) комнату', 'room'],
+  partner_joined: ['партнёр зашёл в комнату', 'room'],
+  invite_sent: ['отправил(а) приглашение', 'invite'],
+  lobby_invite: ['позвал(а) партнёра', 'invite'],
+  open_created: ['открыл(а) публичную комнату', 'room'],
+  open_joined: ['зашёл(ла) в публичную комнату', 'room'],
+  code_shared: ['поделился(лась) кодом', 'invite'],
+  report_sent: ['отправил(а) жалобу', 'report'],
+  friend_request: ['отправил(а) запрос в друзья', 'friend'],
+  friend_added: ['добавил(а) друга', 'friend'],
+  profile_saved: ['сохранил(а) профиль', 'profile'],
+  name_set: ['выбрал(а) имя', 'profile'],
+  chat_sent: ['написал(а) в чате', 'chat'],
+  game_complete: ['закончили партию', 'game'],
+  promo_click: ['нажал(а) на рекламу', 'promo']
+};
+const GROUPS = { all: 'Все', visit: 'Заходы', game: 'Игры', room: 'Комнаты', invite: 'Приглашения', friend: 'Друзья', chat: 'Чат', report: 'Жалобы', promo: 'Реклама', profile: 'Профиль' };
+const ymd = d => d.toISOString().slice(0, 10);
+const dayList = n => Array.from({ length: n }, (_, i) => ymd(new Date(Date.now() - i * 864e5)));
+const DOW = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+const MON = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+const hms = t => new Date(t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+const dayTitle = t => { const d = new Date(t), now = new Date(), y = new Date(Date.now() - 864e5); const same = (a, b) => a.toDateString() === b.toDateString(); return (same(d, now) ? 'Сегодня' : same(d, y) ? 'Вчера' : DOW[d.getDay()]) + ', ' + d.getDate() + ' ' + MON[d.getMonth()]; };
+
+let EV = new Map(), range = 1, group = 'all', q = '', db, live = [], loadedDays = 0;
+function login(msg) {
+  out.innerHTML = `<div class="msg"><b>${msg}</b><p>Войдите через Google той же почтой, которая указана в правилах базы.</p><button class="go" id="g">Войти через Google</button><p id="err"></p></div>`;
+  $('#g').onclick = async () => { try { await Profile.linkGoogle(); location.reload(); } catch (e) { $('#err').textContent = Profile.authError(e); } };
+}
+function build() {
+  out.innerHTML = `<div class="bar"><div class="sg" id="rg"><button data-r="1" class="on">Сегодня</button><button data-r="3">3 дня</button><button data-r="7">7 дней</button><button data-r="30">30 дней</button></div>
+<input class="srch" id="q" type="search" placeholder="Поиск по нику или игре" autocomplete="off" aria-label="Поиск по нику или игре">
+<div class="chips" id="gr"></div></div><div class="cnt" id="cnt"></div><div class="log" id="log"></div><button type="button" class="clr" id="clr">Удалить записи старше 30 дней</button>`;
+  $('#gr').innerHTML = Object.keys(GROUPS).map(k => `<button type="button" class="chip${k === group ? ' on' : ''}" data-g="${k}">${GROUPS[k]}</button>`).join('');
+  $('#rg').onclick = e => { const b = e.target.closest('button'); if (!b) return; range = +b.dataset.r; [...$('#rg').children].forEach(x => x.classList.toggle('on', x === b)); fetchDays().then(draw); };
+  $('#gr').onclick = e => { const b = e.target.closest('button'); if (!b) return; group = b.dataset.g; [...$('#gr').children].forEach(x => x.classList.toggle('on', x === b)); draw(); };
+  $('#q').oninput = e => { q = e.target.value.trim().toLowerCase(); draw(); };
+  let sure = false; $('#clr').onclick = async () => {
+    const b = $('#clr'); if (!sure) { sure = true; b.textContent = 'Точно удалить?'; setTimeout(() => { sure = false; b.textContent = 'Удалить записи старше 30 дней'; }, 4000); return; }
+    sure = false; b.disabled = true; b.textContent = 'Удаляем…';
+    try {
+      const old = dayList(180).slice(30); let n = 0;
+      const jobs = old.map(d => db.ref('activity/' + d).once('value').then(sn => { if (sn.exists()) { n++; return db.ref('activity/' + d).remove(); } }));
+      await Promise.all(jobs); b.textContent = n ? 'Удалено дней: ' + n : 'Старых записей нет';
+    } catch (e) { b.textContent = 'Не получилось удалить'; }
+    setTimeout(() => { b.disabled = false; b.textContent = 'Удалить записи старше 30 дней'; }, 2500);
+  };
+}
+function addRec(day, id, r, fresh) {
+  if (!r || typeof r.t !== 'number' || typeof r.a !== 'string') return;
+  const k = day + '/' + id; if (EV.has(k)) return;
+  EV.set(k, { k, t: r.t, n: String(r.n || 'без имени').slice(0, 40), a: r.a.slice(0, 30), g: String(r.g || '').slice(0, 20), u: String(r.u || ''), fresh: !!fresh });
+}
+async function fetchDays() {
+  EV = new Map(); live.forEach(f => f()); live = [];
+  const days = dayList(range); loadedDays = range;
+  await Promise.all(days.map(async d => { const s = await db.ref('activity/' + d).orderByChild('t').limitToLast(500).once('value'); s.forEach(c => { addRec(d, c.key, c.val()); }); }));
+  const today = days[0], ref = db.ref('activity/' + today).orderByChild('t').limitToLast(1);
+  const h = ref.on('child_added', c => { const had = EV.size; addRec(today, c.key, c.val(), true); if (EV.size !== had) draw(); });
+  live.push(() => ref.off('child_added', h));
+}
+function draw() {
+  const list = [...EV.values()].filter(e => {
+    const info = ACTS[e.a]; if (!info) return false;
+    if (group !== 'all' && info[1] !== group) return false;
+    if (q && !(e.n.toLowerCase().includes(q) || gname(e.g).toLowerCase().includes(q) || info[0].toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((a, b) => b.t - a.t);
+  const users = new Set(list.map(e => e.u || e.n)).size;
+  $('#cnt').textContent = list.length ? `Действий: ${list.length} · людей: ${users}` : '';
+  const L = $('#log'); L.textContent = '';
+  if (!list.length) { const m = document.createElement('div'); m.className = 'msg'; m.textContent = EV.size ? 'Ничего не найдено по фильтру.' : 'Пока нет действий за этот период.'; L.appendChild(m); return; }
+  let cur = ''; const shown = list.slice(0, 400);
+  shown.forEach(e => {
+    const dt = dayTitle(e.t); if (dt !== cur) { cur = dt; const h = document.createElement('div'); h.className = 'dayh'; h.textContent = dt; L.appendChild(h); }
+    const info = ACTS[e.a], r = document.createElement('div'); r.className = 'row' + (e.fresh ? ' new' : '');
+    const tm = document.createElement('span'); tm.className = 'tm'; tm.textContent = hms(e.t);
+    const tx = document.createElement('span'); tx.className = 'tx';
+    const nk = document.createElement('span'); nk.className = 'nk'; nk.textContent = e.n;
+    const ac = document.createElement('span'); ac.className = 'ac'; ac.textContent = ' ' + info[0];
+    tx.append(nk, ac);
+    if (e.g && gname(e.g) && !(e.a === 'page_view' && ['index', 'privacy', 'panel'].includes(e.g))) { const gm = document.createElement('span'); gm.className = 'gm'; gm.textContent = ' — ' + gname(e.g); tx.appendChild(gm); }
+    r.append(tm, tx); L.appendChild(r);
+  });
+  if (list.length > shown.length) { const m = document.createElement('div'); m.className = 'cnt'; m.textContent = 'Показаны последние 400 из ' + list.length + '. Сузьте период или поиск.'; L.appendChild(m); }
+}
+(async () => {
+  const uid = await Profile.init();
+  if (!uid) { out.innerHTML = '<div class="msg"><b>Нет связи с базой</b><p>Проверьте интернет и настройки Firebase.</p></div>'; return; }
+  if (!Profile.isLinked()) return login('Нужен вход');
+  db = firebase.database();
+  try {
+    await firebase.auth().currentUser.getIdToken(true);
+    build(); await fetchDays(); draw();
+    $('#live').hidden = false; $('#note').hidden = false;
+    try { localStorage.setItem('kh_owner', '1'); } catch (e) {}
+  } catch (e) { login('Нет доступа'); }
+})();
+</script>
+</body>
+</html>

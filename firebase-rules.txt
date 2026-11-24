@@ -6,13 +6,14 @@
     работать) и нажмите Publish.
  2. Потом загрузите новые файлы сайта на GitHub.
 
-Что добавилось: codes (коды друзей), friends (списки друзей), invites
+Что добавилось (журнал действий): блок activity — страница activity.html для владельца; пишут только игроки, принявшие статистику, читает только ваша почта.
+Что добавилось раньше: codes (коды друзей), friends (списки друзей), invites
 (приглашения в игру), history (история партий для статистики), ads (рекламные баннеры; пишет только владелец), stats (счётчики для панели владельца;
 замените ВАША_ПОЧТА@gmail.com на почту вашего Google-аккаунта). Анонимный вход должен быть включён
 (Authentication → Sign-in method → Anonymous).
 
 
-ВАРИАНТ 1 (рекомендую) — «только со входом» (обновлено 24.11.2026: защита комнат, чата, жалоб и счётчиков)
+ВАРИАНТ 1 (рекомендую) — «только со входом» (обновлено 24.11.2026: защита комнат, чата, жалоб и счётчиков; добавлен блок activity — журнал действий)
 --------------------------------------------
 {
   "rules": {
@@ -68,6 +69,24 @@
         ".write": "auth != null && auth.uid === $uid",
         "$id": {
           ".validate": "newData.hasChildren(['game', 'res', 't']) && (newData.child('res').val() === 'win' || newData.child('res').val() === 'loss' || newData.child('res').val() === 'draw' || newData.child('res').val() === 'coop')"
+        }
+      }
+    },
+    "activity": {
+      ".read": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
+      "$day": {
+        ".validate": "$day.matches(/^20[0-9][0-9]-[01][0-9]-[0-3][0-9]$/)",
+        ".indexOn": ["t"],
+        "$id": {
+          ".write": "auth != null && !data.exists() && newData.child('u').val() === auth.uid",
+          ".validate": "newData.hasChildren(['u', 'n', 'a', 't']) && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('a').isString() && newData.child('a').val().length <= 30 && newData.child('t').val() === now && (!newData.child('g').exists() || (newData.child('g').isString() && newData.child('g').val().length <= 20))",
+          "u": { ".validate": "newData.isString()" },
+          "n": { ".validate": "newData.isString()" },
+          "a": { ".validate": "newData.isString()" },
+          "g": { ".validate": "newData.isString()" },
+          "t": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
         }
       }
     },
@@ -206,6 +225,24 @@
         ".write": "auth != null && auth.uid === $uid",
         "$id": {
           ".validate": "newData.hasChildren(['game', 'res', 't']) && (newData.child('res').val() === 'win' || newData.child('res').val() === 'loss' || newData.child('res').val() === 'draw' || newData.child('res').val() === 'coop')"
+        }
+      }
+    },
+    "activity": {
+      ".read": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
+      "$day": {
+        ".validate": "$day.matches(/^20[0-9][0-9]-[01][0-9]-[0-3][0-9]$/)",
+        ".indexOn": ["t"],
+        "$id": {
+          ".write": "auth != null && !data.exists() && newData.child('u').val() === auth.uid",
+          ".validate": "newData.hasChildren(['u', 'n', 'a', 't']) && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('a').isString() && newData.child('a').val().length <= 30 && newData.child('t').val() === now && (!newData.child('g').exists() || (newData.child('g').isString() && newData.child('g').val().length <= 20))",
+          "u": { ".validate": "newData.isString()" },
+          "n": { ".validate": "newData.isString()" },
+          "a": { ".validate": "newData.isString()" },
+          "g": { ".validate": "newData.isString()" },
+          "t": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
         }
       }
     },
