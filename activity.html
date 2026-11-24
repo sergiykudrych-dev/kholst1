@@ -50,10 +50,15 @@ button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--r
 .clr{border-color:#b00020;color:#b00020}
 .note{margin-top:18px;font-size:12px;color:var(--mute)}
 @media(min-width:560px){.row{grid-template-columns:72px minmax(0,1fr)}}
+
+/* Полоса под часами на iPhone (только когда сайт открыт с иконки «Домой»): скрывает текст, уезжающий под строку состояния */
+.sbar{display:none}
+@media(display-mode:standalone){.sbar{display:block;position:fixed;top:0;left:0;right:0;height:56px;z-index:40;background:#FFEAF1;pointer-events:none}main{padding-top:max(20px,64px)!important}}
 </style>
 <link rel="stylesheet" href="bg.css?v=3">
 </head>
 <body>
+<div class="sbar" aria-hidden="true"></div>
 <main>
 <a class="back" href="panel.html">← В панель</a>
 <h1>Журнал действий</h1>
