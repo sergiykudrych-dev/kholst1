@@ -45,6 +45,8 @@ html{background:#300A49}body{min-height:100dvh;font:500 16px/1.45 Manrope,system
 main{position:relative;max-width:520px;margin:0 auto;padding:max(48px,env(safe-area-inset-top)) 20px max(32px,env(safe-area-inset-bottom));display:grid;gap:14px}
 h1{font:400 clamp(52px,16vw,84px)/1 'Marck Script',cursive;color:var(--deep);text-align:center}.h1s{display:block;margin-top:6px;font:700 13px/1.2 Manrope,system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
 .lead{text-align:center;color:var(--mute);margin-bottom:12px;font-size:15px}
+.onl{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 0 10px;font-size:14px;font-weight:700;color:var(--mute)}.onl i{width:9px;height:9px;border-radius:50%;background:#22a45d;box-shadow:0 0 0 0 rgba(34,164,93,.6);animation:onp 1.8s infinite}.onl b{font-variant-numeric:tabular-nums}@keyframes onp{70%{box-shadow:0 0 0 7px rgba(34,164,93,0)}100%{box-shadow:0 0 0 0 rgba(34,164,93,0)}}@media(prefers-reduced-motion:reduce){.onl i{animation:none}}
+
 .game{display:flex;align-items:center;gap:16px;width:100%;text-align:left;padding:16px;border:0;border-radius:28px;background:rgba(255,255,255,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 14px 34px -16px rgba(142,15,69,.55);cursor:pointer;color:inherit;font:inherit;transition:transform .2s}
 .game:hover{transform:translateY(-2px)}
 .tile{flex:none;width:68px;height:68px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(145deg,#FF7FA8,#C2185B)}
@@ -162,6 +164,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
   <div class="langw" data-noi18n><button class="langbtn" id="langb" type="button" aria-haspopup="true" aria-label="Мова / Language">🌐 <b></b></button><div class="langm" id="langm" hidden><button type="button" data-l="ru">Русский</button><button type="button" data-l="uk">Українська</button><button type="button" data-l="en">English</button></div></div>
   <h1>Во что сыграем?<span class="h1s">Игры для двоих онлайн</span></h1>
   <p class="lead">Выберите игру <b>→</b> отправьте ссылку <b>→</b> играйте</p>
+  <p class="onl" id="onl" hidden aria-live="polite"><i></i><span>Сейчас на сайте</span> <b id="onln"></b></p>
   <div class="toprow"><button class="who" id="who" type="button"></button><button class="who ic fr" id="fr" type="button" aria-label="Друзья" title="Друзья">👥 Друзья</button></div>
   <button class="back2" id="back2" type="button" hidden></button>
   <button class="openr" id="openr" type="button"><i>🚪</i><span class="t"><b>Открытые комнаты</b><small id="openn">Смотрим, кто ждёт игру…</small></span><span class="go2">→</span></button>
@@ -264,7 +267,7 @@ h1{font:800 clamp(40px,12.5vw,58px)/1.02 Manrope,system-ui,sans-serif;letter-spa
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="version.js"></script><script src="version-check.js"></script>
-<script src="analytics.js?v=4"></script>
+<script src="analytics.js?v=5"></script>
 <script src="profile.js?v=3"></script>
 <script src="ads.js" data-mode="home"></script>
 <script src="stats.js?v=2"></script>
@@ -457,6 +460,22 @@ function markPub() {
   };
   $('#omake').onclick = () => { odlg.close(); wantPub = true; Friends.toast('Выберите игру — комната будет открытой 🌍'); };
   window.__wantPub = () => { const w = wantPub; wantPub = false; return w; };
+})();
+/* «Сейчас на сайте»: считаем свежие отметки присутствия (раз в минуту); при ошибке или 0 — блок скрыт */
+(async () => {
+  try {
+    const uid = await Profile.init(); if (!uid) return;
+    const db = firebase.database(); let off = 0;
+    db.ref('.info/serverTimeOffset').on('value', s => { off = s.val() || 0; });
+    const show = async () => {
+      try {
+        const s = await db.ref('presence').once('value'), now = Date.now() + off; let n = 0;
+        s.forEach(c => { const t = c.child('t').val(); if (typeof t === 'number' && now - t < 120000) n++; });
+        $('#onln').textContent = n; $('#onl').hidden = n < 1;
+      } catch (e) { $('#onl').hidden = true; }
+    };
+    show(); setInterval(show, 60000);
+  } catch (e) {}
 })();
 </script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b768ba0e7ece4c259e179c15b129aa55"}'></script><!-- End Cloudflare Web Analytics -->

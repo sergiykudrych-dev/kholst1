@@ -72,6 +72,15 @@
         }
       }
     },
+    "presence": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['t'])",
+        "t": { ".validate": "newData.isNumber() && newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
     "activity": {
       ".read": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
@@ -226,6 +235,15 @@
         "$id": {
           ".validate": "newData.hasChildren(['game', 'res', 't']) && (newData.child('res').val() === 'win' || newData.child('res').val() === 'loss' || newData.child('res').val() === 'draw' || newData.child('res').val() === 'coop')"
         }
+      }
+    },
+    "presence": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['t'])",
+        "t": { ".validate": "newData.isNumber() && newData.val() === now" },
+        "$other": { ".validate": false }
       }
     },
     "activity": {

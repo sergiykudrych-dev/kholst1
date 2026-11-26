@@ -62,6 +62,21 @@
     } catch (e) {}
   }
 
+  /* «Сейчас на сайте»: анонимная отметка присутствия (только случайный id и время), удаляется при выходе. Имена и действия сюда не пишутся. */
+  let presOn = false;
+  async function presence() {
+    try {
+      if (presOn) return; presOn = true;
+      try { if (localStorage.getItem('kh_me') === '1' || localStorage.getItem('kh_owner') === '1') return; } catch (e) {}
+      if (!(window.Profile && window.firebase && firebase.database && Profile.init)) return;
+      const uid = await Profile.init(); if (!uid) return;
+      const ref = firebase.database().ref('presence/' + uid), TS = firebase.database.ServerValue.TIMESTAMP;
+      const beat = () => { if (document.visibilityState === 'hidden') return; ref.onDisconnect().remove().catch(() => {}); ref.set({ t: TS }).catch(() => {}); };
+      beat(); setInterval(beat, 45000);
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') beat(); });
+    } catch (e) {}
+  }
+
   function load() {
     if (loaded || !ID || status() !== 'granted') return;
     loaded = true;
@@ -112,6 +127,7 @@
 
   const start = () => {
     setTimeout(() => { if (!GAMES.includes(pageName())) act('page_view'); }, 1500);   /* заход на страницу — в журнал владельца всегда (ник к этому моменту уже известен) */
+    setTimeout(presence, 2500);
     if (!ID) return;
     if (status() === 'granted') load(); else if (status() === null && pageName() !== 'privacy') {
       const show = () => { if (document.querySelector('.pf-ov')) return setTimeout(show, 700); banner(); };   /* не поверх окна «Как вас зовут?» */
