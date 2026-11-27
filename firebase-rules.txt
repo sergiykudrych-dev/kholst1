@@ -101,6 +101,8 @@
           "n": { ".validate": "newData.isString()" },
           "a": { ".validate": "newData.isString()" },
           "g": { ".validate": "newData.isString()" },
+          "c": { ".validate": "newData.isString() && newData.val().length <= 12" },
+          "d": { ".validate": "newData.isString() && newData.val().length <= 12" },
           "t": { ".validate": "newData.isNumber()" },
           "$other": { ".validate": false }
         }
@@ -273,6 +275,8 @@
           "n": { ".validate": "newData.isString()" },
           "a": { ".validate": "newData.isString()" },
           "g": { ".validate": "newData.isString()" },
+          "c": { ".validate": "newData.isString() && newData.val().length <= 12" },
+          "d": { ".validate": "newData.isString() && newData.val().length <= 12" },
           "t": { ".validate": "newData.isNumber()" },
           "$other": { ".validate": false }
         }

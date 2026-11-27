@@ -72,6 +72,7 @@ const $ = s => document.querySelector(s), out = $('#out');
 const ITEMS = [
   { id: 'prof', t: 'Профили игроков', d: 'Имена, аватары, коды друзей, друзья, приглашения, история игр, настройки уведомлений.', paths: ['users', 'codes', 'friends', 'invites', 'history', 'push'] },
   { id: 'rooms', t: 'Открытые комнаты', d: 'Список свободных комнат на главной. Сами игры, которые идут сейчас, не трогаем.', paths: ['rooms/_open'] },
+  { id: 'adl', t: 'Рекламные ссылки и их статистика', d: 'Счётчики переходов по ссылкам вида ?from=название (erofilm, psycholog_st…) за все дни. Сами баннеры в разделе ads не трогаем: их удаляют в панели.', special: 'adlinks' },
   { id: 'log', t: 'Журнал действий и счётчик онлайн', d: 'Вся лента на странице «Журнал действий» и список тех, кто сейчас на сайте.', paths: ['activity', 'presence'] }
 ];
 function login(msg) {
@@ -87,11 +88,23 @@ function build() {
     const sel = ITEMS.filter(i => document.querySelector('.opt input[data-i="' + i.id + '"]').checked);
     $('#do').disabled = true; const r = $('#res'); r.textContent = 'Удаляем…'; let log = '';
     const db = firebase.database();
-    for (const it of sel) for (const p of it.paths) {
-      try { await db.ref(p).remove(); log += '✓ ' + p + '\n'; } catch (e) { log += '✗ ' + p + ' (нет доступа: вставьте новые правила базы)\n'; }
+    for (const it of sel) if (it.special === 'adlinks') {
+      try {
+        const s = await db.ref('stats/daily').once('value'), up = {}; let n = 0;
+        s.forEach(d => { d.forEach(k => { if (/^v_c_/.test(k.key)) { up['stats/daily/' + d.key + '/' + k.key] = null; n++; } }); });
+        if (n) await db.ref().update(up);
+        log += '✓ рекламные ссылки: удалено счётчиков ' + n + '\n';
+      } catch (e) { log += '✗ рекламные ссылки — нет доступа\n'; }
+      r.textContent = log;
+    } else for (const p of it.paths) {
+      try {
+        await db.ref(p).remove(); let left = null;
+        try { left = (await db.ref(p).once('value')).numChildren(); } catch (e) {}
+        log += (left ? '⚠ ' + p + ': осталось записей ' + left + '\n' : '✓ ' + p + '\n');
+      } catch (e) { log += '✗ ' + p + ' — нет доступа (' + ((e && e.code) || 'ошибка') + '). Вставьте новые правила базы и нажмите ещё раз.\n'; }
       r.textContent = log;
     }
-    r.textContent = log + 'Готово.';
+    r.textContent = log + 'Готово. Тот, кто сейчас на сайте, появится снова: это уже новые записи.';
     $('#cf').value = '';
   };
 }

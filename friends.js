@@ -54,11 +54,11 @@
 
   async function ensureCode() {
     const u = (await db.ref('users/' + me).once('value')).val() || {};
-    if (u.code) { myCode = u.code; return; }
+    if (u.code) { myCode = u.code; try { localStorage.setItem('kh_fcode', myCode); } catch (e) {} return; }
     for (let i = 0; i < 8; i++) {
       const c = Array.from({ length: 6 }, () => ALPHA[Math.floor(Math.random() * ALPHA.length)]).join('');
       const r = await db.ref('codes/' + c).transaction(x => x === null ? me : undefined);
-      if (r.committed) { myCode = c; await db.ref('users/' + me).update({ code: c, name: P.name() || null, avatar: P.avatar() || null }); return; }
+      if (r.committed) { myCode = c; try { localStorage.setItem('kh_fcode', c); } catch (e) {} await db.ref('users/' + me).update({ code: c, name: P.name() || null, avatar: P.avatar() || null }); return; }
     }
     throw new Error('code');
   }
@@ -140,7 +140,7 @@
       e.innerHTML = `<b>✓ Профиль сохранён</b>${P.isTg() || P.inTg() ? '<span class="em">Telegram подключён</span>' : (P.email() ? `<span class="em">${esc(P.email())}</span>` : '')}${tgl}${P.inTg() ? '' : `<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`}`;
     } else {
       e.className = 'facc warn';
-      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта. Войдите любым способом:<div class="two"><button class="btn" type="button" data-a="google">Google / почта</button>${P._tgs ? `<a class="btn" href="${P._tgs}" target="_blank" rel="noopener" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Открыть Telegram и нажать «Старт»</a>` : `<button class="btn" type="button" data-a="tglogin">Telegram</button>`}</div>`;
+      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта. Войдите любым способом:<div class="two"${P._tgs ? ' style="grid-template-columns:1fr"' : ''}>${P._tgs ? '' : '<button class="btn" type="button" data-a="google">Google / почта</button>'}${P._tgs ? `<a class="btn" href="${P._tgs}" target="_blank" rel="noopener" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Открыть Telegram и нажать «Старт»</a>` : `<button class="btn" type="button" data-a="tglogin">Telegram</button>`}</div>`;
     }
   }
   function render() {
@@ -165,6 +165,36 @@
   const shareUrl = () => new URL('index.html#add=' + myCode, location.href).href;
   const shareText = () => 'Добавь меня в друзья в «Во что сыграем?». Мой код: ' + myCode;
 
+  const tgBase = () => window.TG_AUTH_URL.replace(/\/auth$/, '');
+  /* ждём, пока человек нажмёт «Старт» в боте, и входим */
+  function tgPoll(code, end) {
+    const poll = async () => {
+      if (Date.now() > end || P.isLinked()) { P._tgs = ''; try { localStorage.removeItem('kh_tgs'); } catch (e) {} if (dlg && dlg.open) renderAcc(); return; }
+      try {
+        const pr = await fetch(tgBase() + '/login/poll', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code }) });
+        const pj = pr.ok ? await pr.json() : null;
+        if (pj && pj.token) {
+          try { localStorage.removeItem('kh_tgs'); } catch (e) {}
+          const u = (await firebase.auth().signInWithCustomToken(pj.token)).user;
+          const rec = (await firebase.database().ref('users/' + u.uid).once('value')).val() || {};
+          const nm = rec.name || pj.name; if (nm) P.save(nm, rec.avatar || '');
+          ev('profile_saved', { method: 'telegram' }); say('Вход выполнен ✓'); setTimeout(() => location.reload(), 600); return;
+        }
+        if (pr.status === 410) { P._tgs = ''; try { localStorage.removeItem('kh_tgs'); } catch (e) {} if (dlg && dlg.open) renderAcc(); say('Код устарел. Нажмите ещё раз.'); return; }
+      } catch (e) {}
+      setTimeout(poll, 2000);
+    };
+    setTimeout(poll, 2000);
+  }
+  /* если страница перезагрузилась, пока человек был в Telegram, продолжаем ждать */
+  function tgResume() {
+    try {
+      const s = JSON.parse(localStorage.getItem('kh_tgs') || 'null');
+      if (s && s.c && Date.now() - s.t < 10 * 60e3 && !P.isLinked()) { P._tgs = 'https://t.me/twosomegames_bot?start=S' + s.c; tgPoll(s.c, s.t + 10 * 60e3); }
+      else localStorage.removeItem('kh_tgs');
+    } catch (e) {}
+  }
+
   function dialog() {
     if (dlg) return dlg;
     dlg = document.createElement('dialog'); dlg.id = 'fdlg';
@@ -187,39 +217,25 @@
         else if (a === 'accept') { await ensureName(); const up = {}; up['friends/' + me + '/' + u + '/status'] = 'ok'; up['friends/' + u + '/' + me + '/status'] = 'ok'; await db.ref().update(up); ev('friend_added'); F.notify('accepted', u); }
         else if (a === 'remove') await unlink(u);
         else if (a === 'google') {
-          say('Открываем вход…');
+          say('Открываем вход…'); ev('auth_pick', { method: 'google' });
           const r = await P.linkGoogle();
           if (r === 'switched') {
             const u = (await firebase.database().ref('users/' + firebase.auth().currentUser.uid).once('value')).val() || {};
             if (u.name) P.save(u.name, u.avatar || '');
             say('Профиль найден, загружаем…'); setTimeout(() => location.reload(), 600);
-          } else { ev('profile_saved'); say('Профиль сохранён ✓'); renderAcc(); }
+          } else { ev('profile_saved', { method: 'google' }); say('Профиль сохранён ✓'); renderAcc(); }
         }
         else if (a === 'tglogin') {
-          const base = window.TG_AUTH_URL.replace(/\/auth$/, '');
-          say('Готовим вход…');
+          say('Готовим вход…'); ev('auth_pick', { method: 'telegram' });
           const tok = await firebase.auth().currentUser.getIdToken();
-          const r = await fetch(base + '/login/start', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken: tok }) });
+          const r = await fetch(tgBase() + '/login/start', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken: tok }) });
           const j = r.ok ? await r.json() : null;
           if (!j || !j.code) { say('Не получилось. Попробуйте позже.'); return; }
           P._tgs = 'https://t.me/twosomegames_bot?start=S' + j.code; renderAcc();
-          const end = Date.now() + 10 * 60e3;
-          const poll = async () => {
-            if (Date.now() > end || P.isLinked()) { P._tgs = ''; if (dlg.open) renderAcc(); return; }
-            try {
-              const pr = await fetch(base + '/login/poll', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code: j.code }) });
-              const pj = pr.ok ? await pr.json() : null;
-              if (pj && pj.token) {
-                const u = (await firebase.auth().signInWithCustomToken(pj.token)).user;
-                const rec = (await firebase.database().ref('users/' + u.uid).once('value')).val() || {};
-                const nm = rec.name || pj.name; if (nm) P.save(nm, rec.avatar || '');
-                ev('profile_saved'); say('Вход выполнен ✓'); setTimeout(() => location.reload(), 600); return;
-              }
-              if (pr.status === 410) { P._tgs = ''; renderAcc(); say('Код устарел. Нажмите ещё раз.'); return; }
-            } catch (e) {}
-            setTimeout(poll, 2000);
-          };
-          setTimeout(poll, 2000);
+          try { localStorage.setItem('kh_tgs', JSON.stringify({ c: j.code, t: Date.now() })); } catch (e) {}
+          tgPoll(j.code, Date.now() + 10 * 60e3);
+          /* сразу переходим в Telegram; если браузер не дал, остаётся кнопка */
+          try { if (!window.open(P._tgs, '_blank')) location.href = P._tgs; } catch (e) { location.href = P._tgs; }
         }
         else if (a === 'tglink') {
           say('Готовим код…');
@@ -294,7 +310,7 @@
       if (!uid) throw new Error('noauth');
       db = firebase.database(); me = uid; return ensureCode();
     }).then(() => {
-      listen();
+      listen(); tgResume();
       const m = location.hash.match(/add=([A-Za-z0-9]{4,10})/);
       if (m) { history.replaceState(null, '', location.pathname + location.search); F.open().then(() => { $('#fin').value = m[1].toUpperCase(); addByCode(m[1]); }); }
     }).catch(() => { F.off = true; });

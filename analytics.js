@@ -20,7 +20,7 @@
     game_open: p => p.game && 'open_' + p.game,
     game_complete: p => p.host && p.game && ['game_complete', 'done_' + p.game],   /* считает только хозяин комнаты, чтобы не удваивать */
     room_created: () => 'room_created', partner_joined: () => 'partner_joined', invite_sent: () => 'invite_sent', lobby_invite: () => 'lobby_invite', open_created: () => 'open_created', open_joined: () => 'open_joined', code_shared: () => 'code_shared', report_sent: () => 'report_sent', friend_request: () => 'friend_request',
-    friend_added: () => 'friend_added', profile_saved: () => 'profile_saved', name_set: () => 'name_set',
+    friend_added: () => 'friend_added', profile_saved: p => ['profile_saved', p.method === 'telegram' ? 'saved_tg' : p.method === 'google' ? 'saved_google' : null].filter(Boolean), auth_pick: p => 'auth_pick_' + (p.method === 'telegram' ? 'tg' : 'google'), name_set: () => 'name_set',
     promo_view: () => 'promo_view', promo_click: p => ['promo_click', 'promo_click_' + (p.where === 'end' ? 'end' : 'home')]
   };
   async function own(name, params) {
@@ -42,13 +42,13 @@
   }
 
   /* Журнал действий для владельца: ник, время, что сделал. Ведётся для всех посетителей, включая Telegram (раскрыто в политике конфиденциальности); свои действия владельца не пишутся. */
-  const ACT = new Set(['page_view', 'game_open', 'room_created', 'partner_joined', 'invite_sent', 'lobby_invite', 'open_created', 'open_joined', 'code_shared', 'report_sent', 'friend_request', 'friend_added', 'profile_saved', 'name_set', 'chat_sent', 'game_complete', 'promo_click']);
+  const ACT = new Set(['page_view', 'game_open', 'room_created', 'partner_joined', 'invite_sent', 'lobby_invite', 'open_created', 'open_joined', 'code_shared', 'report_sent', 'friend_request', 'friend_added', 'profile_saved', 'auth_pick', 'name_set', 'chat_sent', 'game_complete', 'promo_click']);
   let actN = 0, actLast = '', actAt = 0;
   async function act(name, params) {
     try {
       if (!ACT.has(name) || actN >= 150) return;
       try { if (localStorage.getItem('kh_me') === '1' || localStorage.getItem('kh_owner') === '1') return; } catch (e) {}   /* свои действия не пишем */
-      const p = params || {}, g = String(p.game || (name === 'page_view' ? pageName() : '') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 20);
+      const p = params || {}, g = String(p.game || p.method || (name === 'page_view' ? pageName() : '') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 20);
       const key = name + '|' + g, now = Date.now();
       if (key === actLast && now - actAt < 2000) return;   /* не дублируем одно и то же подряд */
       actLast = key; actAt = now;
@@ -57,6 +57,10 @@
       let n = ''; try { n = String((Profile.name && Profile.name()) || ''); } catch (e) {}
       const rec = { u: uid, n: (n || 'без имени').slice(0, 40), a: name, t: firebase.database.ServerValue.TIMESTAMP };
       if (g) rec.g = g;
+      try {   /* код друга и устройство: чтобы в журнале видеть код человека и когда он меняется */
+        const c = String(localStorage.getItem('kh_fcode') || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 12); if (c) rec.c = c;
+        let d = localStorage.getItem('kh_dev'); if (!d) { d = Math.random().toString(36).slice(2, 12); localStorage.setItem('kh_dev', d); } rec.d = d.replace(/[^a-z0-9]/g, '').slice(0, 12);
+      } catch (e) {}
       actN++;
       firebase.database().ref('activity/' + new Date().toISOString().slice(0, 10)).push(rec).catch(() => {});
     } catch (e) {}

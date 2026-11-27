@@ -189,6 +189,10 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
 <div class="k"><b>${fmt(sum('invite_sent', d30))}</b><span>приглашений другу</span></div>
 <div class="k"><b>${fmt(sum('friend_added', d30))}</b><span>подружились</span></div>
 <div class="k"><b>${fmt(sum('profile_saved', d30))}</b><span>сохранили профиль</span></div>
+<div class="k"><b>${fmt(sum('auth_pick_google', d30))}</b><span>выбрали вход через Google</span></div>
+<div class="k"><b>${fmt(sum('auth_pick_tg', d30))}</b><span>выбрали вход через Telegram</span></div>
+<div class="k"><b>${fmt(sum('saved_google', d30))}</b><span>вошли через Google</span></div>
+<div class="k"><b>${fmt(sum('saved_tg', d30))}</b><span>вошли через Telegram</span></div>
 <div class="k"><b>${fmt(sum('views', d30))}</b><span>открытий страниц</span></div>
 <div class="k"><b>${fmt(sum('open_created', d30))}</b><span>открытых комнат создано</span></div>
 <div class="k"><b>${fmt(sum('open_joined', d30))}</b><span>зашли в открытую комнату</span></div>
@@ -224,7 +228,7 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
   /* Реклама: ссылки */
   $('#links').innerHTML = `<div class="card"><span class="ct">Рекламные ссылки</span><p class="pc" style="margin:0">Дайте такую ссылку рекламодателю или поставьте в пост: сколько человек перешло, видно здесь.</p>
 <div class="cn"><input id="cn" maxlength="40" placeholder="Название (канал Иры)"><button type="button" id="cadd">Создать</button></div><p class="pc" id="cmsg" style="margin:0"></p>` +
-    (camp.filter(c => !SYS[c]).length ? camp.filter(c => !SYS[c]).map(c => `<div class="cl"><b>${c}</b><div class="u"><input readonly value="https://twosome.games/?from=${c}" aria-label="Ссылка"><button type="button" data-copy>Копировать</button>${local.includes(c) && !seen.has(c) ? `<button type="button" class="del" data-del="${c}" aria-label="Убрать ссылку">✕</button>` : ''}</div><span class="pc" style="margin:0">Переходов: сегодня <b>${fmt(sum('v_c_' + c, [today]))}</b> · 7 дней <b>${fmt(sum('v_c_' + c, d7))}</b> · 30 дней <b>${fmt(sum('v_c_' + c, d30))}</b></span></div>`).join('') : '<p class="pc" style="margin:0">Ссылок пока нет.</p>') +
+    (camp.filter(c => !SYS[c]).length ? camp.filter(c => !SYS[c]).map(c => `<div class="cl"><b>${c}</b><div class="u"><input readonly value="https://twosome.games/?from=${c}" aria-label="Ссылка"><button type="button" data-copy>Копировать</button><button type="button" class="del" data-del="${c}" aria-label="Удалить ссылку и её статистику">✕</button></div><span class="pc" style="margin:0">Переходов: сегодня <b>${fmt(sum('v_c_' + c, [today]))}</b> · 7 дней <b>${fmt(sum('v_c_' + c, d7))}</b> · 30 дней <b>${fmt(sum('v_c_' + c, d30))}</b></span></div>`).join('') : '<p class="pc" style="margin:0">Ссылок пока нет.</p>') +
     `<p class="pc" style="margin:0">Считается один переход на посещение. Свои заходы по ссылке не считаются (на устройстве, где вы открывали панель), проверяйте с другого телефона.</p></div>`;
 
   /* действия */
@@ -243,7 +247,17 @@ ${me ? '<div class="ok">✓ Ваши заходы с этого устройст
     setTimeout(() => { b.textContent = t0; }, 1800);
   });
   document.querySelectorAll('.cl input').forEach(i => i.onclick = () => i.select());
-  document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { setLinks(getLinks().filter(s => s !== b.dataset.del)); render(RAW, TOT); });
+  document.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    const c = b.dataset.del;
+    if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Удалить?'; setTimeout(() => { b.dataset.sure = ''; b.textContent = '✕'; }, 3500); return; }
+    try {
+      const db = firebase.database(), s = await db.ref('stats/daily').once('value'), up = {};
+      s.forEach(d => { if (d.child('v_c_' + c).exists()) up['stats/daily/' + d.key + '/v_c_' + c] = null; });
+      if (Object.keys(up).length) await db.ref().update(up);
+      setLinks(getLinks().filter(x => x !== c));
+      location.reload();
+    } catch (e) { b.textContent = 'Нет доступа'; }
+  });
   showTab(TAB);
 }
 

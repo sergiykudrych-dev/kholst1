@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <title>Журнал действий — Во что сыграем?</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
-<style>[hidden]{display:none!important}html{background:#FFE9F0}
+<style>.cd{font-weight:800;color:var(--deep);font-size:13px}.chg{margin-top:2px;font-size:13px;font-weight:800;color:#b00020}[hidden]{display:none!important}html{background:#FFE9F0}
 :root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#7A4260;--card:rgba(255,255,255,.88)}
 *{box-sizing:border-box;margin:0}
 html,body{overflow-x:hidden}body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed}
@@ -70,6 +70,7 @@ button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--r
 <script>
 const $ = s => document.querySelector(s), out = $('#out');
 const GAMES = { paint: 'Холст', word: 'Угадай слово', number: 'Угадай число', egg: 'Не урони яйцо', chips: 'Чипсы-сюрприз', tictactoe: 'Крестики-нолики', memory: 'Найди пару', questions: 'Вопросы друг другу', monster: 'Создай монстра', seabattle: 'Морской бой', truth: 'Правда или действие', index: 'главную', privacy: 'политику', panel: 'панель' };
+GAMES.telegram = 'Telegram'; GAMES.google = 'Google';
 const gname = g => GAMES[g] || g || '';
 const ACTS = {
   page_view: ['зашёл(ла) на сайт', 'visit'],
@@ -88,7 +89,8 @@ const ACTS = {
   name_set: ['выбрал(а) имя', 'profile'],
   chat_sent: ['написал(а) в чате', 'chat'],
   game_complete: ['закончили партию', 'game'],
-  promo_click: ['нажал(а) на рекламу', 'promo']
+  promo_click: ['нажал(а) на рекламу', 'promo'],
+  auth_pick: ['выбрал(а) способ входа', 'profile']
 };
 const GROUPS = { all: 'Все', visit: 'Заходы', game: 'Игры', room: 'Комнаты', invite: 'Приглашения', friend: 'Друзья', chat: 'Чат', report: 'Жалобы', promo: 'Реклама', profile: 'Профиль' };
 const ymd = d => d.toISOString().slice(0, 10);
@@ -125,7 +127,7 @@ function build() {
 function addRec(day, id, r, fresh) {
   if (!r || typeof r.t !== 'number' || typeof r.a !== 'string') return;
   const k = day + '/' + id; if (EV.has(k)) return;
-  EV.set(k, { k, t: r.t, n: String(r.n || 'без имени').slice(0, 40), a: r.a.slice(0, 30), g: String(r.g || '').slice(0, 20), u: String(r.u || ''), fresh: !!fresh });
+  EV.set(k, { k, t: r.t, n: String(r.n || 'без имени').slice(0, 40), a: r.a.slice(0, 30), g: String(r.g || '').slice(0, 20), u: String(r.u || ''), c: String(r.c || '').slice(0, 12), d: String(r.d || '').slice(0, 12), fresh: !!fresh });
 }
 async function fetchDays() {
   EV = new Map(); live.forEach(f => f()); live = [];
@@ -136,10 +138,13 @@ async function fetchDays() {
   live.push(() => ref.off('child_added', h));
 }
 function draw() {
+  /* смена кода: по устройству (или по аккаунту, если устройство неизвестно) сравниваем коды в порядке времени */
+  const chg = new Map(), lastC = new Map();
+  [...EV.values()].sort((x, y) => x.t - y.t).forEach(e => { if (!e.c) return; const key = e.d || e.u; const p = lastC.get(key); if (p && p !== e.c) chg.set(e.k, p); lastC.set(key, e.c); });
   const list = [...EV.values()].filter(e => {
     const info = ACTS[e.a]; if (!info) return false;
     if (group !== 'all' && info[1] !== group) return false;
-    if (q && !(e.n.toLowerCase().includes(q) || gname(e.g).toLowerCase().includes(q) || info[0].toLowerCase().includes(q))) return false;
+    if (q && !(e.n.toLowerCase().includes(q) || e.c.toLowerCase().includes(q) || gname(e.g).toLowerCase().includes(q) || info[0].toLowerCase().includes(q))) return false;
     return true;
   }).sort((a, b) => b.t - a.t);
   const users = new Set(list.map(e => e.u || e.n)).size;
@@ -156,6 +161,8 @@ function draw() {
     const ac = document.createElement('span'); ac.className = 'ac'; ac.textContent = ' ' + info[0];
     tx.append(nk, ac);
     if (e.g && gname(e.g) && !(e.a === 'page_view' && ['index', 'privacy', 'panel'].includes(e.g))) { const gm = document.createElement('span'); gm.className = 'gm'; gm.textContent = ' — ' + gname(e.g); tx.appendChild(gm); }
+    if (e.c) { const cd = document.createElement('span'); cd.className = 'cd'; cd.textContent = ' · код ' + e.c; tx.appendChild(cd); }
+    if (chg.has(e.k)) { const cg = document.createElement('div'); cg.className = 'chg'; cg.textContent = '⚠ код сменился: ' + chg.get(e.k) + ' → ' + e.c; tx.appendChild(cg); }
     r.append(tm, tx); L.appendChild(r);
   });
   if (list.length > shown.length) { const m = document.createElement('div'); m.className = 'cnt'; m.textContent = 'Показаны последние 400 из ' + list.length + '. Сузьте период или поиск.'; L.appendChild(m); }
