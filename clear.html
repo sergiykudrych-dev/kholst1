@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FFEAF1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<title>Очистка данных — Во что сыграем?</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>[hidden]{display:none!important}html{background:#FFE9F0}
+:root{--ink:#4A1236;--rose:#C2185B;--deep:#8E0F45;--mute:#7A4260;--card:rgba(255,255,255,.88)}
+*{box-sizing:border-box;margin:0}
+html,body{overflow-x:hidden}body{min-height:100dvh;font:500 16px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#FFEAF1,#FFC9DC 55%,#F8A9C9) fixed}
+main{max-width:760px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom))}
+a.back{display:inline-block;margin-bottom:8px;color:var(--deep);font-weight:700;text-decoration:none;font-size:14px}
+h1{font-size:28px;font-weight:800;color:var(--deep);margin-bottom:2px}
+.sub{color:var(--mute);font-size:14px}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#14532D}
+.live i{width:9px;height:9px;border-radius:50%;background:#22a45d;box-shadow:0 0 0 0 rgba(34,164,93,.6);animation:p 1.8s infinite}
+@keyframes p{70%{box-shadow:0 0 0 8px rgba(34,164,93,0)}100%{box-shadow:0 0 0 0 rgba(34,164,93,0)}}
+.bar{display:grid;gap:8px;margin-bottom:12px}
+.sg{display:flex;gap:2px;padding:2px;border-radius:12px;background:#F7D3E0}
+.sg button{flex:1;min-height:44px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:var(--deep);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.sg button.on{background:var(--rose);color:#fff;font-weight:800}
+.srch{width:100%;min-height:46px;padding:0 14px;border:1.5px solid #E8B7CB;border-radius:12px;background:#fff;color:var(--ink);font:500 16px Manrope,system-ui,sans-serif}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:36px;padding:0 12px;border:1.5px solid var(--rose);border-radius:999px;background:#fff;color:var(--rose);font:700 13px Manrope,system-ui,sans-serif;cursor:pointer}
+.chip.on{background:var(--rose);color:#fff}
+.cnt{margin:6px 2px 8px;font-size:13px;color:var(--mute)}
+.log{display:grid;gap:6px}
+.dayh{margin:12px 2px 2px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--deep)}
+.row{display:grid;grid-template-columns:64px minmax(0,1fr);gap:4px 10px;align-items:baseline;padding:10px 14px;border-radius:14px;background:var(--card)}
+.row .tm{font-size:13px;font-weight:800;color:var(--deep);font-variant-numeric:tabular-nums}
+.row .tx{min-width:0;overflow-wrap:anywhere}
+.row .nk{font-weight:800}
+.row .ac{color:var(--ink)}
+.row .gm{color:var(--mute);font-size:14px}
+.row.new{animation:f 2.4s ease-out}
+@keyframes f{0%{background:#FFD0E1}100%{background:var(--card)}}
+.msg{padding:18px;border-radius:20px;background:var(--card);text-align:center}
+.msg p{margin-top:6px;color:var(--mute);font-size:14px}
+button.go{width:100%;padding:15px;border:0;border-radius:16px;background:var(--rose);color:#fff;font:800 17px Manrope,system-ui,sans-serif;cursor:pointer;margin-top:10px}
+.more,.clr{width:100%;min-height:46px;margin-top:12px;border:1.5px solid var(--rose);border-radius:12px;background:#fff;color:var(--rose);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.clr{border-color:#b00020;color:#b00020}
+.note{margin-top:18px;font-size:12px;color:var(--mute)}
+@media(min-width:560px){.row{grid-template-columns:72px minmax(0,1fr)}}
+
+</style>
+<style>.opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;margin-bottom:8px;border-radius:14px;background:var(--card);cursor:pointer}.opt input{width:22px;height:22px;margin-top:2px;accent-color:var(--rose);flex:none}.opt b{display:block}.opt span{font-size:13px;color:var(--mute)}.res{margin-top:10px;font-size:14px;color:var(--mute);white-space:pre-line}button.go.red{background:#b00020}button.go:disabled{opacity:.5}</style>
+<link rel="stylesheet" href="bg.css?v=4">
+</head>
+<body>
+<main>
+<a class="back" href="panel.html">← В панель</a>
+<h1>Очистка данных</h1>
+<div class="hd"><p class="sub" id="sub">Удаление из базы. Необратимо</p></div>
+<div id="out"><div class="msg">Загружаем…</div></div>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="profile.js?v=3"></script>
+<script>
+const $ = s => document.querySelector(s), out = $('#out');
+const ITEMS = [
+  { id: 'prof', t: 'Профили игроков', d: 'Имена, аватары, коды друзей, друзья, приглашения, история игр, настройки уведомлений.', paths: ['users', 'codes', 'friends', 'invites', 'history', 'push'] },
+  { id: 'rooms', t: 'Открытые комнаты', d: 'Список свободных комнат на главной. Сами игры, которые идут сейчас, не трогаем.', paths: ['rooms/_open'] },
+  { id: 'log', t: 'Журнал действий и счётчик онлайн', d: 'Вся лента на странице «Журнал действий» и список тех, кто сейчас на сайте.', paths: ['activity', 'presence'] }
+];
+function login(msg) {
+  out.innerHTML = `<div class="msg"><b>${msg}</b><p>Войдите через Google той же почтой, которая указана в правилах базы.</p><button class="go" id="g">Войти через Google</button><p id="err"></p></div>`;
+  $('#g').onclick = async () => { try { await Profile.linkGoogle(); location.reload(); } catch (e) { $('#err').textContent = Profile.authError(e); } };
+}
+function build() {
+  out.innerHTML = ITEMS.map(i => `<label class="opt"><input type="checkbox" data-i="${i.id}"><div><b>${i.t}</b><span>${i.d}</span></div></label>`).join('') +
+    `<div class="msg" style="margin-top:12px"><p>Чтобы подтвердить, введите слово <b>УДАЛИТЬ</b></p><input class="srch" id="cf" autocomplete="off" aria-label="Подтверждение" style="margin-top:10px;text-align:center"><button class="go red" id="do" disabled>Удалить выбранное</button><div class="res" id="res"></div></div>`;
+  const upd = () => { $('#do').disabled = $('#cf').value.trim().toUpperCase() !== 'УДАЛИТЬ' || !document.querySelector('.opt input:checked'); };
+  out.addEventListener('input', upd); out.addEventListener('change', upd);
+  $('#do').onclick = async () => {
+    const sel = ITEMS.filter(i => document.querySelector('.opt input[data-i="' + i.id + '"]').checked);
+    $('#do').disabled = true; const r = $('#res'); r.textContent = 'Удаляем…'; let log = '';
+    const db = firebase.database();
+    for (const it of sel) for (const p of it.paths) {
+      try { await db.ref(p).remove(); log += '✓ ' + p + '\n'; } catch (e) { log += '✗ ' + p + ' (нет доступа: вставьте новые правила базы)\n'; }
+      r.textContent = log;
+    }
+    r.textContent = log + 'Готово.';
+    $('#cf').value = '';
+  };
+}
+(async () => {
+  const uid = await Profile.init();
+  if (!uid) { out.innerHTML = '<div class="msg"><b>Нет связи с базой</b></div>'; return; }
+  if (!Profile.isLinked()) return login('Нужен вход');
+  try { await firebase.auth().currentUser.getIdToken(true); build(); } catch (e) { login('Нет доступа'); }
+})();
+</script>
+</body>
+</html>

@@ -18,6 +18,7 @@
 {
   "rules": {
     "users": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$uid": {
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid",
@@ -30,12 +31,14 @@
       }
     },
     "codes": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$code": {
         ".read": "auth != null",
         ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
       }
     },
     "friends": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$fid": {
@@ -50,6 +53,7 @@
       }
     },
     "invites": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$id": {
@@ -58,12 +62,14 @@
       }
     },
     "push": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid"
       }
     },
     "history": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid",
@@ -73,6 +79,7 @@
       }
     },
     "presence": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       ".read": "auth != null",
       "$uid": {
         ".write": "auth != null && auth.uid === $uid",
@@ -141,6 +148,7 @@
     },
     "rooms": {
       "_open": {
+        ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
         ".read": "auth != null",
         "$k": {
           ".write": "auth != null && (newData.exists() ? newData.child('h').val() === (data.exists() ? data.child('h').val() : auth.uid) && (!data.child('j').exists() || newData.child('j').val() === data.child('j').val()) : (data.child('h').val() === auth.uid || data.child('j').exists()))",
@@ -201,18 +209,21 @@
 {
   "rules": {
     "users": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$uid": {
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid"
       }
     },
     "codes": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$code": {
         ".read": "auth != null",
         ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
       }
     },
     "friends": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$fid": {
@@ -221,6 +232,7 @@
       }
     },
     "invites": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$id": {
@@ -229,6 +241,7 @@
       }
     },
     "history": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid",
@@ -238,6 +251,7 @@
       }
     },
     "presence": {
+      ".write": "auth != null && auth.token.email === 'ВАША_ПОЧТА@gmail.com' && auth.token.email_verified === true",
       ".read": "auth != null",
       "$uid": {
         ".write": "auth != null && auth.uid === $uid",

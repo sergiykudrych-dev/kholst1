@@ -139,7 +139,7 @@
       e.innerHTML = `<b>✓ Профиль сохранён</b>${P.isTg() ? '<span class="em">через Telegram</span>' : (P.email() ? `<span class="em">${esc(P.email())}</span>` : '')}${P.isTg() ? '' : `<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`}`;
     } else {
       e.className = 'facc warn';
-      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта.<button class="btn" type="button" data-a="google">Сохранить через Google</button>`;
+      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта. Выберите, как входить:<div class="two"><button class="btn" type="button" data-a="google">Google / почта</button><a class="btn" href="https://t.me/twosomegames_bot" target="_blank" rel="noopener" data-a-tg="1" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Telegram</a></div><span class="em">Telegram: откройте игру из бота, профиль сохранится сам.</span>`;
     }
   }
   function render() {
