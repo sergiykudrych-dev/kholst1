@@ -136,7 +136,7 @@
     const e = $('#facc'); if (!e) return;
     if (P.isLinked()) {
       e.className = 'facc ok';
-      const tgl = (P.inTg() || P.isTg()) ? '' : (P._tgl ? `<a class="btn" href="${P._tgl}" target="_blank" rel="noopener" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Открыть Telegram и нажать «Старт»</a>` : `<button class="btn" type="button" data-a="tglink">Привязать Telegram</button>`);
+      const tgl = true ? '' : (P._tgl ? `<a class="btn" href="${P._tgl}" target="_blank" rel="noopener" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Открыть Telegram и нажать «Старт»</a>` : `<button class="btn" type="button" data-a="tglink">Привязать Telegram</button>`);
       e.innerHTML = `<b>✓ Профиль сохранён</b>${P.isTg() || P.inTg() ? '<span class="em">Telegram подключён</span>' : (P.email() ? `<span class="em">${esc(P.email())}</span>` : '')}${tgl}${P.inTg() ? '' : `<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`}`;
     } else {
       e.className = 'facc warn';
