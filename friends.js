@@ -136,10 +136,11 @@
     const e = $('#facc'); if (!e) return;
     if (P.isLinked()) {
       e.className = 'facc ok';
-      e.innerHTML = `<b>✓ Профиль сохранён</b>${P.isTg() ? '<span class="em">через Telegram</span>' : (P.email() ? `<span class="em">${esc(P.email())}</span>` : '')}${P.isTg() ? '' : `<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`}`;
+      const tgl = P.inTg() ? '' : (P._tgl ? `<a class="btn" href="${P._tgl}" target="_blank" rel="noopener" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Открыть Telegram и нажать «Старт»</a>` : `<button class="btn" type="button" data-a="tglink">Привязать Telegram</button>`);
+      e.innerHTML = `<b>✓ Профиль сохранён</b>${P.isTg() || P.inTg() ? '<span class="em">Telegram подключён</span>' : (P.email() ? `<span class="em">${esc(P.email())}</span>` : '')}${tgl}${P.inTg() ? '' : `<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`}`;
     } else {
       e.className = 'facc warn';
-      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта. Выберите, как входить:<div class="two"><button class="btn" type="button" data-a="google">Google / почта</button><a class="btn" href="https://t.me/twosomegames_bot" target="_blank" rel="noopener" data-a-tg="1" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Telegram</a></div><span class="em">Telegram: откройте игру из бота, профиль сохранится сам.</span>`;
+      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта.<button class="btn" type="button" data-a="google">Сохранить через Google</button><span class="em">После этого можно привязать Telegram.</span>`;
     }
   }
   function render() {
@@ -194,6 +195,14 @@
             say('Профиль найден, загружаем…'); setTimeout(() => location.reload(), 600);
           } else { ev('profile_saved'); say('Профиль сохранён ✓'); renderAcc(); }
         }
+        else if (a === 'tglink') {
+          say('Готовим код…');
+          const tok = await firebase.auth().currentUser.getIdToken(true);
+          const r = await fetch(window.TG_AUTH_URL.replace(/\/auth$/, '/link/start'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken: tok }) });
+          const j = r.ok ? await r.json() : null;
+          if (!j || !j.code) { say('Не получилось. Попробуйте позже.'); return; }
+          P._tgl = 'https://t.me/twosomegames_bot?start=L' + j.code; renderAcc(); setTimeout(() => { P._tgl = ''; }, 14 * 60e3);
+        }
         else if (a === 'signout') {
           if (!outAsk) { outAsk = true; renderAcc(); return; }
           await P.signOut(); location.reload();
@@ -221,7 +230,7 @@
   // Уведомление на телефон друга (через Cloudflare Worker, адрес в firebase-config.js → PUSH_URL)
   // Друг из Telegram: дополнительно пишем ему от имени бота (Worker проверяет, что вы друзья)
   const tgNotify = async (type, to, extra) => {
-    const base = window.TG_AUTH_URL; if (!base || !/^tg_\d+$/.test(to || '')) return;
+    const base = window.TG_AUTH_URL; if (!base || !/^[\w-]{3,40}$/.test(to || '')) return;
     try {
       const u = firebase.auth().currentUser; if (!u) return;
       const tok = await u.getIdToken();

@@ -9,6 +9,7 @@ const enc = new TextEncoder();
 const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const b64uStr = s => b64u(enc.encode(s));
 const hmac = async (key, data) => crypto.subtle.sign('HMAC', await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']), enc.encode(data));
+const rnd = n => { const a = new Uint8Array(n); crypto.getRandomValues(a); return [...a].map(x => 'abcdefghjkmnpqrstuvwxyz23456789'[x % 31]).join(''); };
 const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
 
 /* Проверка подписи Telegram (initData мини-приложения). Возвращает пользователя или null. */
@@ -94,9 +95,33 @@ export default {
       try { user = await checkInitData(String((await req.json()).initData || ''), env.BOT_TOKEN); } catch (e) {}
       if (!user) return new Response('{"error":"bad"}', { status: 403, headers: cors });
       try {
-        const token = await firebaseToken('tg_' + user.id, env);
+        let uid = 'tg_' + user.id;
+        try { const m = await adminDb(env, 'tgmap/' + user.id); if (typeof m === 'string' && /^[\w-]{6,40}$/.test(m)) uid = m; } catch (e) {}   /* привязан к профилю с сайта: входим под ним */
+        const token = await firebaseToken(uid, env);
         return new Response(JSON.stringify({ token, name: String(user.first_name || '').slice(0, 20) }), { headers: { ...cors, 'content-type': 'application/json' } });
       } catch (e) { return new Response(JSON.stringify({ error: 'key', why: String((e && e.message) || e).slice(0, 80) }), { status: 500, headers: cors }); }
+    }
+
+    /* Привязка Telegram к профилю с сайта. Шаг 1: сайт (вход через Google) просит одноразовый код. */
+    if (url.pathname === '/link/start') {
+      const origin = req.headers.get('origin') || '';
+      const cors = { 'access-control-allow-origin': ORIGINS.includes(origin) ? origin : ORIGINS[0], 'access-control-allow-headers': 'content-type', 'vary': 'origin' };
+      if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+      const out = (code, extra) => new Response(JSON.stringify({ ok: code === 200, ...extra }), { status: code, headers: { ...cors, 'content-type': 'application/json' } });
+      if (req.method !== 'POST' || !env.FB_CLIENT_EMAIL || !env.FB_PRIVATE_KEY) return out(404, { error: 'off' });
+      let idToken = ''; try { idToken = String((await req.json()).idToken || ''); } catch (e) {}
+      let u = null;
+      try {
+        const lk = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + FB_KEY, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken }) });
+        u = lk.ok ? ((await lk.json()).users || [])[0] : null;
+      } catch (e) {}
+      if (!u) return out(403, { error: 'auth' });
+      if (!(u.providerUserInfo || []).length) return out(403, { error: 'anon' });   /* только сохранённый профиль (Google), не временный */
+      try {
+        const code = rnd(10);
+        await adminDb(env, 'tglink/' + code, 'PUT', { u: u.localId, t: Date.now() });
+        return out(200, { code });
+      } catch (e) { return out(503, { error: 'db' }); }
     }
 
     /* Сообщение другу от бота. Вызывает сайт: idToken отправителя проверяется в Firebase,
@@ -109,7 +134,7 @@ export default {
       if (req.method !== 'POST') return out(404, 'off');
       let b = null; try { b = await req.json(); } catch (e) { return out(400, 'json'); }
       const { idToken, type, to, page, room } = b || {};
-      if (!idToken || !/^tg_\d{1,15}$/.test(String(to || '')) || !['invite', 'friend', 'accepted'].includes(type)) return out(400, 'args');
+      if (!idToken || !/^[\w-]{3,40}$/.test(String(to || '')) || !['invite', 'friend', 'accepted'].includes(type)) return out(400, 'args');
       let uid = null;
       try {
         const lk = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + FB_KEY, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken }) });
@@ -131,6 +156,9 @@ export default {
         await adminDb(env, 'tgnotify/' + uid, 'PATCH', { h: hour, n: n + 1, ['pairs/' + to + '_' + type]: now });
         me = (await adminDb(env, 'users/' + uid)) || {};
       } catch (e) { return out(503, 'check'); }
+      let chat = /^tg_\d{1,15}$/.test(to) ? to.slice(3) : null;
+      if (!chat) { try { const c = await adminDb(env, 'tgchat/' + to); chat = c && /^\d{1,15}$/.test(String(c)) ? String(c) : null; } catch (e) {} }
+      if (!chat) return out(404, 'no telegram');
       const name = String(me.name || 'Друг').replace(/[\u0000-\u001f<>]/g, '').slice(0, 20);
       const av0 = String(me.avatar || '').replace(/[\u0000-\u001f<>\s]/g, '');
       const av = av0.length <= 16 && !/[\p{L}\p{N}]/u.test(av0) ? av0 : '';   /* аватарка — это эмодзи; буквы и длинный текст не пропускаем */
@@ -142,7 +170,7 @@ export default {
         link += page + '.html?tgroom=' + room + '&from=tginvite'; btn = 'Играть';
       } else if (type === 'friend') { text = who + ' хочет добавить вас в друзья 💗'; link += '?from=tginvite'; btn = 'Открыть'; }
       else { text = who + ' принял(а) вашу заявку: теперь вы друзья ✓'; link += '?from=tginvite'; btn = 'Играть'; }
-      const r = await api('sendMessage', { chat_id: Number(to.slice(3)), text, reply_markup: { inline_keyboard: [[{ text: btn, web_app: { url: link } }]] } });
+      const r = await api('sendMessage', { chat_id: Number(chat), text, reply_markup: { inline_keyboard: [[{ text: btn, web_app: { url: link } }]] } });
       return out(r.ok ? 200 : 502, r.ok ? null : 'telegram ' + r.status);
     }
 
@@ -150,6 +178,24 @@ export default {
       if (!env.SECRET || req.headers.get('x-telegram-bot-api-secret-token') !== env.SECRET) return new Response('forbidden', { status: 403 });
       let m = null;
       try { m = (await req.json()).message; } catch (e) {}
+      const lm = m && m.chat && m.chat.type === 'private' && m.from && /^\/start(?:@\w+)?\s+L([a-z0-9]{10})$/.exec(String(m.text || '').trim());
+      if (lm) {
+        let ok = false;
+        try {
+          const rec = await adminDb(env, 'tglink/' + lm[1]);
+          if (rec && rec.u && Date.now() - rec.t < 15 * 60e3) {
+            await adminDb(env, 'tgmap/' + m.from.id, 'PUT', rec.u);
+            await adminDb(env, 'tgchat/' + rec.u, 'PUT', m.from.id);
+            ok = true;
+          }
+          if (rec) await adminDb(env, 'tglink/' + lm[1], 'DELETE');
+        } catch (e) {}
+        await api('sendMessage', {
+          chat_id: m.chat.id, text: ok ? 'Готово: Telegram привязан к вашему профилю ✓\nТеперь друзья и имя одни и те же на сайте и здесь.' : 'Код не подошёл или устарел. Получите новый на сайте: Друзья → Привязать Telegram.',
+          reply_markup: { inline_keyboard: [[{ text: 'Играть', web_app: { url: GAME_URL } }]] }
+        });
+        return new Response('ok');
+      }
       if (m && m.chat && m.chat.type === 'private') {
         await api('sendMessage', {
           chat_id: m.chat.id, text: WELCOME,

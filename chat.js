@@ -193,7 +193,7 @@ body.ch-open #view,body.ch-open .adx-game{opacity:.35;filter:saturate(.7);transi
     try {
       const u = firebase.auth().currentUser; if (!u) return; const tok = await u.getIdToken();
       if (window.PUSH_URL) fetch(window.PUSH_URL, { method: 'POST', keepalive: true, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: JSON.stringify({ type, to }) }).catch(() => {});
-      if (window.TG_AUTH_URL && /^tg_\d+$/.test(to)) fetch(window.TG_AUTH_URL.replace(/\/auth$/, '/notify'), { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: tok, type, to }) }).catch(() => {});
+      if (window.TG_AUTH_URL && /^[\w-]{3,40}$/.test(to)) fetch(window.TG_AUTH_URL.replace(/\/auth$/, '/notify'), { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: tok, type, to }) }).catch(() => {});
     } catch (e) {}
   }
   function toast(t) {

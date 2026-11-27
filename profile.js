@@ -21,7 +21,7 @@
     if (tgData() && !window.Telegram) { const s = document.createElement('script'); s.src = 'https://telegram.org/js/telegram-web-app.js'; document.head.appendChild(s); }
   } catch (e) {}
   P.tgAskWrite = function () {
-    if (!P.isTg() || store.get('kh_tgw') || !window.Telegram || !Telegram.WebApp || !Telegram.WebApp.requestWriteAccess) return;
+    if (!P.inTg() || store.get('kh_tgw') || !window.Telegram || !Telegram.WebApp || !Telegram.WebApp.requestWriteAccess) return;
     store.set('kh_tgw', '1'); try { Telegram.WebApp.requestWriteAccess(); } catch (e) {}
   };
 
@@ -143,6 +143,7 @@
 
   /* Сохранение профиля через Google: анонимный аккаунт превращается в постоянный (uid тот же). */
   const cu = () => (window.firebase && firebase.auth && firebase.apps.length) ? firebase.auth().currentUser : null;
+  P.inTg = () => !!tgData();
   P.isTg = () => { const u = cu(); return !!(u && /^tg_/.test(u.uid)); };
   P.isLinked = () => { const u = cu(); return !!(u && !u.isAnonymous); };
   P.email = () => { const u = cu(); return (u && u.email) || ''; };
