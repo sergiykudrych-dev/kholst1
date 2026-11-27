@@ -20,7 +20,7 @@
     game_open: p => p.game && 'open_' + p.game,
     game_complete: p => p.host && p.game && ['game_complete', 'done_' + p.game],   /* считает только хозяин комнаты, чтобы не удваивать */
     room_created: () => 'room_created', partner_joined: () => 'partner_joined', invite_sent: () => 'invite_sent', lobby_invite: () => 'lobby_invite', open_created: () => 'open_created', open_joined: () => 'open_joined', code_shared: () => 'code_shared', report_sent: () => 'report_sent', friend_request: () => 'friend_request',
-    friend_added: () => 'friend_added', profile_saved: p => ['profile_saved', p.method === 'telegram' ? 'saved_tg' : p.method === 'google' ? 'saved_google' : null].filter(Boolean), auth_pick: p => 'auth_pick_' + (p.method === 'telegram' ? 'tg' : 'google'), name_set: () => 'name_set',
+    friend_added: () => 'friend_added', profile_saved: p => ['profile_saved', p.method === 'telegram' ? 'saved_tg' : p.method === 'google' ? 'saved_google' : null].filter(Boolean), tg_login: () => ['tg_app', 'saved_tg'], auth_pick: p => 'auth_pick_' + (p.method === 'telegram' ? 'tg' : 'google'), name_set: () => 'name_set',
     promo_view: () => 'promo_view', promo_click: p => ['promo_click', 'promo_click_' + (p.where === 'end' ? 'end' : 'home')]
   };
   async function own(name, params) {
@@ -42,7 +42,7 @@
   }
 
   /* Журнал действий для владельца: ник, время, что сделал. Ведётся для всех посетителей, включая Telegram (раскрыто в политике конфиденциальности); свои действия владельца не пишутся. */
-  const ACT = new Set(['page_view', 'game_open', 'room_created', 'partner_joined', 'invite_sent', 'lobby_invite', 'open_created', 'open_joined', 'code_shared', 'report_sent', 'friend_request', 'friend_added', 'profile_saved', 'auth_pick', 'name_set', 'chat_sent', 'game_complete', 'promo_click']);
+  const ACT = new Set(['page_view', 'game_open', 'room_created', 'partner_joined', 'invite_sent', 'lobby_invite', 'open_created', 'open_joined', 'code_shared', 'report_sent', 'friend_request', 'friend_added', 'profile_saved', 'auth_pick', 'tg_login', 'name_set', 'chat_sent', 'game_complete', 'promo_click']);
   let actN = 0, actLast = '', actAt = 0;
   async function act(name, params) {
     try {

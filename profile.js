@@ -130,7 +130,7 @@
             u = (await auth.signInWithCustomToken(j.token)).user;
             P.tgDbg = 'вход ок';
             if (!P.name() && j.name) { store.set('kh_name', clean(j.name)); store.set('kh_skip', ''); }
-            ev('tg_login');
+            { const dk = new Date().toISOString().slice(0, 10); if (store.get('kh_tgd') !== dk) { store.set('kh_tgd', dk); ev('tg_login'); } }
           }
         } catch (e) { P.tgDbg = 'Ошибка: ' + ((e && (e.code || e.message)) || e); }
       } else if (td && !window.TG_AUTH_URL) P.tgDbg = 'нет адреса входа (старый файл)';
