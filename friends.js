@@ -235,7 +235,7 @@
           try { localStorage.setItem('kh_tgs', JSON.stringify({ c: j.code, t: Date.now() })); } catch (e) {}
           tgPoll(j.code, Date.now() + 10 * 60e3);
           /* сразу переходим в Telegram; если браузер не дал, остаётся кнопка */
-          try { if (!window.open(P._tgs, '_blank')) location.href = P._tgs; } catch (e) { location.href = P._tgs; }
+          try { location.href = 'tg://resolve?domain=twosomegames_bot&start=S' + j.code; } catch (e) {}   /* схема tg:// открывает приложение без новой пустой вкладки */
         }
         else if (a === 'tglink') {
           say('Готовим код…');
