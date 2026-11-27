@@ -124,6 +124,35 @@ export default {
       } catch (e) { return out(503, { error: 'db' }); }
     }
 
+    /* Вход через Telegram прямо на сайте (без Google). Шаг 1: сайт просит код; шаг 2: человек жмёт «Старт» в боте;
+       шаг 3: сайт опрашивает /login/poll и получает токен. */
+    if (url.pathname === '/login/start' || url.pathname === '/login/poll') {
+      const origin = req.headers.get('origin') || '';
+      const cors = { 'access-control-allow-origin': ORIGINS.includes(origin) ? origin : ORIGINS[0], 'access-control-allow-headers': 'content-type', 'vary': 'origin' };
+      if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+      const out = (code, extra) => new Response(JSON.stringify({ ok: code === 200, ...extra }), { status: code, headers: { ...cors, 'content-type': 'application/json' } });
+      if (req.method !== 'POST' || !env.FB_CLIENT_EMAIL || !env.FB_PRIVATE_KEY) return out(404, { error: 'off' });
+      let b = {}; try { b = await req.json(); } catch (e) {}
+      try {
+        if (url.pathname === '/login/start') {
+          const lk = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + FB_KEY, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken: String(b.idToken || '') }) });
+          if (!lk.ok) return out(403, { error: 'auth' });
+          const code = rnd(10);
+          await adminDb(env, 'tglogin/' + code, 'PUT', { t: Date.now() });
+          return out(200, { code });
+        }
+        const code = String(b.code || '');
+        if (!/^[a-z0-9]{10}$/.test(code)) return out(400, { error: 'args' });
+        const rec = await adminDb(env, 'tglogin/' + code);
+        if (!rec || Date.now() - rec.t > 10 * 60e3) { if (rec) await adminDb(env, 'tglogin/' + code, 'DELETE'); return out(410, { error: 'expired' }); }
+        if (!rec.tg) return out(200, { pending: true });
+        await adminDb(env, 'tglogin/' + code, 'DELETE');
+        let uid = 'tg_' + rec.tg;
+        try { const m = await adminDb(env, 'tgmap/' + rec.tg); if (typeof m === 'string' && /^[\w-]{6,40}$/.test(m)) uid = m; } catch (e) {}
+        return out(200, { token: await firebaseToken(uid, env), name: String(rec.name || '').slice(0, 20) });
+      } catch (e) { return out(503, { error: 'db' }); }
+    }
+
     /* Сообщение другу от бота. Вызывает сайт: idToken отправителя проверяется в Firebase,
        отправлять можно только своим друзьям (проверка по базе от имени отправителя). */
     if (url.pathname === '/notify') {
@@ -178,6 +207,16 @@ export default {
       if (!env.SECRET || req.headers.get('x-telegram-bot-api-secret-token') !== env.SECRET) return new Response('forbidden', { status: 403 });
       let m = null;
       try { m = (await req.json()).message; } catch (e) {}
+      const sm = m && m.chat && m.chat.type === 'private' && m.from && /^\/start(?:@\w+)?\s+S([a-z0-9]{10})$/.exec(String(m.text || '').trim());
+      if (sm) {
+        let ok = false;
+        try {
+          const rec = await adminDb(env, 'tglogin/' + sm[1]);
+          if (rec && !rec.tg && Date.now() - rec.t < 10 * 60e3) { await adminDb(env, 'tglogin/' + sm[1], 'PUT', { t: rec.t, tg: m.from.id, name: String(m.from.first_name || '') }); ok = true; }
+        } catch (e) {}
+        await api('sendMessage', { chat_id: m.chat.id, text: ok ? 'Вход подтверждён ✓ Вернитесь на сайт: он войдёт сам.' : 'Код не подошёл или устарел. Нажмите «Войти через Telegram» на сайте ещё раз.', reply_markup: { inline_keyboard: [[{ text: 'Играть', web_app: { url: GAME_URL } }]] } });
+        return new Response('ok');
+      }
       const lm = m && m.chat && m.chat.type === 'private' && m.from && /^\/start(?:@\w+)?\s+L([a-z0-9]{10})$/.exec(String(m.text || '').trim());
       if (lm) {
         let ok = false;

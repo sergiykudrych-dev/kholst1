@@ -136,11 +136,11 @@
     const e = $('#facc'); if (!e) return;
     if (P.isLinked()) {
       e.className = 'facc ok';
-      const tgl = P.inTg() ? '' : (P._tgl ? `<a class="btn" href="${P._tgl}" target="_blank" rel="noopener" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Открыть Telegram и нажать «Старт»</a>` : `<button class="btn" type="button" data-a="tglink">Привязать Telegram</button>`);
+      const tgl = (P.inTg() || P.isTg()) ? '' : (P._tgl ? `<a class="btn" href="${P._tgl}" target="_blank" rel="noopener" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Открыть Telegram и нажать «Старт»</a>` : `<button class="btn" type="button" data-a="tglink">Привязать Telegram</button>`);
       e.innerHTML = `<b>✓ Профиль сохранён</b>${P.isTg() || P.inTg() ? '<span class="em">Telegram подключён</span>' : (P.email() ? `<span class="em">${esc(P.email())}</span>` : '')}${tgl}${P.inTg() ? '' : `<button class="fb" type="button" data-a="signout">${outAsk ? 'Точно выйти? Друзья пропадут до входа' : 'Выйти'}</button>`}`;
     } else {
       e.className = 'facc warn';
-      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта.<button class="btn" type="button" data-a="google">Сохранить через Google</button><span class="em">После этого можно привязать Telegram.</span>`;
+      e.innerHTML = `<b>Сохраните профиль</b>Иначе друзья пропадут, если очистить данные сайта. Войдите любым способом:<div class="two"><button class="btn" type="button" data-a="google">Google / почта</button>${P._tgs ? `<a class="btn" href="${P._tgs}" target="_blank" rel="noopener" style="display:block;box-sizing:border-box;padding:12px;border:1.5px solid #C2185B;border-radius:14px;color:#C2185B;font:700 15px Manrope,sans-serif;text-decoration:none;text-align:center">Открыть Telegram и нажать «Старт»</a>` : `<button class="btn" type="button" data-a="tglogin">Telegram</button>`}</div>`;
     }
   }
   function render() {
@@ -194,6 +194,32 @@
             if (u.name) P.save(u.name, u.avatar || '');
             say('Профиль найден, загружаем…'); setTimeout(() => location.reload(), 600);
           } else { ev('profile_saved'); say('Профиль сохранён ✓'); renderAcc(); }
+        }
+        else if (a === 'tglogin') {
+          const base = window.TG_AUTH_URL.replace(/\/auth$/, '');
+          say('Готовим вход…');
+          const tok = await firebase.auth().currentUser.getIdToken();
+          const r = await fetch(base + '/login/start', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken: tok }) });
+          const j = r.ok ? await r.json() : null;
+          if (!j || !j.code) { say('Не получилось. Попробуйте позже.'); return; }
+          P._tgs = 'https://t.me/twosomegames_bot?start=S' + j.code; renderAcc();
+          const end = Date.now() + 10 * 60e3;
+          const poll = async () => {
+            if (Date.now() > end || P.isLinked()) { P._tgs = ''; if (dlg.open) renderAcc(); return; }
+            try {
+              const pr = await fetch(base + '/login/poll', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code: j.code }) });
+              const pj = pr.ok ? await pr.json() : null;
+              if (pj && pj.token) {
+                const u = (await firebase.auth().signInWithCustomToken(pj.token)).user;
+                const rec = (await firebase.database().ref('users/' + u.uid).once('value')).val() || {};
+                const nm = rec.name || pj.name; if (nm) P.save(nm, rec.avatar || '');
+                ev('profile_saved'); say('Вход выполнен ✓'); setTimeout(() => location.reload(), 600); return;
+              }
+              if (pr.status === 410) { P._tgs = ''; renderAcc(); say('Код устарел. Нажмите ещё раз.'); return; }
+            } catch (e) {}
+            setTimeout(poll, 2000);
+          };
+          setTimeout(poll, 2000);
         }
         else if (a === 'tglink') {
           say('Готовим код…');
